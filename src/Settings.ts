@@ -1,10 +1,31 @@
-import { Config, Injectors, KeyValString, User_Middlewares } from "@r35007/mock-server/dist/model";
+import { Config, KeyValString, User_Middlewares } from "@r35007/mock-server/dist/model";
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
-import { Prompt } from "./prompt";
 
 export class Settings {
+
+  static output = vscode.window.createOutputChannel("Mock Server Path Log");
+
+  static showPathLog() {
+    Settings.output.clear();
+    const paths = Settings.getSettings("paths") as object;
+    Object.keys(paths).forEach(Settings.showLog)
+  }
+
+  static showLog(settingsName: string) {
+    const workSpaceFolderPath = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : "./";
+    const relativePath = Settings.getSettings("paths." + settingsName) as string;
+    const resolvedPath = settingsName === 'rootPath' 
+    ? path.resolve(workSpaceFolderPath, relativePath)
+    : path.resolve(Settings.rootPath, relativePath);
+    if (relativePath?.trim().length && fs.existsSync(resolvedPath)) {
+      Settings.output.appendLine(`${settingsName} : ${resolvedPath}`);
+    } else {
+      Settings.output.appendLine(`\n[Error] - Invalid ${settingsName} : ${resolvedPath}`);
+    }
+  }
+
   static get configuration() {
     return vscode.workspace.getConfiguration("mock-server.settings");
   }
@@ -27,27 +48,29 @@ export class Settings {
   static get baseUrl() {
     return Settings.getSettings("baseUrl") as string;
   }
-  static get globals() {
-    return Settings.getSettings("globals") as object;
-  }
-  static get injectors() {
-    return Settings.getSettings("injectors") as Injectors;
+  static get store() {
+    return Settings.getSettings("store") as object;
   }
   static get reverseRouteOrder() {
     return Settings.getSettings("reverseRouteOrder") as boolean;
   }
-  static get proxy() {
-    return Settings.getSettings("proxy") as KeyValString;
+  static get routeRewrite() {
+    const rewriter = Settings.getSettings("routeRewrite") as KeyValString;
+    return rewriter;
   }
   static get excludeRoutes() {
     const excludeRoutes = Settings.getSettings("excludeRoutes") as string[];
-    const addProxy = Settings.getSettings("excludeRoutes.addProxy") as boolean;
-
-    if (addProxy) excludeRoutes.push(...Object.keys(Settings.proxy));
+    const rewrittenRoute = Object.keys(Settings.routeRewrite);
+    excludeRoutes.push(...rewrittenRoute);
 
     return excludeRoutes
   }
-
+  static get routesToLoop() {
+    return Settings.getSettings("routesToLoop") as string[];
+  }
+  static get routesToGroup() {
+    return Settings.getSettings("routesToGroup") as string[];
+  }
 
   static get showStatusbar() {
     return Settings.getSettings("statusBar.show") as boolean;
@@ -59,37 +82,43 @@ export class Settings {
     return parseInt((Settings.getSettings("statusBar.priority") as any).toString());
   }
 
-  static get donotShowInfoMsg() {
+  static get dontShowInfoMsg() {
     return Settings.getSettings("donotShowInfoMsg") as boolean;
   }
-  static set donotShowInfoMsg(val: boolean) {
+  static set dontShowInfoMsg(val: boolean) {
     Settings.setSettings("donotShowInfoMsg", val);
   }
 
   static get rootPath() {
     const rootPathStr = Settings.getSettings("paths.rootPath") as string;
     const workSpaceFolderPath = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : "./";
-    return Settings.getValidPath("rootPath", workSpaceFolderPath, rootPathStr) || workSpaceFolderPath;
+    const rootPath = Settings.getValidPath(workSpaceFolderPath, rootPathStr) || workSpaceFolderPath;
+    return rootPath;
   }
   static get mockPath() {
     const mockPathStr = Settings.getSettings("paths.mockPath") as string;
-    return Settings.getValidPath("mockPath", Settings.rootPath, mockPathStr) || "";
+    const mockPath = Settings.getValidPath(Settings.rootPath, mockPathStr) || "";
+    return mockPath
   }
   static get staticUrl() {
-    const staticUrlStr = Settings.getSettings("staticUrl") as string;
-    return Settings.getValidPath("staticUrl", Settings.rootPath, staticUrlStr) || "";
+    const staticUrlStr = Settings.getSettings("paths.staticUrl") as string;
+    const staticUrl = Settings.getValidPath(Settings.rootPath, staticUrlStr) || "";
+    return staticUrl
   }
   static get envPath() {
     const envPathStr = Settings.getSettings("paths.envPath") as string;
-    return Settings.getValidPath("envPath", Settings.rootPath, envPathStr) || "";
+    const envPath = Settings.getValidPath(Settings.rootPath, envPathStr) || "";
+    return envPath;
   }
   static get middlewarePath() {
     const middlewarePathStr = Settings.getSettings("paths.middlewarePath") as string;
-    return Settings.getValidPath("injectorsPath", Settings.rootPath, middlewarePathStr, true);
+    const middlewarePath = Settings.getValidPath(Settings.rootPath, middlewarePathStr, true);
+    return middlewarePath;
   }
-  static get callbackPath() {
-    const callbackPathPathStr = Settings.getSettings("paths.generateMockCallbackPath") as string;
-    return Settings.getValidPath("generateMockCallbackPath", Settings.rootPath, callbackPathPathStr, true);
+  static get injectorsPath() {
+    const injectorsPathStr = Settings.getSettings("paths.injectorsPath") as string;
+    const injectorsPath = Settings.getValidPath(Settings.rootPath, injectorsPathStr, true);
+    return injectorsPath;
   }
   static get middlewares() {
     const middlewarePath = Settings.middlewarePath;
@@ -106,7 +135,6 @@ export class Settings {
     }
     return undefined;
   }
-
   static get finalCallback() {
     const middlewares = Settings.middlewares;
     if (middlewares) {
@@ -121,23 +149,21 @@ export class Settings {
       rootPath: Settings.rootPath,
       baseUrl: Settings.baseUrl,
       staticUrl: Settings.staticUrl,
-      proxy: Settings.proxy,
+      routeRewrite: Settings.routeRewrite,
       excludeRoutes: Settings.excludeRoutes,
       reverseRouteOrder: Settings.reverseRouteOrder,
       throwError: true,
     };
   }
-  static getValidPath(settingsName: string, rootPath: string, relativePath: string, shouldBeFile: boolean = false) {
-    if (relativePath && relativePath.trim().length) {
+  static getValidPath(rootPath: string, relativePath: string, shouldBeFile: boolean = false) {
+    if (relativePath?.trim().length) {
       const resolvedPath = path.resolve(rootPath, relativePath);
       if (fs.existsSync(resolvedPath)) {
-        if (shouldBeFile && !fs.statSync(resolvedPath).isFile() && path.extname(resolvedPath) !== ".js") {
-          Prompt.showPopupMessage(`Invalid ${settingsName} - ${resolvedPath}`, "error");
+        if (shouldBeFile && !fs.statSync(resolvedPath).isFile()) {
           return undefined;
         }
         return resolvedPath;
       }
-      Prompt.showPopupMessage(`Invalid ${settingsName} - ${resolvedPath}`, "error");
       return undefined;
     } else {
       return undefined;

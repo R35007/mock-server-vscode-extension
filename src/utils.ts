@@ -1,21 +1,26 @@
 import { MockServer } from "@r35007/mock-server";
-import { FileDetails, HAR } from "@r35007/mock-server/dist/model";
+import { HAR } from "@r35007/mock-server/dist/model";
+import { watch } from 'chokidar';
 import * as fs from "fs";
+import { FSWatcher } from 'node:fs';
 import * as path from "path";
 import * as vscode from "vscode";
 import { generateMockID } from "./enum";
 import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
 
+
 export class Utils {
   protected mockServer: MockServer;
   protected environment = "none";
   protected output;
 
+  watcher: FSWatcher | undefined;
+
   constructor() {
     const workSpaceFolderPath = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : "./";
     this.mockServer = new MockServer(undefined, { rootPath: workSpaceFolderPath, throwError: true });
-    this.output = vscode.window.createOutputChannel("Mock Server");
+    this.output = vscode.window.createOutputChannel("Mock Server Log");
   }
 
   protected getEditorProps = () => {
@@ -134,4 +139,26 @@ export class Utils {
 
     return jsonList;
   };
+
+  protected restartOnChange = (restart: Function) => {
+    if(!this.watcher) {
+      const filesToWatch = ([
+        Settings.mockPath || '',
+        Settings.envPath || '',
+        Settings.middlewarePath || '',
+        Settings.injectorsPath || '',
+        Settings.staticUrl || ''
+      ]).filter(Boolean);
+  
+      this.watcher = watch(filesToWatch);
+      this.watcher.on('change', (event, path) => {
+        restart();
+      });
+    }
+  }
+
+  protected stopWatchingChanges = async () => {
+    this.watcher && await this.watcher.close();
+    this.watcher = undefined;
+  }
 }
