@@ -2,7 +2,7 @@
 	"name": "mock-server",
 	"displayName": "Mock Server",
 	"description": "Customize Your Own Dynamic Local Mock Server",
-	"version": "2.0.2",
+	"version": "2.0.3",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/mockserverlogo.png",
