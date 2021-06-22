@@ -16,9 +16,9 @@ export class Settings {
   static showLog(settingsName: string) {
     const workSpaceFolderPath = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : "./";
     const relativePath = Settings.getSettings("paths." + settingsName) as string;
-    const resolvedPath = settingsName === 'rootPath' 
-    ? path.resolve(workSpaceFolderPath, relativePath)
-    : path.resolve(Settings.rootPath, relativePath);
+    const resolvedPath = settingsName === 'rootPath'
+      ? path.resolve(workSpaceFolderPath, relativePath)
+      : path.resolve(Settings.rootPath, relativePath);
     if (relativePath?.trim().length && fs.existsSync(resolvedPath)) {
       Settings.output.appendLine(`${settingsName} : ${resolvedPath}`);
     } else {
@@ -100,10 +100,10 @@ export class Settings {
     const mockPath = Settings.getValidPath(Settings.rootPath, mockPathStr) || "";
     return mockPath
   }
-  static get staticUrl() {
-    const staticUrlStr = Settings.getSettings("paths.staticUrl") as string;
-    const staticUrl = Settings.getValidPath(Settings.rootPath, staticUrlStr) || "";
-    return staticUrl
+  static get staticPath() {
+    const staticPathStr = Settings.getSettings("paths.staticPath") as string;
+    const staticPath = Settings.getValidPath(Settings.rootPath, staticPathStr) || "";
+    return staticPath
   }
   static get envPath() {
     const envPathStr = Settings.getSettings("paths.envPath") as string;
@@ -148,7 +148,7 @@ export class Settings {
       port: Settings.port,
       rootPath: Settings.rootPath,
       baseUrl: Settings.baseUrl,
-      staticUrl: Settings.staticUrl,
+      staticUrl: Settings.staticPath,
       routeRewrite: Settings.routeRewrite,
       excludeRoutes: Settings.excludeRoutes,
       reverseRouteOrder: Settings.reverseRouteOrder,

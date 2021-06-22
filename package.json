@@ -97,7 +97,7 @@
 						"envPath": "env",
 						"injectorsPath": "injectors.json",
 						"middlewarePath": "callback.js",
-						"staticUrl": ""
+						"staticPath": ""
 					},
 					"properties": {
 						"rootPath": {
@@ -125,7 +125,7 @@
 							"default": "callback.js",
 							"description": "Provide the middleware.js path. Note: the js file must have an default module export of the middleware"
 						},
-						"staticUrl": {
+						"staticPath": {
 							"type": "string",
 							"default": "",
 							"description": "Every file under tis folder will be hosted in a localhost"

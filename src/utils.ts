@@ -147,7 +147,7 @@ export class Utils {
         Settings.envPath || '',
         Settings.middlewarePath || '',
         Settings.injectorsPath || '',
-        Settings.staticUrl || ''
+        Settings.staticPath || ''
       ]).filter(Boolean);
   
       this.watcher = watch(filesToWatch);
