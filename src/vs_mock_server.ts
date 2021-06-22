@@ -107,16 +107,20 @@ export default class VSMockServer extends Utils {
     }
   };
 
-  resetServer = () => {
+  resetServer = async () => {
     try {
+      if (this.mockServer.isServerStarted) this.mockServer.stopServer();
       this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Reset initiated`);
       this.mockServer.resetServer();
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Resetting`);
+      Prompt.showPopupMessage("Server Reset Done.", "info");
       StatusbarUi.startServer(150);
-      this.startServer("Re Start");
     } catch (err) {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] failed to reset`);
-      StatusbarUi.stopServer(0, Settings.port);
+      Prompt.showPopupMessage("Server Reset Failed.", "error");
+      this.mockServer.isServerStarted
+      ? StatusbarUi.stopServer(0, Settings.port)
+      : StatusbarUi.startServer(150);
       this.output.appendLine(err);
     }
   }
