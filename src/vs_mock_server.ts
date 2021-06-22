@@ -43,9 +43,8 @@ export default class VSMockServer extends Utils {
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] Server ${txt}ing...`);
         StatusbarUi.working(`${txt}ing...`);
 
-        Object.entries(Settings.store).forEach(([key, val]) => this.mockServer.setStore(key, val));
         const mock = this.getJSON(Settings.mockPath) as UserRoutes;
-        this.mockServer.setData(mock, Settings.config, Settings.middlewarePath, Settings.injectorsPath);
+        this.mockServer.setData(mock, Settings.config, Settings.middlewarePath, Settings.injectorsPath, Settings.store);
         await this.mockServer.launchServer();
         this.restartOnChange(this.restartServer);
 

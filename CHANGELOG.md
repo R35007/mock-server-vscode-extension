@@ -1,3 +1,7 @@
+## v2.0.4
+
+- updated `@r35007/mock-server@2.1.0`
+
 ## v2.0.1,v2.0.2,v2.0.3
 
 - Bug Fix
