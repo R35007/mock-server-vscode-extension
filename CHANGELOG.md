@@ -1,6 +1,11 @@
+## v2.0.6
+
+- updated `@r35007/mock-server@2.1.1`
+
 ## v2.0.5
 
 - `mockServer.resetServer` command bug fix.
+
 ## v2.0.4
 
 - updated `@r35007/mock-server@2.1.0`
