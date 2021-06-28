@@ -1,4 +1,4 @@
-## v2.1.0
+## v2.1.1
 
 - updated `@r35007/mock-server@2.3.0`
 - Now can directly access server Mock data.
