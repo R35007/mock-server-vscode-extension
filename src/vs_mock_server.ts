@@ -1,4 +1,4 @@
-import { UserRoutes } from "@r35007/mock-server/dist/model";
+import { Routes, TransformHARConfig } from "@r35007/mock-server/dist/model";
 import { generateMockID } from "./enum";
 import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
@@ -18,11 +18,13 @@ export default class VSMockServer extends Utils {
     if (writable) {
 
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] Mock Generation running...`);
-      const { editorText, fileName, editor, document, textRange } = writable;
+      const { fileName, editor, document, textRange } = writable;
       try {
-        const config = {
+        const config: TransformHARConfig = {
           routesToLoop: Settings.routesToLoop,
-          routesToGroup: Settings.routesToGroup
+          routesToGroup: Settings.routesToGroup,
+          routeRewrite: Settings.routeRewrite,
+          excludeRoutes: Settings.excludeRoutes
         }
         const mock = this.mockServer.transformHar(document.uri.fsPath, config, Settings.entryCallback, Settings.finalCallback);
         this.writeFile(JSON.stringify(mock, null, "\t"), fileName, "Mock generated Successfully", editor, document, textRange);
@@ -43,7 +45,7 @@ export default class VSMockServer extends Utils {
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] Server ${txt}ing...`);
         StatusbarUi.working(`${txt}ing...`);
 
-        const mock = this.getJSON(Settings.mockPath) as UserRoutes;
+        const mock = await this.getJSON(Settings.mockPath) as Routes;
         this.mockServer.setData(mock, Settings.config, Settings.middlewarePath, Settings.injectorsPath, Settings.store);
         await this.mockServer.launchServer();
         this.restartOnChange(this.restartServer);
@@ -93,9 +95,10 @@ export default class VSMockServer extends Utils {
     if (this.mockServer.isServerStarted) {
       try {
         this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Server Stop initiated`);
+        this.output.appendLine(`[${new Date().toLocaleTimeString()}] Server Stopping`);
+        StatusbarUi.working("Stopping...");
         await this.mockServer.stopServer();
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Server Stopped`);
-        StatusbarUi.startServer(150);
         this.startServer("Restart");
       } catch (err) {
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Server Failed to Stop`);
@@ -119,8 +122,8 @@ export default class VSMockServer extends Utils {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] failed to reset`);
       Prompt.showPopupMessage("Server Reset Failed.", "error");
       this.mockServer.isServerStarted
-      ? StatusbarUi.stopServer(0, Settings.port)
-      : StatusbarUi.startServer(150);
+        ? StatusbarUi.stopServer(0, Settings.port)
+        : StatusbarUi.startServer(150);
       this.output.appendLine(err);
     }
   }

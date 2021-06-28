@@ -58,10 +58,13 @@ export class Settings {
     const rewriter = Settings.getSettings("routeRewrite") as KeyValString;
     return rewriter;
   }
+  static get excludeOldRoutes() {
+    return Settings.getSettings("excludeOldRoutes") as boolean;
+  }
   static get excludeRoutes() {
     const excludeRoutes = Settings.getSettings("excludeRoutes") as string[];
-    const rewrittenRoute = Object.keys(Settings.routeRewrite);
-    excludeRoutes.push(...rewrittenRoute);
+    const oldRoutes = Object.keys(Settings.routeRewrite);
+    Settings.excludeOldRoutes && excludeRoutes.push(...oldRoutes);
 
     return excludeRoutes
   }
@@ -156,6 +159,7 @@ export class Settings {
     };
   }
   static getValidPath(rootPath: string, relativePath: string, shouldBeFile: boolean = false) {
+    if (relativePath.startsWith("http")) return relativePath;
     if (relativePath?.trim().length) {
       const resolvedPath = path.resolve(rootPath, relativePath);
       if (fs.existsSync(resolvedPath)) {

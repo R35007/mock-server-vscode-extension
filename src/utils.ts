@@ -1,5 +1,6 @@
 import { MockServer } from "@r35007/mock-server";
 import { HAR } from "@r35007/mock-server/dist/model";
+import axios from 'axios';
 import { watch } from 'chokidar';
 import * as fs from "fs";
 import { FSWatcher } from 'node:fs';
@@ -94,20 +95,29 @@ export class Utils {
     }
   };
 
-  protected getJSON = (mockPath: string) => {
+  protected getJSON = async (mockPath: string) => {
     const environmentList = this.getEnvironmentList();
     const environment = this.environment.toLowerCase();
     if (!environment.trim().length || environment === "none" || !environmentList.find((e) => e.fileName === environment)) {
       Settings.environment = "none";
-      return this.mockServer.getJSON(mockPath, []);
+      return await this.getDataFromUrl(mockPath);
     }
 
     Settings.environment = environment;
-    const mock = this.mockServer.getJSON(mockPath, []);
+    const mock = await this.getDataFromUrl(mockPath);
     const envPath = environmentList.find((e) => e.fileName === environment)!.filePath;
     const env = this.mockServer.getJSON(envPath, []);
     return { ...mock, ...env };
   };
+
+  protected getDataFromUrl = async (mockPath: string) =>{
+    if(mockPath.startsWith("http")){
+      const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => {});
+      return data;
+    }else{
+      return this.mockServer.getJSON(mockPath);
+    }
+  }
 
   protected getEnvironmentList = () => {
     const filesList = this.convertHARtoMock();
@@ -148,7 +158,7 @@ export class Utils {
         Settings.middlewarePath || '',
         Settings.injectorsPath || '',
         Settings.staticPath || ''
-      ]).filter(Boolean);
+      ]).filter(p => !p.startsWith("http")).filter(Boolean);
   
       this.watcher = watch(filesToWatch);
       this.watcher.on('change', (event, path) => {
