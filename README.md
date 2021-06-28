@@ -47,7 +47,7 @@ This can be provided inside the middleware.js and this file path must be proided
 middleware.js
 
 ```js
-exports.entryCallback = (entry, statusCode, routePath, response) => {
+exports.entryCallback = (entry, routePath, routeConfig, pathToRegexp) => {
   return {
     [routePath]: {
       statusCode,
@@ -65,7 +65,7 @@ This can be provided inside the middleware.js and this file path must be proided
 middleware.js
 
 ```js
-exports.entryCallback = (entry, statusCode, routePath, response) => {
+exports.entryCallback = (entry, routePath, routeConfig, pathToRegexp)  => {
   return {
     [routePath]: {
       statusCode,
@@ -74,7 +74,7 @@ exports.entryCallback = (entry, statusCode, routePath, response) => {
   };
 };
 
-exports.finalCallback = (generatedMock) => {
+exports.finalCallback = (generatedMock, pathToRegexp) => {
   return generatedMock;
 };
 ```
