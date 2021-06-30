@@ -1,3 +1,8 @@
+## v2.1.4
+
+- `mock-server.settings.store` is renamed to `mock-server.settings.paths.storePath`
+- updated `@r35007/mock-server@2.4.2`
+
 ## v2.1.3
 
 - Bug Fix

@@ -47,7 +47,7 @@ export default class VSMockServer extends Utils {
         StatusbarUi.working(`${txt}ing...`);
 
         const mock = await this.getJSON(Settings.mockPath) as Routes;
-        this.mockServer.setData(mock, Settings.config, Settings.middlewarePath, Settings.injectorsPath, Settings.store);
+        this.mockServer.setData(mock, Settings.config, Settings.middlewarePath, Settings.injectorsPath, Settings.storePath);
         await this.mockServer.launchServer();
         this.restartOnChange(this.restartServer);
 

@@ -48,9 +48,6 @@ export class Settings {
   static get baseUrl() {
     return Settings.getSettings("baseUrl") as string;
   }
-  static get store() {
-    return Settings.getSettings("store") as object;
-  }
   static get reverseRouteOrder() {
     return Settings.getSettings("reverseRouteOrder") as boolean;
   }
@@ -122,6 +119,11 @@ export class Settings {
     const injectorsPathStr = Settings.getSettings("paths.injectorsPath") as string;
     const injectorsPath = Settings.getValidPath(Settings.rootPath, injectorsPathStr, true);
     return injectorsPath;
+  }
+  static get storePath() {
+    const storePathstr = Settings.getSettings("paths.storePath") as string;
+    const storePath = Settings.getValidPath(Settings.rootPath, storePathstr, true);
+    return storePath;
   }
   static get middlewares() {
     const middlewarePath = Settings.middlewarePath;
