@@ -1,13 +1,12 @@
 import * as vscode from "vscode";
 import {
-  generateMockID,
-  resetServerId,
+  generateMockID, resetServerId,
   startServerID,
   stopServerID,
-  switchEnvironmentID,
+  switchEnvironmentID
 } from "./enum";
-import VSMockServer from "./vs_mock_server";
 import { StatusbarUi } from "./StatusBarUI";
+import VSMockServer from "./vs_mock_server";
 
 export function activate(context: vscode.ExtensionContext) {
   const vsMockServer = new VSMockServer();

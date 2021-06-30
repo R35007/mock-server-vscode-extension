@@ -1,6 +1,12 @@
-## v2.1.1
+## v2.1.3
 
-- updated `@r35007/mock-server@2.3.0`
+- Bug Fix
+- updated `@r35007/mock-server@2.4.1`
+- changes default mockPath from `https://jsonplaceholder.typicode.com/db` to `http://jsonplaceholder.typicode.com/db`
+
+## v2.1.2
+
+- updated `@r35007/mock-server@2.3.1`
 - Now can directly access server Mock data.
   Try to give the follwing code in `settings.json`
 

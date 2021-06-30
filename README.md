@@ -1,8 +1,9 @@
 # Mock Server[](#mock-server)
 
-This extension helps to generate mock from HAR file and generate a local mock server.
-This also helps to filter any JSON file using the filter schema.
-This extension is a wraper over for the node package `mock-server@1.0.3`.
+- Get a full REST API with zero coding in less than 30 seconds (seriously)
+- This extension is a wraper over for the node package `mock-server@2.4.1`.
+
+![Home Page](https://r35007.github.io/Mock-Server/homePage.png)
 
 Please visit [https://r35007.github.io/Mock-Server/](https://r35007.github.io/Mock-Server/) for further information.
 
@@ -44,16 +45,13 @@ This command helps to generate a mock data from HAR file. NOTE: The HAR file siz
 While generating mock to call a method for each entry you must provide a callback method for entry.
 This can be provided inside the middleware.js and this file path must be proided to the "`mock-server.paths.middlewarePath`".
 
-middleware.js
+For further information please visit [https://r35007.github.io/Mock-Server/#generatemockfromhar](https://r35007.github.io/Mock-Server/#generatemockfromhar)
+
+`middleware.js`
 
 ```js
 exports.entryCallback = (entry, routePath, routeConfig, pathToRegexp) => {
-  return {
-    [routePath]: {
-      statusCode,
-      mock: response,
-    },
-  };
+  // your code goes here ...
 };
 ```
 
@@ -62,19 +60,16 @@ exports.entryCallback = (entry, routePath, routeConfig, pathToRegexp) => {
 While generating mock to call a method at the end of the generatedMock you must provide a final callback method.
 This can be provided inside the middleware.js and this file path must be proided to the "`mock-server.paths.middlewarePath`".
 
-middleware.js
+For further information please visit [https://r35007.github.io/Mock-Server/#generatemockfromhar](https://r35007.github.io/Mock-Server/#generatemockfromhar)
+
+`middleware.js`
 
 ```js
 exports.entryCallback = (entry, routePath, routeConfig, pathToRegexp)  => {
-  return {
-    [routePath]: {
-      statusCode,
-      mock: response,
-    },
-  };
+  // your code goes here ...
 };
 
-exports.finalCallback = (generatedMock, pathToRegexp) => {
-  return generatedMock;
+exports.finalCallback = (harData, generatedMock, pathToRegexp) => {
+  // your code goes here ...
 };
 ```

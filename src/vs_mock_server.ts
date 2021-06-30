@@ -4,6 +4,7 @@ import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
 import { StatusbarUi } from "./StatusBarUI";
 import { Utils } from "./utils";
+const kill = require('kill-port');
 
 export default class VSMockServer extends Utils {
   constructor() {
@@ -26,7 +27,7 @@ export default class VSMockServer extends Utils {
           routeRewrite: Settings.routeRewrite,
           excludeRoutes: Settings.excludeRoutes
         }
-        const mock = this.mockServer.transformHar(document.uri.fsPath, config, Settings.entryCallback, Settings.finalCallback);
+        const mock = this.mockServer.generateMockFromHAR(document.uri.fsPath, config, Settings.entryCallback, Settings.finalCallback);
         this.writeFile(JSON.stringify(mock, null, "\t"), fileName, "Mock generated Successfully", editor, document, textRange);
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Mock generated Successfully`);
       } catch (err) {
@@ -112,7 +113,7 @@ export default class VSMockServer extends Utils {
 
   resetServer = async () => {
     try {
-      if (this.mockServer.isServerStarted) this.mockServer.stopServer();
+      if (this.mockServer.isServerStarted) await this.mockServer.stopServer();
       this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Reset initiated`);
       this.mockServer.resetServer();
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Resetting`);
@@ -122,10 +123,11 @@ export default class VSMockServer extends Utils {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] failed to reset`);
       Prompt.showPopupMessage("Server Reset Failed.", "error");
       this.mockServer.isServerStarted
-        ? StatusbarUi.stopServer(0, Settings.port)
-        : StatusbarUi.startServer(150);
+      ? StatusbarUi.stopServer(0, Settings.port)
+      : StatusbarUi.startServer(150);
       this.output.appendLine(err);
     }
+    await kill(Settings.port, 'tcp');
   }
 
   switchEnvironment = async () => {

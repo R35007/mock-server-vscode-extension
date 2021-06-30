@@ -1,5 +1,5 @@
 import { MockServer } from "@r35007/mock-server";
-import { HAR } from "@r35007/mock-server/dist/model";
+import { HAR, TransformHARConfig } from "@r35007/mock-server/dist/model";
 import axios from 'axios';
 import { watch } from 'chokidar';
 import * as fs from "fs";
@@ -130,13 +130,17 @@ export class Utils {
     const jsonList = filesList.map((f) => {
       if (f.extension === ".har") {
         try {
-          const oldPath = f.filePath;
+          const harPath = f.filePath;
           const newPath = f.filePath.replace(".har", ".json");
-          const data = fs.readFileSync(oldPath);
-          const harData = JSON.parse(data.toString()) as HAR;
-          const newMock = this.mockServer.transformHar(harData, Settings.entryCallback, Settings.finalCallback);
-          fs.writeFileSync(oldPath, JSON.stringify(newMock, null, "\t"));
-          fs.renameSync(oldPath, newPath);
+          const config: TransformHARConfig = {
+            routesToLoop: Settings.routesToLoop,
+            routesToGroup: Settings.routesToGroup,
+            routeRewrite: Settings.routeRewrite,
+            excludeRoutes: Settings.excludeRoutes
+          }
+          const newMock = this.mockServer.generateMockFromHAR(harPath, config, Settings.entryCallback, Settings.finalCallback);
+          fs.writeFileSync(harPath, JSON.stringify(newMock, null, "\t"));
+          fs.renameSync(harPath, newPath);
           return { ...f, extension: ".json", filePath: newPath };
         } catch (err) {
           console.log(err);
