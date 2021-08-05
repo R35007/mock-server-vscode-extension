@@ -49,7 +49,7 @@ This Extension is built upon node package `@r35007/mock-server`.
 
 - To view the List of resources go to Command `MockServer: Home Page`
 
-![Home Page](https://raw.githubusercontent.com/R35007/vscoode-mock-server-extension/main/images/getting-started.gif?token=AFREITC4QTZ67UJQ5UMDWN3BBP3GM)
+![Home Page](https://github.com/R35007/Mock-Server/blob/main/src/img/getting_started_in_vs_code.gif?raw=true)
 
 ## **Commands**
 
