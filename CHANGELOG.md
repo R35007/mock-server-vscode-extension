@@ -1,3 +1,7 @@
+## v3.0.3
+
+- License Update
+
 ## v3.0.2
 
 - ReadMe update
@@ -23,7 +27,7 @@
 
 - updated `@r35007/mock-server@2.3.1`
 - Now can directly access server Mock data.
-  Try to give the follwing code in `settings.json`
+  Try to give the following code in `settings.json`
 
 ```json
 {
@@ -53,7 +57,7 @@
 ## v2.0.0
 
 - Bug Fix
-- Added Filewatcher. Automatically restarts the server for file changes.
+- Added File watcher. Automatically restarts the server for file changes.
 - updated `@r35007/mock-server@2.0.7`
 
 ## v1.0.0
