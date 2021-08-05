@@ -29,7 +29,7 @@ export class Prompt {
 
   static showPopupMessage = (message: string, action: "info" | "warning" | "error") => {
     if (action === "info") {
-      !Settings.dontShowInfoMsg &&
+      Settings.showInfoMsg &&
         vscode.window.showInformationMessage(message)
     } else if (action === "error") {
       vscode.window.showErrorMessage(message);

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { startServerID, stopServerID } from "./enum";
+import { START_SERVER, STOP_SERVER } from './enum';
 import { Settings } from "./Settings";
 
 export class StatusbarUi {
@@ -7,11 +7,14 @@ export class StatusbarUi {
 
   static get statusBarItem() {
     if (!StatusbarUi._statusBarItem) {
-      StatusbarUi._statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment[Settings.statusBarPosition], Settings.statusBarPriority);
-      if (Settings.showStatusbar) this.statusBarItem.show();
+      StatusbarUi._statusBarItem = vscode.window.createStatusBarItem(
+        vscode.StatusBarAlignment[Settings.statusBar.position],
+        Settings.statusBar.priority
+      );
+      if (Settings.statusBar.show) this.statusBarItem.show();
     }
     return StatusbarUi._statusBarItem;
-  } 
+  }
 
   static set statusBarItem(val: any) {
     StatusbarUi._statusBarItem = val;
@@ -31,7 +34,7 @@ export class StatusbarUi {
   static startServer(delay: number, showPopupMessage?: () => void) {
     setTimeout(() => {
       StatusbarUi.statusBarItem.text = "$(broadcast) Mock it";
-      StatusbarUi.statusBarItem.command = startServerID;
+      StatusbarUi.statusBarItem.command = START_SERVER;
       StatusbarUi.statusBarItem.tooltip = "Click to start mock server";
       showPopupMessage && showPopupMessage();
     }, delay);
@@ -40,7 +43,7 @@ export class StatusbarUi {
   static stopServer(delay: number, port: number, showPopupMessage?: () => void) {
     setTimeout(() => {
       StatusbarUi.statusBarItem.text = `$(circle-slash) Port : ${port}`;
-      StatusbarUi.statusBarItem.command = stopServerID;
+      StatusbarUi.statusBarItem.command = STOP_SERVER;
       StatusbarUi.statusBarItem.tooltip = "Click to stop mock server";
       showPopupMessage && showPopupMessage();
     }, delay);

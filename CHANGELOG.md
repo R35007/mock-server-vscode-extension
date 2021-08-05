@@ -1,3 +1,9 @@
+## v3.0.0
+
+- implemented mock server `Home Page` inside vs code.
+- added more settings
+- updated `@r35007/mock-server@3.0.9`
+
 ## v2.1.4
 
 - `mock-server.settings.store` is renamed to `mock-server.settings.paths.storePath`

@@ -2,7 +2,7 @@
 	"name": "mock-server",
 	"displayName": "Mock Server",
 	"description": "Customize Your Own Dynamic Local Mock Server",
-	"version": "2.1.4",
+	"version": "3.0.0",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/mockserverlogo.png",
@@ -46,8 +46,8 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "mockServer.generateMockFromHAR",
-				"title": "Generate Mock from HAR",
+				"command": "mockServer.generateRoutes",
+				"title": "Generate Routes",
 				"category": "MockServer"
 			},
 			{
@@ -69,6 +69,16 @@
 				"command": "mockServer.switchEnvironment",
 				"title": "Switch Environment",
 				"category": "MockServer"
+			},
+			{
+				"command": "mockServer.getDbSnapShot",
+				"title": "Get Db Snapshot",
+				"category": "MockServer"
+			},
+			{
+				"command": "mockServer.homePage",
+				"title": "Home Page",
+				"category": "MockServer"
 			}
 		],
 		"configuration": {
@@ -77,138 +87,163 @@
 				"mock-server.settings.port": {
 					"type": "number",
 					"default": 3000,
-					"description": "Set custom port to generate local mock server"
+					"description": "Set custom port"
+				},
+				"mock-server.settings.host": {
+					"type": "string",
+					"default": "localhost",
+					"description": "Set custom host"
+				},
+				"mock-server.settings.base": {
+					"type": "string",
+					"default": "",
+					"description": "Set custom base url"
+				},
+				"mock-server.settings.id": {
+					"type": "string",
+					"default": "id",
+					"description": "Set custom database id"
 				},
 				"mock-server.settings.environment": {
 					"type": "string",
 					"default": "none",
-					"description": "Set custom mock environment."
+					"description": "Set custom mock environment"
 				},
-				"mock-server.settings.baseUrl": {
-					"type": "string",
-					"default": "",
-					"description": "Set custom base url. This url will be added as a prefix to every routes"
-				},
-				"mock-server.settings.paths": {
+				"mock-server.settings.defaults": {
 					"type": "object",
 					"default": {
-						"rootPath": "./mock",
-						"mockPath": "http://jsonplaceholder.typicode.com/db",
-						"envPath": "env",
-						"injectorsPath": "injectors.json",
-						"middlewarePath": "callback.js",
-						"storePath": "store.json",
-						"staticPath": ""
+						"noGzip": false,
+						"noCors": false,
+						"readOnly": false,
+						"logger": true,
+						"bodyParser": true
 					},
 					"properties": {
-						"rootPath": {
-							"type": "string",
-							"default": "./mock",
-							"description": "Set custom root path. Note : every other paths given in will be relative to this root path"
+						"noGzip": {
+							"type": "boolean",
+							"default": false,
+							"description": "Disable compression."
 						},
-						"mockPath": {
-							"type": "string",
-							"default": "dev",
-							"description": "Set mock Path to generate local mock server. Note : If the path points to a folder, the mock will be generated for every json files inside the given folder"
+						"noCors": {
+							"type": "boolean",
+							"default": false,
+							"description": "Disable CORS ( Cross Origin Resource Sharing) "
 						},
-						"envPath": {
-							"type": "string",
-							"default": "env",
-							"description": "Set custom environment data folder Path. Note : The .json files inside the folder will be listed down for switching environment using `Switch environment` command"
+						"readOnly": {
+							"type": "boolean",
+							"default": false,
+							"description": "Accept only GET requests"
 						},
-						"injectorsPath": {
-							"type": "string",
-							"default": "injectors.json",
-							"description": "Provide the injectors.json path."
+						"logger": {
+							"type": "boolean",
+							"default": true,
+							"description": "Enable logger middleware"
 						},
-						"middlewarePath": {
-							"type": "string",
-							"default": "callback.js",
-							"description": "Provide the middleware.js path. Note: the js file must have an default module export of the middleware"
-						},
-						"storePath": {
-							"type": "string",
-							"default": "store.json",
-							"description": "Provide the store.json path"
-						},
-						"staticPath": {
-							"type": "string",
-							"default": "",
-							"description": "Every file under tis folder will be hosted in a localhost"
+						"bodyParser": {
+							"type": "boolean",
+							"default": true,
+							"description": "Enable body-parser middleware"
 						}
 					},
 					"description": "set paths to start the mock server",
 					"additionalProperties": false
 				},
-				"mock-server.settings.routeRewrite": {
+				"mock-server.settings.paths": {
 					"type": "object",
-					"default": {},
-					"description": "Rewrite the route."
-				},
-				"mock-server.settings.excludeRoutes": {
-					"type": "array",
-					"description": "Provide list of routes to exclude form generate local server that matches this route",
-					"items": {
-						"type": "string"
+					"default": {
+						"root": "./",
+						"db": "db.json",
+						"middleware": "middleware.js",
+						"injectors": "injectors.json",
+						"store": "store.json",
+						"rewriter": "rewriter.json",
+						"staticDir": "public",
+						"envDir": "env"
 					},
-					"uniqueItems": true,
-					"scope": "window"
-				},
-				"mock-server.settings.excludeOldRoutes": {
-					"type": "boolean",
-					"default": false,
-					"description": "If true, it excluded the old routes which are rewritten using routeRewrite",
-					"scope": "window"
-				},
-				"mock-server.settings.routesToLoop": {
-					"type": "array",
-					"default": [
-						"*"
-					],
-					"description": "Provide list of routes to loop form generate mock that matches this route",
-					"items": {
-						"type": "string"
+					"properties": {
+						"root": {
+							"type": "string",
+							"default": "./mock",
+							"description": "Set custom root path. Note : every other paths given in will be relative to this root path"
+						},
+						"db": {
+							"type": "string",
+							"default": "db.json",
+							"description": "Set db.json file path"
+						},
+						"middleware": {
+							"type": "string",
+							"default": "middleware.js",
+							"description": "Set middleware.js file path"
+						},
+						"injectors": {
+							"type": "string",
+							"default": "injectors.json",
+							"description": "Set injectors.json file path"
+						},
+						"store": {
+							"type": "string",
+							"default": "store.json",
+							"description": "Set store.json file path"
+						},
+						"rewriter": {
+							"type": "string",
+							"default": "rewriter.json",
+							"description": "Set rewriter.json file path"
+						},
+						"staticDir": {
+							"type": "string",
+							"default": "",
+							"description": "Set path to static files"
+						},
+						"envDir": {
+							"type": "string",
+							"default": "env",
+							"description": "Set path to environment files"
+						}
 					},
-					"uniqueItems": true,
-					"scope": "window"
+					"description": "set paths to start the mock server",
+					"additionalProperties": false
 				},
-				"mock-server.settings.routesToGroup": {
-					"type": "array",
-					"description": "Provide list of routes to group form generate mock that matches this route",
-					"items": {
-						"type": "string"
+				"mock-server.settings.statusBar": {
+					"type": "object",
+					"default": {
+						"show": true,
+						"position": "Right",
+						"priority": 0
 					},
-					"uniqueItems": true,
-					"scope": "window"
+					"properties": {
+						"show": {
+							"type": "boolean",
+							"default": true,
+							"description": "Change this to false if you don't want the button to show in statusbar"
+						},
+						"position": {
+							"type": "string",
+							"default": "Right",
+							"enum": [
+								"Right",
+								"Left"
+							],
+							"description": "Set a custom position of the statusbar. Note: Please reload the extension to take effect."
+						},
+						"priority": {
+							"type": "number",
+							"default": 0,
+							"description": "helps to reorder the placement of the statusbar. Minimum priority moves the statusbar to left most. Note: Please reload the extension to take effect."
+						}
+					},
+					"description": "Set Statusbar Settings"
 				},
-				"mock-server.settings.reverseRouteOrder": {
+				"mock-server.settings.showInfoMsg": {
 					"type": "boolean",
 					"default": true,
-					"description": "If true, routes will be generated in a reverse order"
+					"description": "Change this to false if you don't want to show information pop up messages."
 				},
-				"mock-server.settings.statusBar.show": {
-					"type": "boolean",
-					"default": true,
-					"description": "Change this to false if you don't want the button to show in statusbar"
-				},
-				"mock-server.settings.statusBar.position": {
-					"type": "string",
-					"default": "Right",
-					"enum": [
-						"Right",
-						"Left"
-					],
-					"description": "Set a custom position of the statusbar. Note: Please reload the extension to take effect."
-				},
-				"mock-server.settings.statusBar.priority": {
-					"type": "number",
-					"default": 0,
-					"description": "helps to reorder the placement of the statusbar. Minimum priority moves the statusbar to left most. Note: Please reload the extension to take effect."
-				},
-				"mock-server.settings.donotShowInfoMsg": {
+				"mock-server.settings.reverse": {
 					"type": "boolean",
 					"default": false,
-					"description": "Change this to true if you don't want to show information pop up messages."
+					"description": "Generate Routes in reverse order"
 				}
 			}
 		},
@@ -246,7 +281,7 @@
 		"typescript": "^4.1.3"
 	},
 	"dependencies": {
-		"@r35007/mock-server": "^2.4.2",
+		"@r35007/mock-server": "^3.0.8",
 		"@types/chokidar": "^2.1.3",
 		"@types/express": "^4.17.11",
 		"axios": "^0.21.1",

@@ -1,30 +1,9 @@
-import { Config, KeyValString, User_Middlewares } from "@r35007/mock-server/dist/model";
+import { Config, User_Middlewares } from "@r35007/mock-server/dist/server/model";
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
 export class Settings {
-
-  static output = vscode.window.createOutputChannel("Mock Server Path Log");
-
-  static showPathLog() {
-    Settings.output.clear();
-    const paths = Settings.getSettings("paths") as object;
-    Object.keys(paths).forEach(Settings.showLog)
-  }
-
-  static showLog(settingsName: string) {
-    const workSpaceFolderPath = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : "./";
-    const relativePath = Settings.getSettings("paths." + settingsName) as string;
-    const resolvedPath = settingsName === 'rootPath'
-      ? path.resolve(workSpaceFolderPath, relativePath)
-      : path.resolve(Settings.rootPath, relativePath);
-    if (relativePath?.trim().length && fs.existsSync(resolvedPath)) {
-      Settings.output.appendLine(`${settingsName} : ${resolvedPath}`);
-    } else {
-      Settings.output.appendLine(`\n[Error] - Invalid ${settingsName} : ${resolvedPath}`);
-    }
-  }
 
   static get configuration() {
     return vscode.workspace.getConfiguration("mock-server.settings");
@@ -38,141 +17,95 @@ export class Settings {
   static get port() {
     return (Settings.getSettings("port") as number) || 3000;
   }
+  static get host() {
+    return (Settings.getSettings("host") as string) || 'localhost';
+  }
+  static get base() {
+    return Settings.getSettings("base") as string;
+  }
+  static get id() {
+    return Settings.getSettings("id") as string || 'id';
+  }
   static get environment() {
-    const env = Settings.getSettings("environment") as string;
-    return env || "none";
+    return Settings.getSettings("environment") as string || "none";
   }
   static set environment(env: string) {
     Settings.setSettings("environment", env ? env.toLowerCase() : "none");
   }
-  static get baseUrl() {
-    return Settings.getSettings("baseUrl") as string;
+  static get defaults() {
+    return Settings.getSettings("defaults") as {
+      noGzip: boolean;
+      noCors: boolean;
+      logger: boolean;
+      readOnly: boolean;
+      bodyParser: boolean;
+    };
   }
-  static get reverseRouteOrder() {
-    return Settings.getSettings("reverseRouteOrder") as boolean;
+  static get statusBar() {
+    return Settings.getSettings("statusBar") as {
+      show: boolean;
+      position: "Right" | "Left";
+      priority: number;
+    };
   }
-  static get routeRewrite() {
-    const rewriter = Settings.getSettings("routeRewrite") as KeyValString;
-    return rewriter;
+  static get paths() {
+    const root = Settings.getValidPath(Settings.getSettings("paths.root") as string, "./") || 
+      vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./";
+    return {
+      root,
+      db: Settings.getValidPath(Settings.getSettings("paths.db") as string, "db.json", root),
+      middleware: Settings.getValidPath(Settings.getSettings("paths.middleware") as string, "middleware.js", root),
+      injectors: Settings.getValidPath(Settings.getSettings("paths.injectors") as string, "injectors.json", root),
+      store: Settings.getValidPath(Settings.getSettings("paths.store") as string, "store.json", root),
+      rewriter: Settings.getValidPath(Settings.getSettings("paths.rewriter") as string, "rewriter.json", root),
+      envDir: Settings.getValidPath(Settings.getSettings("paths.envDir") as string, "env", root),
+      staticDir: Settings.getValidPath(Settings.getSettings("paths.staticDir") as string, "public", root),
+    }
   }
-  static get excludeOldRoutes() {
-    return Settings.getSettings("excludeOldRoutes") as boolean;
-  }
-  static get excludeRoutes() {
-    const excludeRoutes = Settings.getSettings("excludeRoutes") as string[];
-    const oldRoutes = Object.keys(Settings.routeRewrite);
-    Settings.excludeOldRoutes && excludeRoutes.push(...oldRoutes);
-
-    return excludeRoutes
-  }
-  static get routesToLoop() {
-    return Settings.getSettings("routesToLoop") as string[];
-  }
-  static get routesToGroup() {
-    return Settings.getSettings("routesToGroup") as string[];
-  }
-
-  static get showStatusbar() {
-    return Settings.getSettings("statusBar.show") as boolean;
-  }
-  static get statusBarPosition() {
-    return Settings.getSettings("statusBar.position") as "Right" | "Left";
-  }
-  static get statusBarPriority() {
-    return parseInt((Settings.getSettings("statusBar.priority") as any).toString());
-  }
-
-  static get dontShowInfoMsg() {
-    return Settings.getSettings("donotShowInfoMsg") as boolean;
-  }
-  static set dontShowInfoMsg(val: boolean) {
-    Settings.setSettings("donotShowInfoMsg", val);
-  }
-
-  static get rootPath() {
-    const rootPathStr = Settings.getSettings("paths.rootPath") as string;
-    const workSpaceFolderPath = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : "./";
-    const rootPath = Settings.getValidPath(workSpaceFolderPath, rootPathStr) || workSpaceFolderPath;
-    return rootPath;
-  }
-  static get mockPath() {
-    const mockPathStr = Settings.getSettings("paths.mockPath") as string;
-    const mockPath = Settings.getValidPath(Settings.rootPath, mockPathStr) || "";
-    return mockPath
-  }
-  static get staticPath() {
-    const staticPathStr = Settings.getSettings("paths.staticPath") as string;
-    const staticPath = Settings.getValidPath(Settings.rootPath, staticPathStr) || "";
-    return staticPath
-  }
-  static get envPath() {
-    const envPathStr = Settings.getSettings("paths.envPath") as string;
-    const envPath = Settings.getValidPath(Settings.rootPath, envPathStr) || "";
-    return envPath;
-  }
-  static get middlewarePath() {
-    const middlewarePathStr = Settings.getSettings("paths.middlewarePath") as string;
-    const middlewarePath = Settings.getValidPath(Settings.rootPath, middlewarePathStr, true);
-    return middlewarePath;
-  }
-  static get injectorsPath() {
-    const injectorsPathStr = Settings.getSettings("paths.injectorsPath") as string;
-    const injectorsPath = Settings.getValidPath(Settings.rootPath, injectorsPathStr, true);
-    return injectorsPath;
-  }
-  static get storePath() {
-    const storePathstr = Settings.getSettings("paths.storePath") as string;
-    const storePath = Settings.getValidPath(Settings.rootPath, storePathstr, true);
-    return storePath;
-  }
-  static get middlewares() {
-    const middlewarePath = Settings.middlewarePath;
+  static get middleware() {
+    const middlewarePath = Settings.paths.middleware;
     if (middlewarePath) {
       delete require.cache[middlewarePath];
       return require(middlewarePath) as User_Middlewares;
     }
-    return undefined;
   }
   static get entryCallback() {
-    const middlewares = Settings.middlewares;
-    if (middlewares) {
-      return middlewares["entryCallback"] as any;
+    const middleware = Settings.middleware;
+    if (middleware) {
+      return middleware["entryCallback"] as any;
     }
-    return undefined;
   }
   static get finalCallback() {
-    const middlewares = Settings.middlewares;
-    if (middlewares) {
-      return middlewares["finalCallback"] as any;
+    const middleware = Settings.middleware;
+    if (middleware) {
+      return middleware["finalCallback"] as any;
     }
-    return undefined;
   }
-
+  static get reverse() {
+    return Settings.getSettings("reverse") as boolean;
+  }
   static get config(): Config {
     return {
       port: Settings.port,
-      rootPath: Settings.rootPath,
-      baseUrl: Settings.baseUrl,
-      staticUrl: Settings.staticPath,
-      routeRewrite: Settings.routeRewrite,
-      excludeRoutes: Settings.excludeRoutes,
-      reverseRouteOrder: Settings.reverseRouteOrder,
-      throwError: true,
+      host: Settings.host,
+      id: Settings.id,
+      root: Settings.paths.root,
+      base: Settings.base,
+      reverse: Settings.reverse,
+      staticDir: Settings.paths.staticDir || "/public",
+      ...Settings.defaults
     };
   }
-  static getValidPath(rootPath: string, relativePath: string, shouldBeFile: boolean = false) {
+  static get showInfoMsg() {
+    return Settings.getSettings("showInfoMsg") as boolean;
+  }
+  static set showInfoMsg(val: boolean) {
+    Settings.setSettings("showInfoMsg", val);
+  }
+  static getValidPath(relativePath: string, defaults: string, rootPath?: string) {
     if (relativePath.startsWith("http")) return relativePath;
-    if (relativePath?.trim().length) {
-      const resolvedPath = path.resolve(rootPath, relativePath);
-      if (fs.existsSync(resolvedPath)) {
-        if (shouldBeFile && !fs.statSync(resolvedPath).isFile()) {
-          return undefined;
-        }
-        return resolvedPath;
-      }
-      return undefined;
-    } else {
-      return undefined;
-    }
+    const root = rootPath || vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./";
+    const resolvedPath = path.resolve(root, relativePath?.trim() || defaults);
+    if (fs.existsSync(resolvedPath)) return resolvedPath;
   }
 }

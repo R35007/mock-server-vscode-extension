@@ -1,26 +1,26 @@
 import { MockServer } from "@r35007/mock-server";
-import { HAR, TransformHARConfig } from "@r35007/mock-server/dist/model";
+import { PathDetails, Routes } from '@r35007/mock-server/dist/server/model';
+import { getJSON, getFilesList } from "@r35007/mock-server/dist/server/utils/fetch";
 import axios from 'axios';
 import { watch } from 'chokidar';
 import * as fs from "fs";
 import { FSWatcher } from 'node:fs';
 import * as path from "path";
 import * as vscode from "vscode";
-import { generateMockID } from "./enum";
+import { GENERATE_ROUTES } from './enum';
 import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
 
 
 export class Utils {
-  protected mockServer: MockServer;
-  protected environment = "none";
-  protected output;
+  mockServer: MockServer;
+  environment = "none";
+  output;
 
   watcher: FSWatcher | undefined;
 
   constructor() {
-    const workSpaceFolderPath = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : "./";
-    this.mockServer = new MockServer(undefined, { rootPath: workSpaceFolderPath, throwError: true });
+    this.mockServer = new MockServer({ root: Settings.paths.root });
     this.output = vscode.window.createOutputChannel("Mock Server Log");
   }
 
@@ -46,7 +46,7 @@ export class Utils {
     if (editorProps) {
       const { editor, document, textRange, editorText } = editorProps;
 
-      if ((action === generateMockID) && !editorProps.editorText.trim().length) {
+      if ((action === GENERATE_ROUTES) && !editorProps.editorText.trim().length) {
         const extension = path.extname(path.resolve(document.fileName));
         if (extensions.indexOf(extension) < 0) return false;
       }
@@ -95,77 +95,72 @@ export class Utils {
     }
   };
 
-  protected getJSON = async (mockPath: string) => {
-    const environmentList = this.getEnvironmentList();
+  protected getValidRoutes = async (dbPath?: string) => {
+    if(!dbPath) return;
+    const environmentList = this.getEnvironmentList(Settings.paths.envDir);
     const environment = this.environment.toLowerCase();
     if (!environment.trim().length || environment === "none" || !environmentList.find((e) => e.fileName === environment)) {
       Settings.environment = "none";
-      return await this.getDataFromUrl(mockPath);
+      return await this.getDataFromUrl(dbPath);
     }
 
     Settings.environment = environment;
-    const mock = await this.getDataFromUrl(mockPath);
+    const mock = await this.getDataFromUrl(dbPath);
     const envPath = environmentList.find((e) => e.fileName === environment)!.filePath;
-    const env = this.mockServer.getJSON(envPath, []);
+    const env = getJSON(envPath, []);
     return { ...mock, ...env };
   };
 
-  protected getDataFromUrl = async (mockPath: string) =>{
-    if(mockPath.startsWith("http")){
-      const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => {});
+  protected getDataFromUrl = async (mockPath: string) => {
+    if (mockPath.startsWith("http")) {
+      const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
       return data;
-    }else{
-      return this.mockServer.getJSON(mockPath);
+    } else {
+      return getJSON(mockPath);
     }
   }
 
-  protected getEnvironmentList = () => {
-    const filesList = this.convertHARtoMock();
-    const envList = filesList.filter((f) => f.extension === ".json").map((f) => ({ ...f, fileName: f.fileName.toLowerCase() }));
-    return envList;
+  protected getEnvironmentList = (envDir? : string) => {
+    if (!envDir) return [];
+    return this.getEnvFilesList(envDir).map((f) => ({ ...f, fileName: f.fileName.toLowerCase() }));
   };
 
-  protected convertHARtoMock = () => {
-    const filesList = this.mockServer.getFilesList(Settings.envPath);
-    const jsonList = filesList.map((f) => {
-      if (f.extension === ".har") {
-        try {
-          const harPath = f.filePath;
-          const newPath = f.filePath.replace(".har", ".json");
-          const config: TransformHARConfig = {
-            routesToLoop: Settings.routesToLoop,
-            routesToGroup: Settings.routesToGroup,
-            routeRewrite: Settings.routeRewrite,
-            excludeRoutes: Settings.excludeRoutes
-          }
-          const newMock = this.mockServer.generateMockFromHAR(harPath, config, Settings.entryCallback, Settings.finalCallback);
-          fs.writeFileSync(harPath, JSON.stringify(newMock, null, "\t"));
-          fs.renameSync(harPath, newPath);
-          return { ...f, extension: ".json", filePath: newPath };
-        } catch (err) {
-          console.log(err);
-          return f;
-        }
+  protected getEnvFilesList = (envDir: string) => {
+    return getFilesList(envDir).map((f) => {
+      if (![".har", ".json"].includes(f.extension)) return;
+      try {
+        const dbPath = f.filePath;
+        const newDbPath = dbPath.replace(".har", ".json");
+        const routes = this.mockServer.getValidRoutes(
+          dbPath, 
+          Settings.entryCallback, 
+          Settings.finalCallback, 
+          { reverse: Settings.reverse }
+        );
+        fs.writeFileSync(dbPath, JSON.stringify(routes, null, "\t"));
+        fs.renameSync(dbPath, newDbPath);
+        return { ...f, extension: ".json", filePath: newDbPath };
+      } catch (err) {
+        console.log(err);
+        return;
       }
-
-      return f;
-    });
-
-    return jsonList;
+    }).filter(Boolean) as PathDetails[];
   };
 
   protected restartOnChange = (restart: Function) => {
-    if(!this.watcher) {
+    if (!this.watcher) {
       const filesToWatch = ([
-        Settings.mockPath || '',
-        Settings.envPath || '',
-        Settings.middlewarePath || '',
-        Settings.injectorsPath || '',
-        Settings.staticPath || ''
-      ]).filter(p => !p.startsWith("http")).filter(Boolean);
-  
+        Settings.paths.db,
+        Settings.paths.middleware,
+        Settings.paths.injectors,
+        Settings.paths.store,
+        Settings.paths.rewriter,
+        Settings.paths.staticDir,
+        Settings.paths.envDir,
+      ]).filter(p => !p?.startsWith("http")).filter(Boolean) as string[];
+
       this.watcher = watch(filesToWatch);
-      this.watcher.on('change', (event, path) => {
+      this.watcher.on('change', (_event, _path) => {
         restart();
       });
     }
@@ -174,5 +169,17 @@ export class Utils {
   protected stopWatchingChanges = async () => {
     this.watcher && await this.watcher.close();
     this.watcher = undefined;
+  }
+
+  protected cleanRoutes = (routes: Routes) => {
+    for(let key in routes){
+      if(routes[key] && typeof routes[key] === 'object' && !Array.isArray(routes[key])){
+        delete routes[key]._extension;
+        delete routes[key]._isFile;
+        delete routes[key]._request;
+        delete routes[key]._id;
+        delete routes[key].override;
+      }
+    }
   }
 }

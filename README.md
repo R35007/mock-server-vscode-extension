@@ -1,75 +1,271 @@
-# Mock Server[](#mock-server)
+# Mock Server[](#mock-server) [![](https://img.shields.io/npm/l/@r35007/mock-server?color=blue)](https://img.shields.io/npm/l/@r35007/mock-server?color=blue) [![](https://img.shields.io/npm/types/@r35007/mock-server)](https://img.shields.io/npm/types/@r35007/mock-server)
 
-- Get a full REST API with zero coding in less than 30 seconds (seriously)
-- This extension is a wraper over for the node package `mock-server@2.4.1`.
+Get a full REST API with **zero coding** in **less than 30 seconds** (seriously)
 
-![Home Page](https://r35007.github.io/Mock-Server/homePage.png)
+Created with <3 for front-end developers who need a quick back-end for prototyping and mocking.
 
-Please visit [https://r35007.github.io/Mock-Server/](https://r35007.github.io/Mock-Server/) for further information.
+This Extension is built upon node package `@r35007/mock-server`.
 
 ## Table of contents
 
-- [Setup](#setup)
+- [Getting started](#getting-started)
 - [Commands](#commands)
-  - [Start/Stop Server](#start/stop-server)
-  - [Refresh/Restart Server](#Refresh/ReStart-server)
+  - [Start Server](#start-server)
+  - [Stop Server](#stop-server)
+  - [Reset Server](#reset-server)
   - [Switch Environment](#switch-environment)
-  - [Generate Mock](#generate-mock)
+  - [Get Db Snapshot](#get-db-snapshot)
+  - [Generate Routes](#generate-routes)
+  - [Home Page](#home-page)
+- [Settings](#settings)
+  - [Set Custom Port](#set-custom-port)
+  - [Set Custom host](#set-custom-host)
+  - [Set Base Path](#set-base-path)
+  - [Set Db Id](#set-db-id)
+  - [Set Data Paths](#set-data-paths)
+    - [DB](#db)
+    - [Middleware](#middleware)
+    - [Injectors](#injectors)
+    - [Route Rewriters](#route-rewriters)
+    - [Static File Server](#static-file-server)
+- [Documentation](#documentation)
+- [Author](#author)
+- [License](#license)
 
-## Setup
+## Getting started
 
-- First provide a valid paths in `mock-server.paths.mockPath`
-- Thie given path must contain a valid `.json` file to generate a local mock server
-- Now run the command `Start Server` to launch the server.
+- Install the Extension.
+- Create a `db.json` with some data.
 
-## Commands
+```json
+{
+  "posts": [{ "id": 1, "title": "mock-server", "author": "r35007" }],
+  "comments": [{ "id": 1, "body": "some comment", "postId": 1 }],
+  "profile": { "name": "r35007" }
+}
+```
 
-### `Start/Stop Server`
+- From Command Palette (`Ctrl/Cm+Sh+P`) type mock and select `MockServer: Start Server` (`Alt+Enter`)
 
-This command generates a local mock server from the given `mock-server.settings.paths.mockPath` in the vs code settings.
+- To view the List of resources go to Command `MockServer: Home Page`
 
-### `Refresh/Restart Server`
+![Home Page](./images/getting-started.gif)
 
-This command restarts a local mock server. If any changes done to the settings or mock data please restart the server.
+## **Commands**
 
-### `Switch Environment`
+### **Start Server**
 
-This command switches the mock data point environment files that are provided in the `mock-server.settings.paths.envPath` folder. You can also switch environment via `mock-server.settings.environment`
+Mock Server can be started in three ways.
 
-### `Generate Mock`
+- From Command Palette (`Ctrl/Cm+Sh+P`) type mock and select `MockServer: Start Server`
+- Use `Alt+Enter` shortcut to start or restart the server.
+- Click the `Mock It` icon at the right corner of the statusbar
+- Server will automatically will restarted if any changes are made.
+- You can also manually restart the server bu giving the same `MockServer: Start Server` Command
 
-This command helps to generate a mock data from HAR file. NOTE: The HAR file size must be less than 5MB.
+### **Stop Server**
 
-#### `entryCallback`
+- From Command Palette (`Ctrl/Cm+Sh+P`) type mock and select `MockServer: Stop Server`.
+- ShortCut using `Shift+Alt+Enter`
 
-While generating mock to call a method for each entry you must provide a callback method for entry.
-This can be provided inside the middleware.js and this file path must be proided to the "`mock-server.paths.middlewarePath`".
+### **Reset Server**
 
-For further information please visit [https://r35007.github.io/Mock-Server/#generatemockfromhar](https://r35007.github.io/Mock-Server/#generatemockfromhar)
+- If stopping the server got stuck in middle or something went wrong, you can reset the server using `MockServer: Reset Server` Command.
+- This Command kills the server port, stops the server and resets all its instance.
+
+### **Switch Environment**
+
+Helps to work in multiple data environments.
+
+- Create `env` folder in root.
+- Keep you different db data of extension `.json` or `.har`
+- From Command Palette (`Ctrl/Cm+Sh+P`) type mock and select `MockServer: Switch Environment`
+- Use`Alt+S` shortcut to switch environment.
+- Now All the `.json` will be listed down. You can pick a data to launch the server.
+- Note `.har` will automatically converted into `.json` with a valid db routes.
+- This path can be modified using the settings `mock-server.settings.paths.envDir`.
+
+### **Get Db Snapshot**
+
+- `MockServer: Get Db Snapshot` Command helps to save the current db data snapshot.
+
+### **Generate Routes**
+
+- `MockServer: Generate Routes` Command helps to generate a valid routes.
+- This also helps to convert the `.har` data to a valid `db.json` file.
+
+### **Home Page**
+
+- `MockServer: Home Page` Command opens a new window which shows you all the list of resources.
+- This window also helps to update or add new resources in runtime.
+- It can be opened in a separate browser window using [http://localhost:3000](http://localhost:3000)
+
+## **Settings**
+
+### **Set Custom Port**
+
+- Set a custom port using `mock-server.settings.port` in vscode settings.json.
+- Default: `3000`.
+
+### **Set Custom Host**
+
+- Set a custom host using `mock-server.settings.host` in vscode settings.json.
+- Default: `localhost`.
+
+### **Set Base Path**
+
+- You can mount the Mock Server on another endpoint using the base url.
+- Use `mock-server.settings.base` in vscode settings.json to set a custom base path.
+- Alternatively you can also set the base path using the [Route Rewriter](#route-rewriter).
+
+### **Set Db Id**
+
+- `mock-server.settings.id` set database id property (e.g. \_id).
+- Default: `id`
+
+### **Set Data Paths**
+
+- `mock-server.settings.paths` sets all the data paths to start the Mock Server.
+- Defaults:
+
+```jsonc
+{
+  "root": "./", // all paths will be relative this path.
+  "db": "db.json", // If its a folder path, the server pick all the .json files and run the mock server.
+  "middleware": "middleware.js", // path to middlewares. Must be .js type file
+  "injectors": "injectors.json", // path to injectors file
+  "store": "store.json", // path to store file
+  "rewriter": "rewriter.json", // path to rewriters file
+  "staticDir": "public", // path to static file server.
+  "envDir": "env" // path to env. on `MockServer: Switch Environment` Command, picks all the .json files under this directory.
+}
+```
+
+### DB
+
+- Create `db.json`
+- Set custom Db path using setting `mock-server.settings.paths.db`.
+- This path can be either file path or folder path or also a server path.
+- If provided as a folder path, then all the `.json` files will be joined together and starts the server.
+- Example 1 : `db.json`.
+- Example 2 : `./folder`.
+- Example 2 : `https://jsonplaceholder.typicode.com/db`.
+
+### Middleware
+
+- Create `middleware.js`
+- Set custom Middleware path using setting `mock-server.settings.paths.middleware`.
+- Middlewares must be of a type `.js` file.
+- Callback method to generate routes can also be given in this `middleware.js`.
+- Example:
 
 `middleware.js`
 
 ```js
-exports.entryCallback = (entry, routePath, routeConfig, pathToRegexp) => {
+// This method is called only on generating routes suing MockServer: Generate Routes Command
+// It will be called for each entry in a HAR formatted data
+// Here you can return your custom route and routeConfig
+// `entryCallback` is a reserved word for generating Routes
+exports.entryCallback = (entry, routePath, routeConfig)  => {
   // your code goes here ...
 };
+
+// This method is called only on generating routes suing MockServer: Generate Routes Command
+// It will be called at last of all entry looping.
+// Here you can return your custom routes
+// Whatever you return here will be pasted in the file
+// `finalCallback` is a reserved word for generating Routes
+exports.finalCallback = (data, generatedRoutes) => {
+  // your code goes here ...
+};
+
+// This is a Express middleware used to call on a specific routes.
+// example in db.json
+//{
+//  "/posts": {
+//    "mock": [{ "id": 1, "title": "mock-server", "author": "r35007" }];
+//    "middlewares": ["customLog"]
+//  }
+//}
+// You can create n number of middlewares like this and can be used in any routes as mentioned in above example.
+export customLog = (req, res, next) => {
+  // your code goes here ...
+}
 ```
 
-#### `finalCallback`
+### Injectors
 
-While generating mock to call a method at the end of the generatedMock you must provide a final callback method.
-This can be provided inside the middleware.js and this file path must be proided to the "`mock-server.paths.middlewarePath`".
+- Create `injectors.json`.
+- Set custom Injectors path using `mock-server.settings.paths.injectors`.
+- Injectors helps to inject a route config to the routes in the `db.json`.
+- Example:
 
-For further information please visit [https://r35007.github.io/Mock-Server/#generatemockfromhar](https://r35007.github.io/Mock-Server/#generatemockfromhar)
+`injectors.json`
 
-`middleware.js`
-
-```js
-exports.entryCallback = (entry, routePath, routeConfig, pathToRegexp)  => {
-  // your code goes here ...
-};
-
-exports.finalCallback = (harData, generatedMock, pathToRegexp) => {
-  // your code goes here ...
-};
+```jsonc
+{
+  "/posts": {
+    "delay": 2000 // set delay of 2000ms to the /posts route
+  },
+  // Make sure common route config is provided at the end of all other route configs
+  "/(.*)": {
+    // sets config to all the routes. acts as a common config
+    "override": true, // If true its replaces all the existing route config
+    "middlewares": ["log", "..."], // the item ... will be replaced with the existing route middlewares
+    "statusCode": 200,
+    "delay": 1000 // sets common delay of 1 second
+  }
+}
 ```
+
+### Route Rewriters
+
+- Create `rewriters.json`.
+- Set custom Rewriters path using `mock-server.settings.paths.rewriter`.
+- This helps to create a custom route.
+- Example:
+
+`rewriters.json`
+
+```jsonc
+{
+  "/:resource/:id/show": "/:resource/:id",
+  "/posts/:category": "/posts?category=:category",
+  "/articlesS?id=:id": "/posts/:id"
+}
+```
+
+To mount on another endpoint you can use `mock-server.settings.base`. Alternatively you can also rewrite the url as follows
+
+```jsonc
+{
+  "/api/*": "/$1"
+}
+```
+
+Now you can access resources using /api/
+
+```txt
+  /api/posts # → /posts
+  /api/posts/1  # → /posts/1
+```
+
+### Static File Server
+
+- Create a folder `public` in the project root folder.
+- Now when you start the server, all files under this folder will be automatically hosted in the file server.
+- Set Custom directory using `mock-server.settings.paths.staticDir`
+
+## **Documentation**
+
+- ReadMe - [https://r35007.github.io/Mock-Server/](https://r35007.github.io/Mock-Server/)
+
+## Author
+
+**Sivaraman** - [sendmsg2siva.siva@gmail.com](sendmsg2siva.siva@gmail.com)
+
+- _GitHub_ - [https://github.com/R35007/Mock-Server](https://github.com/R35007/Mock-Server)
+
+## License
+
+MIT

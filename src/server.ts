@@ -1,66 +1,65 @@
-import { Routes, TransformHARConfig } from "@r35007/mock-server/dist/model";
-import { generateMockID } from "./enum";
+import { Routes } from "@r35007/mock-server/dist/server/model";
+import { GENERATE_ROUTES } from './enum';
 import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
 import { StatusbarUi } from "./StatusBarUI";
 import { Utils } from "./utils";
 const kill = require('kill-port');
 
-export default class VSMockServer extends Utils {
+export default class MockServer extends Utils {
   constructor() {
     super();
     this.output.appendLine("\nMock Server Server Initiated");
     StatusbarUi.init();
   }
 
-  generateMockFromHAR = async () => {
-    this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Mock Generation initiated`);
-    const writable = await this.getWritable([".json"], generateMockID);
+  generateRoutes = async () => {
+    this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Routes Generation initiated`);
+    const writable = await this.getWritable([".json"], GENERATE_ROUTES);
     if (writable) {
-
-      this.output.appendLine(`[${new Date().toLocaleTimeString()}] Mock Generation running...`);
+      this.output.appendLine(`[${new Date().toLocaleTimeString()}] Routes Generation running...`);
       const { fileName, editor, document, textRange } = writable;
       try {
-        const config: TransformHARConfig = {
-          routesToLoop: Settings.routesToLoop,
-          routesToGroup: Settings.routesToGroup,
-          routeRewrite: Settings.routeRewrite,
-          excludeRoutes: Settings.excludeRoutes
-        }
-        const mock = this.mockServer.generateMockFromHAR(document.uri.fsPath, config, Settings.entryCallback, Settings.finalCallback);
-        this.writeFile(JSON.stringify(mock, null, "\t"), fileName, "Mock generated Successfully", editor, document, textRange);
-        this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Mock generated Successfully`);
+        const routes = this.mockServer.getValidRoutes(
+          document.uri.fsPath,
+          Settings.entryCallback,
+          Settings.finalCallback,
+          { reverse: Settings.reverse }
+        );
+        this.cleanRoutes(routes);
+        this.writeFile(JSON.stringify(routes, null, "\t"), fileName, "Routes generated Successfully", editor, document, textRange);
+        this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Routes generated Successfully`);
       } catch (err) {
-        this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Failed to generate mock`);
+        this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Failed to generate routes`);
         this.output.appendLine(err);
-        Prompt.showPopupMessage(`Failed to generate mock. \n${err.message}`, "error");
+        Prompt.showPopupMessage(`Failed to generate routes. \n${err.message}`, "error");
       }
     }
   };
 
   startServer = async (txt: string) => {
-    Settings.showPathLog();
     this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Server ${txt} initiated`);
     try {
-      if (Settings.mockPath.length && !this.mockServer.isServerStarted) {
-        this.output.appendLine(`[${new Date().toLocaleTimeString()}] Server ${txt}ing...`);
-        StatusbarUi.working(`${txt}ing...`);
+      const paths = Settings.paths;
+      const db = paths.db;
+      this.output.appendLine(`[${new Date().toLocaleTimeString()}] Server ${txt}ing...`);
+      StatusbarUi.working(`${txt}ing...`);
 
-        const mock = await this.getJSON(Settings.mockPath) as Routes;
-        this.mockServer.setData(mock, Settings.config, Settings.middlewarePath, Settings.injectorsPath, Settings.storePath);
-        await this.mockServer.launchServer();
-        this.restartOnChange(this.restartServer);
+      const routes = await this.getValidRoutes(db) as Routes;
+      this.mockServer.setData(
+        routes,
+        Settings.config,
+        paths.middleware,
+        paths.injectors,
+        paths.store,
+        paths.rewriter
+      );
+      await this.mockServer.launchServer();
+      this.restartOnChange(this.restartServer);
 
-
-        const statusMsg = `Server is ${txt}ed at port : ${Settings.port}`;
-        StatusbarUi.stopServer(150, Settings.port, () => Prompt.showPopupMessage(statusMsg, "info"));
-        this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Server is ${txt}ed at port : ${Settings.port}`);
-      } else {
-        const statusMsg = `'mock-server.settings.paths.mockPath' - Please provide a valid path here`;
-        this.output.appendLine(`[${new Date().toLocaleTimeString()}] ${statusMsg}`);
-        Prompt.showPopupMessage(statusMsg, "error");
-        StatusbarUi.startServer(0, () => Prompt.showPopupMessage(statusMsg, "error"));
-      }
+      const statusMsg = `Server is ${txt}ed at port : ${Settings.port}`;
+      StatusbarUi.stopServer(150, Settings.port, () => Prompt.showPopupMessage(statusMsg, "info"));
+      this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Server is ${txt}ed at port : ${Settings.port}`);
     } catch (err) {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Server Failed to ${txt}`);
       this.output.appendLine(err);
@@ -73,7 +72,7 @@ export default class VSMockServer extends Utils {
     this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Server Stop initiated`);
     try {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] Server Stopping`);
-      if (this.mockServer.isServerStarted) {
+      if (this.mockServer.server) {
         StatusbarUi.working("Stopping...");
         await this.mockServer.stopServer();
         this.stopWatchingChanges();
@@ -93,7 +92,7 @@ export default class VSMockServer extends Utils {
   };
 
   restartServer = async () => {
-    if (this.mockServer.isServerStarted) {
+    if (this.mockServer.server) {
       try {
         this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Server Stop initiated`);
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] Server Stopping`);
@@ -113,7 +112,7 @@ export default class VSMockServer extends Utils {
 
   resetServer = async () => {
     try {
-      if (this.mockServer.isServerStarted) await this.mockServer.stopServer();
+      if (this.mockServer.server) await this.mockServer.stopServer();
       this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Reset initiated`);
       this.mockServer.resetServer();
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Resetting`);
@@ -122,9 +121,9 @@ export default class VSMockServer extends Utils {
     } catch (err) {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] failed to reset`);
       Prompt.showPopupMessage("Server Reset Failed.", "error");
-      this.mockServer.isServerStarted
-      ? StatusbarUi.stopServer(0, Settings.port)
-      : StatusbarUi.startServer(150);
+      this.mockServer.server
+        ? StatusbarUi.stopServer(0, Settings.port)
+        : StatusbarUi.startServer(150);
       this.output.appendLine(err);
     }
     await kill(Settings.port, 'tcp');
@@ -134,8 +133,9 @@ export default class VSMockServer extends Utils {
     this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Switch Environment initiated`);
     try {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] Switching Environment...`);
-      if (Settings.envPath.length) {
-        const envList = this.getEnvironmentList();
+      const envDir = Settings.paths.envDir;
+      if (envDir?.length) {
+        const envList = this.getEnvironmentList(envDir);
         if (envList && envList.length) {
           const environmentList = [...new Set(["none", ...envList.map((e) => e.fileName)])];
 
@@ -166,6 +166,25 @@ export default class VSMockServer extends Utils {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Something went wrong`);
       this.output.appendLine(err);
       Prompt.showPopupMessage(`Something went wrong`, "error");
+    }
+  };
+
+  getDbSnapshot = async () => {
+    this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Db Snapshot initiated`);
+    const writable = await this.getWritable([".json"], GENERATE_ROUTES);
+    if (writable) {
+      this.output.appendLine(`[${new Date().toLocaleTimeString()}] Getting Db Snapshot..`);
+      const { fileName, editor, document, textRange } = writable;
+      try {
+        const snapShot = JSON.parse(JSON.stringify(this.mockServer.routes));
+        this.cleanRoutes(snapShot);
+        this.writeFile(JSON.stringify(snapShot, null, "\t"), fileName, "Db Snapshot retrieved Successfully", editor, document, textRange);
+        this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Db Snapshot retrieved Successfully`);
+      } catch (err) {
+        this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Failed to get Db Snapshot`);
+        this.output.appendLine(err);
+        Prompt.showPopupMessage(`Failed to get Db Snapshot. \n${err.message}`, "error");
+      }
     }
   };
 }
