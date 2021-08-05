@@ -1,4 +1,4 @@
-## v3.0.0
+## v3.0.1
 
 - implemented mock server `Home Page` inside vs code.
 - added more settings
