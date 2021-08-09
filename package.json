@@ -2,7 +2,7 @@
 	"name": "mock-server",
 	"displayName": "Mock Server",
 	"description": "Customize Your Own Dynamic Local Mock Server",
-	"version": "3.0.3",
+	"version": "4.0.0",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/mockserverlogo.png",
@@ -20,6 +20,7 @@
 		"API",
 		"prototyping",
 		"mock",
+		"mock server",
 		"mocking",
 		"test",
 		"testing",
@@ -37,7 +38,7 @@
 		"vscode": "^1.30.0"
 	},
 	"categories": [
-		"Other"
+		"Programming Languages"
 	],
 	"activationEvents": [
 		"*"
@@ -46,8 +47,13 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "mockServer.generateRoutes",
-				"title": "Generate Routes",
+				"command": "mockServer.transformToMockServerDB",
+				"title": "Transform To Mock Server DB",
+				"category": "MockServer"
+			},
+			{
+				"command": "mockServer.generateMockFiles",
+				"title": "Generate Mock Files",
 				"category": "MockServer"
 			},
 			{
@@ -58,11 +64,6 @@
 			{
 				"command": "mockServer.stopServer",
 				"title": "Stop Server",
-				"category": "MockServer"
-			},
-			{
-				"command": "mockServer.resetServer",
-				"title": "Reset Server",
 				"category": "MockServer"
 			},
 			{
@@ -77,7 +78,7 @@
 			},
 			{
 				"command": "mockServer.homePage",
-				"title": "Home Page",
+				"title": "Open Home Page",
 				"category": "MockServer"
 			}
 		],
@@ -155,8 +156,8 @@
 						"db": "db.json",
 						"middleware": "middleware.js",
 						"injectors": "injectors.json",
+						"rewriters": "rewriters.json",
 						"store": "store.json",
-						"rewriter": "rewriter.json",
 						"staticDir": "public",
 						"envDir": "env"
 					},
@@ -181,15 +182,15 @@
 							"default": "injectors.json",
 							"description": "Set injectors.json file path"
 						},
+						"rewriters": {
+							"type": "string",
+							"default": "rewriters.json",
+							"description": "Set rewriters.json file path"
+						},
 						"store": {
 							"type": "string",
 							"default": "store.json",
 							"description": "Set store.json file path"
-						},
-						"rewriter": {
-							"type": "string",
-							"default": "rewriter.json",
-							"description": "Set rewriter.json file path"
 						},
 						"staticDir": {
 							"type": "string",
@@ -262,8 +263,45 @@
 				"command": "mockServer.switchEnvironment",
 				"key": "alt+s",
 				"mac": "alt+s"
+			},
+			{
+				"command": "mockServer.homePage",
+				"key": "alt+h",
+				"mac": "alt+h"
 			}
-		]
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
+					"command": "mockServer.generateMockFiles",
+					"group": "mock-server"
+				}
+			],
+			"editor/context": [
+				{
+					"when": "resourceExtname == .json ||resourceExtname == .har",
+					"command": "mockServer.transformToMockServerDB",
+					"group": "mock-server"
+				},
+				{
+					"command": "mockServer.switchEnvironment",
+					"group": "mock-server"
+				},
+				{
+					"command": "mockServer.startServer",
+					"group": "mock-server"
+				},
+				{
+					"command": "mockServer.stopServer",
+					"group": "mock-server"
+				},
+				{
+					"command": "mockServer.homePage",
+					"group": "mock-server"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
@@ -273,19 +311,19 @@
 		"lint": "eslint src --ext ts"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.30.0",
+		"@types/chokidar": "^2.1.3",
+		"@types/express": "^4.17.13",
 		"@types/node": "^12.11.7",
-		"eslint": "^7.19.0",
+		"@types/vscode": "^1.30.0",
 		"@typescript-eslint/eslint-plugin": "^4.14.1",
 		"@typescript-eslint/parser": "^4.14.1",
+		"eslint": "^7.19.0",
 		"typescript": "^4.1.3"
 	},
 	"dependencies": {
-		"@r35007/mock-server": "^3.0.8",
-		"@types/chokidar": "^2.1.3",
-		"@types/express": "^4.17.11",
+		"@r35007/mock-server": "^4.1.1",
 		"axios": "^0.21.1",
 		"chokidar": "^3.5.2",
-		"kill-port": "^1.6.1"
+		"express": "^4.17.1"
 	}
 }

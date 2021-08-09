@@ -1,4 +1,4 @@
-import { Config, User_Middlewares } from "@r35007/mock-server/dist/server/model";
+import { Config, User_Middleware } from "@r35007/mock-server/dist/server/model";
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
@@ -57,7 +57,7 @@ export class Settings {
       middleware: Settings.getValidPath(Settings.getSettings("paths.middleware") as string, "middleware.js", root),
       injectors: Settings.getValidPath(Settings.getSettings("paths.injectors") as string, "injectors.json", root),
       store: Settings.getValidPath(Settings.getSettings("paths.store") as string, "store.json", root),
-      rewriter: Settings.getValidPath(Settings.getSettings("paths.rewriter") as string, "rewriter.json", root),
+      rewriters: Settings.getValidPath(Settings.getSettings("paths.rewriters") as string, "rewriter.json", root),
       envDir: Settings.getValidPath(Settings.getSettings("paths.envDir") as string, "env", root),
       staticDir: Settings.getValidPath(Settings.getSettings("paths.staticDir") as string, "public", root),
     }
@@ -66,7 +66,7 @@ export class Settings {
     const middlewarePath = Settings.paths.middleware;
     if (middlewarePath) {
       delete require.cache[middlewarePath];
-      return require(middlewarePath) as User_Middlewares;
+      return require(middlewarePath) as User_Middleware;
     }
   }
   static get entryCallback() {

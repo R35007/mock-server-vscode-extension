@@ -1,10 +1,10 @@
-import { Routes } from "@r35007/mock-server/dist/server/model";
-import { GENERATE_ROUTES } from './enum';
+import { Db } from "@r35007/mock-server/dist/server/model";
+import { createSampleFiles, getDbSnapShot } from "@r35007/mock-server/dist/server/utils";
+import { TRANSFORM_TO_MOCK_SERVER_DB } from './enum';
 import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
 import { StatusbarUi } from "./StatusBarUI";
 import { Utils } from "./utils";
-const kill = require('kill-port');
 
 export default class MockServer extends Utils {
   constructor() {
@@ -13,26 +13,32 @@ export default class MockServer extends Utils {
     StatusbarUi.init();
   }
 
-  generateRoutes = async () => {
-    this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Routes Generation initiated`);
-    const writable = await this.getWritable([".json"], GENERATE_ROUTES);
+  transformToMockServerDB = async (args: any) => {
+    
+    this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Data Transform initiated`);
+    const writable = await this.getWritable([".json"], TRANSFORM_TO_MOCK_SERVER_DB, args?.fsPath);
     if (writable) {
-      this.output.appendLine(`[${new Date().toLocaleTimeString()}] Routes Generation running...`);
+      this.output.appendLine(`[${new Date().toLocaleTimeString()}] Data Transforming...`);
       const { fileName, editor, document, textRange } = writable;
       try {
-        const routes = this.mockServer.getValidRoutes(
-          document.uri.fsPath,
+        const options = {
+          reverse: Settings.reverse,
+          isSnapshot: true
+        }
+
+        const db = this.mockServer.getValidDb(
+          args?.fsPath || document?.uri?.fsPath,
+          Settings.paths.injectors,
+          options,
           Settings.entryCallback,
           Settings.finalCallback,
-          { reverse: Settings.reverse }
         );
-        this.cleanRoutes(routes);
-        this.writeFile(JSON.stringify(routes, null, "\t"), fileName, "Routes generated Successfully", editor, document, textRange);
-        this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Routes generated Successfully`);
+        this.writeFile(JSON.stringify(db, null, "\t"), fileName, "Data Transformed Successfully", editor, document, textRange);
+        this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Data Transformed Successfully`);
       } catch (err) {
-        this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Failed to generate routes`);
+        this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Failed to Transform Data`);
         this.output.appendLine(err);
-        Prompt.showPopupMessage(`Failed to generate routes. \n${err.message}`, "error");
+        Prompt.showPopupMessage(`Failed to Transform Data. \n${err.message}`, "error");
       }
     }
   };
@@ -41,22 +47,20 @@ export default class MockServer extends Utils {
     this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Server ${txt} initiated`);
     try {
       const paths = Settings.paths;
-      const db = paths.db;
+      const dbPath = paths.db;
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] Server ${txt}ing...`);
       StatusbarUi.working(`${txt}ing...`);
 
-      const routes = await this.getValidRoutes(db) as Routes;
-      this.mockServer.setData(
-        routes,
-        Settings.config,
+      const db = await this.getDbWithEnv(dbPath) as Db;
+      this.mockServer.setConfig(Settings.config);
+      await this.mockServer.launchServer(
+        db,
         paths.middleware,
         paths.injectors,
-        paths.store,
-        paths.rewriter
+        paths.rewriters,
+        paths.store
       );
-      await this.mockServer.launchServer();
       this.restartOnChange(this.restartServer);
-
       const statusMsg = `Server is ${txt}ed at port : ${Settings.port}`;
       StatusbarUi.stopServer(150, Settings.port, () => Prompt.showPopupMessage(statusMsg, "info"));
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Server is ${txt}ed at port : ${Settings.port}`);
@@ -75,7 +79,7 @@ export default class MockServer extends Utils {
       if (this.mockServer.server) {
         StatusbarUi.working("Stopping...");
         await this.mockServer.stopServer();
-        this.stopWatchingChanges();
+        await this.stopWatchingChanges();
         StatusbarUi.startServer(150, () => Prompt.showPopupMessage("Server is Stopped", "info"));
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Server is Stopped`);
       } else {
@@ -98,36 +102,18 @@ export default class MockServer extends Utils {
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] Server Stopping`);
         StatusbarUi.working("Stopping...");
         await this.mockServer.stopServer();
+        await this.stopWatchingChanges();
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Server Stopped`);
-        this.startServer("Restart");
+        await this.startServer("Restart");
       } catch (err) {
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Server Failed to Stop`);
         StatusbarUi.stopServer(0, Settings.port);
         this.output.appendLine(err);
       }
     } else {
-      this.startServer("Start");
+      await this.startServer("Start");
     }
   };
-
-  resetServer = async () => {
-    try {
-      if (this.mockServer.server) await this.mockServer.stopServer();
-      this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Reset initiated`);
-      this.mockServer.resetServer();
-      this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Resetting`);
-      Prompt.showPopupMessage("Server Reset Done.", "info");
-      StatusbarUi.startServer(150);
-    } catch (err) {
-      this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] failed to reset`);
-      Prompt.showPopupMessage("Server Reset Failed.", "error");
-      this.mockServer.server
-        ? StatusbarUi.stopServer(0, Settings.port)
-        : StatusbarUi.startServer(150);
-      this.output.appendLine(err);
-    }
-    await kill(Settings.port, 'tcp');
-  }
 
   switchEnvironment = async () => {
     this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Switch Environment initiated`);
@@ -171,13 +157,13 @@ export default class MockServer extends Utils {
 
   getDbSnapshot = async () => {
     this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Db Snapshot initiated`);
-    const writable = await this.getWritable([".json"], GENERATE_ROUTES);
+    const writable = await this.getWritable([".json"], TRANSFORM_TO_MOCK_SERVER_DB);
     if (writable) {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] Getting Db Snapshot..`);
       const { fileName, editor, document, textRange } = writable;
       try {
-        const snapShot = JSON.parse(JSON.stringify(this.mockServer.routes));
-        this.cleanRoutes(snapShot);
+        const db = JSON.parse(JSON.stringify(this.mockServer.db));
+        const snapShot = getDbSnapShot(db);
         this.writeFile(JSON.stringify(snapShot, null, "\t"), fileName, "Db Snapshot retrieved Successfully", editor, document, textRange);
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Db Snapshot retrieved Successfully`);
       } catch (err) {
@@ -187,4 +173,10 @@ export default class MockServer extends Utils {
       }
     }
   };
+
+  generateMockFiles = async (args: any) => {
+    this.output.appendLine('\nCreating Samples...');
+    createSampleFiles(args?.fsPath || Settings.paths.root);
+    this.output.appendLine('Sample files created !');
+  }
 }

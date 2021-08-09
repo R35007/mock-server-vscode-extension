@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { GENERATE_ROUTES, GET_DB_SNAPSHOT, HOMEPAGE, RESET_SERVER, START_SERVER, STOP_SERVER, SWITCH_ENVIRONMENT } from './enum';
+import { GENERATE_MOCK_FILES, TRANSFORM_TO_MOCK_SERVER_DB, GET_DB_SNAPSHOT, HOMEPAGE, START_SERVER, STOP_SERVER, SWITCH_ENVIRONMENT } from './enum';
 import { StatusbarUi } from "./StatusBarUI";
 import Server from "./server";
 import HomePage from './HomePage';
@@ -8,7 +8,7 @@ export function activate(context: vscode.ExtensionContext) {
   const server = new Server();
 
   // Generate Mock
-  context.subscriptions.push(vscode.commands.registerCommand(GENERATE_ROUTES, server.generateRoutes));
+  context.subscriptions.push(vscode.commands.registerCommand(TRANSFORM_TO_MOCK_SERVER_DB, server.transformToMockServerDB));
 
   // Start Server
   context.subscriptions.push(vscode.commands.registerCommand(START_SERVER, server.restartServer));
@@ -16,24 +16,23 @@ export function activate(context: vscode.ExtensionContext) {
   // Stop Server
   context.subscriptions.push(vscode.commands.registerCommand(STOP_SERVER, server.stopServer));
 
-  // Reset Server
-  context.subscriptions.push(vscode.commands.registerCommand(RESET_SERVER, server.resetServer));
-
   // Switch Environment
   context.subscriptions.push(vscode.commands.registerCommand(SWITCH_ENVIRONMENT, server.switchEnvironment));
 
   // Get Db Snapshot
   context.subscriptions.push(vscode.commands.registerCommand(GET_DB_SNAPSHOT, server.getDbSnapshot));
   
+  // Create Sample Files
+  context.subscriptions.push(vscode.commands.registerCommand(GENERATE_MOCK_FILES, server.generateMockFiles));
+
   // Home Page
   context.subscriptions.push(vscode.commands.registerCommand(HOMEPAGE, () => {
     HomePage.createOrShow(context.extensionUri, server)
   }));
 
   if (vscode.window.registerWebviewPanelSerializer) {
-		// Make sure we register a serializer in activation event
 		vscode.window.registerWebviewPanelSerializer(HOMEPAGE, {
-			async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any) {
+			async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, _state: any) {
 				HomePage.revive(webviewPanel, context.extensionUri, server);
 			}
 		});

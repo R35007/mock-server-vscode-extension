@@ -1,13 +1,13 @@
 import { MockServer } from "@r35007/mock-server";
-import { PathDetails, Routes } from '@r35007/mock-server/dist/server/model';
-import { getJSON, getFilesList } from "@r35007/mock-server/dist/server/utils/fetch";
+import { Db, PathDetails } from '@r35007/mock-server/dist/server/model';
+import { getFilesList, getJSON } from "@r35007/mock-server/dist/server/utils/fetch";
 import axios from 'axios';
 import { watch } from 'chokidar';
 import * as fs from "fs";
 import { FSWatcher } from 'node:fs';
 import * as path from "path";
 import * as vscode from "vscode";
-import { GENERATE_ROUTES } from './enum';
+import { TRANSFORM_TO_MOCK_SERVER_DB } from './enum';
 import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
 
@@ -40,15 +40,19 @@ export class Utils {
     return false;
   };
 
-  protected getWritable = async (extensions: string[], action: string) => {
+  protected getWritable = async (extensions: string[], action: string, noPrompt: boolean = false) => {
     const editorProps = this.getEditorProps();
 
     if (editorProps) {
       const { editor, document, textRange, editorText } = editorProps;
 
-      if ((action === GENERATE_ROUTES) && !editorProps.editorText.trim().length) {
+      if ((action === TRANSFORM_TO_MOCK_SERVER_DB) && !editorProps.editorText.trim().length) {
         const extension = path.extname(path.resolve(document.fileName));
         if (extensions.indexOf(extension) < 0) return false;
+      }
+
+      if (noPrompt) {
+        return { editorText, fileName: "", editor, document, textRange };
       }
 
       const shouldSaveAsNewFile = await Prompt.shouldSaveAsNewFile();
@@ -95,8 +99,8 @@ export class Utils {
     }
   };
 
-  protected getValidRoutes = async (dbPath?: string) => {
-    if(!dbPath) return;
+  protected getDbWithEnv = async (dbPath?: string) => {
+    if (!dbPath) return;
     const environmentList = this.getEnvironmentList(Settings.paths.envDir);
     const environment = this.environment.toLowerCase();
     if (!environment.trim().length || environment === "none" || !environmentList.find((e) => e.fileName === environment)) {
@@ -105,10 +109,12 @@ export class Utils {
     }
 
     Settings.environment = environment;
-    const mock = await this.getDataFromUrl(dbPath);
+    const db = await this.getDataFromUrl(dbPath);
     const envPath = environmentList.find((e) => e.fileName === environment)!.filePath;
-    const env = getJSON(envPath, []);
-    return { ...mock, ...env };
+    const env = getJSON(envPath, []) as Db;
+    const validDbData = this.mockServer.getValidDb(db);
+    const validEnvData = this.mockServer.getValidDb(env);
+    return { ...validDbData, ...validEnvData };
   };
 
   protected getDataFromUrl = async (mockPath: string) => {
@@ -120,7 +126,7 @@ export class Utils {
     }
   }
 
-  protected getEnvironmentList = (envDir? : string) => {
+  protected getEnvironmentList = (envDir?: string) => {
     if (!envDir) return [];
     return this.getEnvFilesList(envDir).map((f) => ({ ...f, fileName: f.fileName.toLowerCase() }));
   };
@@ -131,13 +137,15 @@ export class Utils {
       try {
         const dbPath = f.filePath;
         const newDbPath = dbPath.replace(".har", ".json");
-        const routes = this.mockServer.getValidRoutes(
-          dbPath, 
-          Settings.entryCallback, 
-          Settings.finalCallback, 
-          { reverse: Settings.reverse }
+        let db = this.mockServer.getValidDb(
+          dbPath,
+          Settings.paths.injectors,
+          { reverse: Settings.reverse },
+          Settings.entryCallback,
+          Settings.finalCallback,
         );
-        fs.writeFileSync(dbPath, JSON.stringify(routes, null, "\t"));
+        db = this.isPlainObject(db) ? db : {};
+        fs.writeFileSync(dbPath, JSON.stringify(db, null, "\t"));
         fs.renameSync(dbPath, newDbPath);
         return { ...f, extension: ".json", filePath: newDbPath };
       } catch (err) {
@@ -153,8 +161,8 @@ export class Utils {
         Settings.paths.db,
         Settings.paths.middleware,
         Settings.paths.injectors,
+        Settings.paths.rewriters,
         Settings.paths.store,
-        Settings.paths.rewriter,
         Settings.paths.staticDir,
         Settings.paths.envDir,
       ]).filter(p => !p?.startsWith("http")).filter(Boolean) as string[];
@@ -171,15 +179,8 @@ export class Utils {
     this.watcher = undefined;
   }
 
-  protected cleanRoutes = (routes: Routes) => {
-    for(let key in routes){
-      if(routes[key] && typeof routes[key] === 'object' && !Array.isArray(routes[key])){
-        delete routes[key]._extension;
-        delete routes[key]._isFile;
-        delete routes[key]._request;
-        delete routes[key]._id;
-        delete routes[key].override;
-      }
-    }
+  protected isPlainObject = (obj: any) => {
+    return obj && typeof obj === 'object' && !Array.isArray(obj)
   }
 }
+

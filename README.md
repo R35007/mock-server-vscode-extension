@@ -12,10 +12,10 @@ This Extension is built upon node package `@r35007/mock-server`.
 - [Commands](#commands)
   - [Start Server](#start-server)
   - [Stop Server](#stop-server)
-  - [Reset Server](#reset-server)
   - [Switch Environment](#switch-environment)
   - [Get Db Snapshot](#get-db-snapshot)
-  - [Generate Routes](#generate-routes)
+  - [Transform to Mock Server Db](#transform-to-mock-server-db)
+  - [Generate Mock Files](#generate-mock-files)
   - [Home Page](#home-page)
 - [Settings](#settings)
   - [Set Custom Port](#set-custom-port)
@@ -51,9 +51,9 @@ This Extension is built upon node package `@r35007/mock-server`.
 
 ![Home Page](https://github.com/R35007/Mock-Server/blob/main/src/img/getting_started_in_vs_code.gif?raw=true)
 
-## **Commands**
+## Commands
 
-### **Start Server**
+### `Start Server`
 
 Mock Server can be started in three ways.
 
@@ -63,17 +63,12 @@ Mock Server can be started in three ways.
 - Server will automatically will restarted if any changes are made.
 - You can also manually restart the server bu giving the same `MockServer: Start Server` Command
 
-### **Stop Server**
+### `Stop Server`
 
 - From Command Palette (`Ctrl/Cm+Sh+P`) type mock and select `MockServer: Stop Server`.
 - ShortCut using `Shift+Alt+Enter`
 
-### **Reset Server**
-
-- If stopping the server got stuck in middle or something went wrong, you can reset the server using `MockServer: Reset Server` Command.
-- This Command kills the server port, stops the server and resets all its instance.
-
-### **Switch Environment**
+### `Switch Environment`
 
 Helps to work in multiple data environments.
 
@@ -85,45 +80,50 @@ Helps to work in multiple data environments.
 - Note `.har` will automatically converted into `.json` with a valid db routes.
 - This path can be modified using the settings `mock-server.settings.paths.envDir`.
 
-### **Get Db Snapshot**
+### `Get Db Snapshot`
 
 - `MockServer: Get Db Snapshot` Command helps to save the current db data snapshot.
 
-### **Generate Routes**
+### `Transform to Mock Server Db`
 
-- `MockServer: Generate Routes` Command helps to generate a valid routes.
+- `MockServer: Transform to Mock Server Db` Command helps to generate a valid routes.
 - This also helps to convert the `.har` data to a valid `db.json` file.
 
-### **Home Page**
+### `Generate Mock Files`
+
+- `MockServer: Generate Mock Files` Command helps to generate a sample mock files in the `mock-server.settings.paths.root` folder.
+- Alternatively you can also generate mock files by right clicking on the folder and click `Generate Mock Files` command in the context menu.
+
+### `Home Page`
 
 - `MockServer: Home Page` Command opens a new window which shows you all the list of resources.
 - This window also helps to update or add new resources in runtime.
 - It can be opened in a separate browser window using [http://localhost:3000](http://localhost:3000)
 
-## **Settings**
+## Settings
 
-### **Set Custom Port**
+### `Set Custom Port`
 
 - Set a custom port using `mock-server.settings.port` in vscode settings.json.
 - Default: `3000`.
 
-### **Set Custom Host**
+### `Set Custom Host`
 
 - Set a custom host using `mock-server.settings.host` in vscode settings.json.
 - Default: `localhost`.
 
-### **Set Base Path**
+### `Set Base Path`
 
 - You can mount the Mock Server on another endpoint using the base url.
 - Use `mock-server.settings.base` in vscode settings.json to set a custom base path.
 - Alternatively you can also set the base path using the [Route Rewriter](#route-rewriter).
 
-### **Set Db Id**
+### `Set Db Id`
 
 - `mock-server.settings.id` set database id property (e.g. \_id).
 - Default: `id`
 
-### **Set Data Paths**
+### `Set Data Paths`
 
 - `mock-server.settings.paths` sets all the data paths to start the Mock Server.
 - Defaults:
@@ -134,8 +134,8 @@ Helps to work in multiple data environments.
   "db": "db.json", // If its a folder path, the server pick all the .json files and run the mock server.
   "middleware": "middleware.js", // path to middlewares. Must be .js type file
   "injectors": "injectors.json", // path to injectors file
+  "rewriters": "rewriters.json", // path to rewriters file
   "store": "store.json", // path to store file
-  "rewriter": "rewriter.json", // path to rewriters file
   "staticDir": "public", // path to static file server.
   "envDir": "env" // path to env. on `MockServer: Switch Environment` Command, picks all the .json files under this directory.
 }
@@ -162,35 +162,52 @@ Helps to work in multiple data environments.
 `middleware.js`
 
 ```js
-// This method is called only on generating routes suing MockServer: Generate Routes Command
+// This method is called only on generating db suing MockServer: Generate Db Command
 // It will be called for each entry in a HAR formatted data
 // Here you can return your custom route and routeConfig
-// `entryCallback` is a reserved word for generating Routes
+// `entryCallback` is a reserved word for generating db
 exports.entryCallback = (entry, routePath, routeConfig)  => {
   // your code goes here ...
+  return { [routePath]: routeConfig };
 };
 
-// This method is called only on generating routes suing MockServer: Generate Routes Command
+// This method is called only on generating db suing MockServer: Generate Db Command
 // It will be called at last of all entry looping.
 // Here you can return your custom routes
 // Whatever you return here will be pasted in the file
-// `finalCallback` is a reserved word for generating Routes
-exports.finalCallback = (data, generatedRoutes) => {
+// `finalCallback` is a reserved word for generating db
+exports.finalCallback = (data, db) => {
   // your code goes here ...
+  return db;
 };
 
 // This is a Express middleware used to call on a specific routes.
 // example in db.json
 //{
-//  "/posts": {
-//    "mock": [{ "id": 1, "title": "mock-server", "author": "r35007" }];
-//    "middlewares": ["customLog"]
+//  "/comments": {
+//    "_config": true,
+//    "delay": 1000,
+//    "fetch": "https://jsonplaceholder.typicode.com/comments",
+//    "fetchCount": 5,
+//    "middlewares": [
+//      "DataWrapper"
+//    ]
 //  }
 //}
 // You can create n number of middlewares like this and can be used in any routes as mentioned in above example.
-export customLog = (req, res, next) => {
-  // your code goes here ...
-}
+exports.DataWrapper = (req, res, next) => {
+  res.locals.data = {
+    status: "Success",
+    message: "Retrived Successfully",
+    result: res.locals.data
+  }
+  next();
+};
+
+exports.CustomLog = (req, res, next) => {
+  console.log(new Date());
+  next();
+};
 ```
 
 ### Injectors
@@ -210,7 +227,7 @@ export customLog = (req, res, next) => {
   // Make sure common route config is provided at the end of all other route configs
   "/(.*)": {
     // sets config to all the routes. acts as a common config
-    "override": true, // If true its replaces all the existing route config
+    "_override": true, // If true its replaces all the existing route config
     "middlewares": ["log", "..."], // the item ... will be replaced with the existing route middlewares
     "statusCode": 200,
     "delay": 1000 // sets common delay of 1 second

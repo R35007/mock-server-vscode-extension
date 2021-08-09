@@ -1,3 +1,10 @@
+## v4.0.0
+
+- Stopping Server takes too long Bug fixed.
+- `Generate Mock Files` Command added.
+- Added commands in editor context
+- Restart Server bug fixed.
+
 ## v3.0.3
 
 - License Update
@@ -8,9 +15,9 @@
 
 ## v3.0.0
 
-- implemented mock server `Home Page` inside vs code.
-- added more settings
-- updated `@r35007/mock-server@3.0.9`
+- Implemented mock server `Home Page` inside vs code.
+- Added more settings
+- Updated `@r35007/mock-server@3.0.9`
 
 ## v2.1.4
 
