@@ -36,7 +36,7 @@ This Extension is built upon node package `@r35007/mock-server`.
 
 - Install the Extension.
 - Right click on the workspace folder and select `Generate Mock Files` from the context.
-- From Command Palette (`Ctrl/Cm+Sh+P`) type mock and select `MockServer: Start Server` (`Alt+Enter`)
+- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Start Server` (`Alt+Enter`)
 - To view the List of resources go to Command `MockServer: Home Page`
 
 ![Home Page](https://github.com/R35007/Mock-Server/blob/main/src/img/VSCode_Extension.gif?raw=true)
@@ -47,7 +47,7 @@ This Extension is built upon node package `@r35007/mock-server`.
 
 Mock Server can be started in three ways.
 
-- From Command Palette (`Ctrl/Cm+Sh+P`) type mock and select `MockServer: Start Server`
+- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Start Server`
 - Use `Alt+Enter` shortcut to start or restart the server.
 - Click the `Mock It` icon at the right corner of the statusbar
 - Server will automatically will restarted if any changes are made.
@@ -55,7 +55,7 @@ Mock Server can be started in three ways.
 
 ### `Stop Server`
 
-- From Command Palette (`Ctrl/Cm+Sh+P`) type mock and select `MockServer: Stop Server`.
+- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Stop Server`.
 - ShortCut using `Shift+Alt+Enter`
 
 ### `Switch Environment`
@@ -64,7 +64,7 @@ Helps to work in multiple data environments.
 
 - Create `env` folder in root.
 - Keep you different db data of extension `.json` or `.har`
-- From Command Palette (`Ctrl/Cm+Sh+P`) type mock and select `MockServer: Switch Environment`
+- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Switch Environment`
 - Use`Alt+S` shortcut to switch environment.
 - Now All the `.json` will be listed down. You can pick a data to launch the server.
 - Note `.har` will automatically converted into `.json` with a valid db routes.
