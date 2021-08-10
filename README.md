@@ -35,21 +35,11 @@ This Extension is built upon node package `@r35007/mock-server`.
 ## Getting started
 
 - Install the Extension.
-- Create a `db.json` with some data.
-
-```json
-{
-  "posts": [{ "id": 1, "title": "mock-server", "author": "r35007" }],
-  "comments": [{ "id": 1, "body": "some comment", "postId": 1 }],
-  "profile": { "name": "r35007" }
-}
-```
-
+- Right click on the workspace folder and select `Generate Mock Files` from the context.
 - From Command Palette (`Ctrl/Cm+Sh+P`) type mock and select `MockServer: Start Server` (`Alt+Enter`)
-
 - To view the List of resources go to Command `MockServer: Home Page`
 
-![Home Page](https://github.com/R35007/Mock-Server/blob/main/src/img/getting_started_in_vs_code.gif?raw=true)
+![Home Page](https://github.com/R35007/Mock-Server/blob/main/src/img/VSCode_Extension.gif?raw=true)
 
 ## Commands
 

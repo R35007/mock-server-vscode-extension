@@ -1,4 +1,4 @@
-## v4.0.0
+## v4.2.0
 
 - Stopping Server takes too long Bug fixed.
 - `Generate Mock Files` Command added.
