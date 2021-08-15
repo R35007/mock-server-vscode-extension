@@ -1,3 +1,9 @@
+## v4.3.1
+
+- `mock-server.settings.paths.snapshotsDir` - Add a snapshot dir to get your d snapshots
+- Dynamically run any json file to start the server by right clicking and select `Start Server` in editor context.
+- Synced with `@r35007/mock-server` package.
+
 ## v4.2.0
 
 - Stopping Server takes too long Bug fixed.

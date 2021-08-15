@@ -152,38 +152,44 @@ Helps to work in multiple data environments.
 `middleware.js`
 
 ```js
-// This method is called only on generating db suing MockServer: Generate Db Command
-// It will be called for each entry in a HAR formatted data
-// Here you can return your custom route and routeConfig
-// `entryCallback` is a reserved word for generating db
-exports.entryCallback = (entry, routePath, routeConfig)  => {
+/* 
+  Used in VS Code Mock Server extension
+  This method is called only on generating db suing MockServer: Generate Db Command
+  It will be called for each entry in a HAR formatted data
+  Here you can return your custom route and routeConfig
+  `entryCallback` is a reserved word for generating Db 
+*/
+exports.entryCallback = (entry, routePath, routeConfig) => {
   // your code goes here ...
-  return { [routePath]: routeConfig };
+  return { [routePath]: routeConfig }
 };
 
-// This method is called only on generating db suing MockServer: Generate Db Command
-// It will be called at last of all entry looping.
-// Here you can return your custom routes
-// Whatever you return here will be pasted in the file
-// `finalCallback` is a reserved word for generating db
+/* 
+  Used in VS Code Mock Server extension
+  This method is called only on generating db suing MockServer: Generate Db Command
+  It will be called at last of all entry looping.
+  Here you can return your custom db
+  Whatever you return here will be pasted in the file
+  `finalCallback` is a reserved word for generating Db
+*/
 exports.finalCallback = (data, db) => {
   // your code goes here ...
   return db;
 };
 
-// This is a Express middleware used to call on a specific routes.
-// example in db.json
-//{
-//  "/comments": {
-//    "_config": true,
-//    "delay": 1000,
-//    "fetch": "https://jsonplaceholder.typicode.com/comments",
-//    "fetchCount": 5,
-//    "middlewares": [
-//      "DataWrapper"
-//    ]
-//  }
-//}
+/* 
+  This is a Express middleware used to call on a specific routes.
+  example in db.json
+  {
+    "/customMiddleware": {
+    "_config": true,
+    "fetch": "http://jsonplaceholder.typicode.com/users",
+    "middlewareNames": [
+      "DataWrapper"
+    ]
+  }
+*/
+
 // You can create n number of middlewares like this and can be used in any routes as mentioned in above example.
 exports.DataWrapper = (req, res, next) => {
   res.locals.data = {
@@ -198,6 +204,12 @@ exports.CustomLog = (req, res, next) => {
   console.log(new Date());
   next();
 };
+
+// Access store value
+exports.GetStoreValue = (req, res, next) => {
+  res.locals.data = "The store value is : " + res.locals.store.data;
+  next();
+};
 ```
 
 ### Injectors
@@ -210,19 +222,41 @@ exports.CustomLog = (req, res, next) => {
 `injectors.json`
 
 ```jsonc
-{
-  "/posts": {
-    "delay": 2000 // set delay of 2000ms to the /posts route
+[
+  {
+    "routeToMatch": "/injectors/:id",
+    "description": "This description is injected using the injectors by matching the pattern '/injectors/:id'."
   },
-  // Make sure common route config is provided at the end of all other route configs
-  "/(.*)": {
-    // sets config to all the routes. acts as a common config
-    "_override": true, // If true its replaces all the existing route config
-    "middlewares": ["log", "..."], // the item ... will be replaced with the existing route middlewares
+  {
+    "routeToMatch": "/injectors/1",
+    "override": true,
+    "mock": "This data is injected using the injectors by matching the pattern '/injectors/1'."
+  },
+  {
+    "routeToMatch": "/injectors/2",
+    "override": true,
+    "mock": "This data is injected using the injectors by matching the pattern '/injectors/2'."
+  },
+  {
+    "routeToMatch": "/injectors/:id",
+    "override": true,
+    "exact": true,
     "statusCode": 200,
-    "delay": 1000 // sets common delay of 1 second
+    "mock": "This data is injected using the injectors by exactly matching the route '/injectors/:id'."
+  },
+  {
+    "routeToMatch": "/(.*)",
+    "description": "This Description is injected using the injectors. Set 'Override' flag to true to override the existing config values."
+  },
+  {
+    "routeToMatch": "/(.*)",
+    "override": true,
+    "middlewareNames": [
+      "...",
+      "CustomLog"
+    ]
   }
-}
+]
 ```
 
 ### Route Rewriters
@@ -236,6 +270,7 @@ exports.CustomLog = (req, res, next) => {
 
 ```jsonc
 {
+  "/posts/:id/comments": "/fetch/comments/proxy?postId=:id",
   "/:resource/:id/show": "/:resource/:id",
   "/posts/:category": "/posts?category=:category",
   "/articlesS?id=:id": "/posts/:id"

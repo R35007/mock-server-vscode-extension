@@ -44,7 +44,7 @@ export default class HomePage {
 
     // If we already have a panel, show it.
     if (HomePage.currentPanel) {
-      HomePage.currentPanel._panel.reveal(column);
+      HomePage.currentPanel?._panel?.reveal(column);
       return;
     }
 
@@ -128,7 +128,7 @@ export default class HomePage {
     ${this._server?.mockServer?.server ?
         `<iframe id="iframe-data"
       style="width: 100%; height: 100%" 
-      src="http://${host}:${port}${base}?_fontSize=11px&_dataFontSize=0.8rem&_dataLineHeight=1.1"
+      src="http://${host}:${port}${base}?_fontSize=11px&_dataFontSize=0.8rem&_dataLineHeight=1.2"
       frameborder="0"></iframe>`
         :
         `<div id="start-server"><a onclick="startServer()">Click Here to Start the Mock Server</a></div>`

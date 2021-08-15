@@ -5,6 +5,7 @@ import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
 import { StatusbarUi } from "./StatusBarUI";
 import { Utils } from "./utils";
+import * as path from "path";
 
 export default class MockServer extends Utils {
   constructor() {
@@ -13,7 +14,7 @@ export default class MockServer extends Utils {
     StatusbarUi.init();
   }
 
-  transformToMockServerDB = async (args: any) => {
+  transformToMockServerDB = async (args?: any) => {
     
     this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Data Transform initiated`);
     const writable = await this.getWritable([".json"], TRANSFORM_TO_MOCK_SERVER_DB, args?.fsPath);
@@ -43,15 +44,15 @@ export default class MockServer extends Utils {
     }
   };
 
-  startServer = async (txt: string) => {
+  startServer = async (txt: string, dbPath?: string) => {
     this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Server ${txt} initiated`);
     try {
       const paths = Settings.paths;
-      const dbPath = paths.db;
+      const _dbPath = dbPath || paths.db;
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] Server ${txt}ing...`);
       StatusbarUi.working(`${txt}ing...`);
 
-      const db = await this.getDbWithEnv(dbPath) as Db;
+      const db = await this.getDbWithEnv(_dbPath) as Db;
       this.mockServer.setConfig(Settings.config);
       await this.mockServer.launchServer(
         db,
@@ -95,7 +96,7 @@ export default class MockServer extends Utils {
     }
   };
 
-  restartServer = async () => {
+  restartServer = async (args?: any) => {
     if (this.mockServer.server) {
       try {
         this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Server Stop initiated`);
@@ -104,14 +105,14 @@ export default class MockServer extends Utils {
         await this.mockServer.stopServer();
         await this.stopWatchingChanges();
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Server Stopped`);
-        await this.startServer("Restart");
+        await this.startServer("Restart", args?.fsPath);
       } catch (err) {
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Server Failed to Stop`);
         StatusbarUi.stopServer(0, Settings.port);
         this.output.appendLine(err);
       }
     } else {
-      await this.startServer("Start");
+      await this.startServer("Start", args?.fsPath);
     }
   };
 
@@ -155,16 +156,17 @@ export default class MockServer extends Utils {
     }
   };
 
-  getDbSnapshot = async () => {
+  getDbSnapshot = async (args?: any) => {
     this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Db Snapshot initiated`);
-    const writable = await this.getWritable([".json"], TRANSFORM_TO_MOCK_SERVER_DB);
+    const writable = await this.getWritable([".json"], TRANSFORM_TO_MOCK_SERVER_DB, true);
     if (writable) {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] Getting Db Snapshot..`);
-      const { fileName, editor, document, textRange } = writable;
+      const { editor, document, textRange } = writable;
       try {
         const db = JSON.parse(JSON.stringify(this.mockServer.db));
         const snapShot = getDbSnapShot(db);
-        this.writeFile(JSON.stringify(snapShot, null, "\t"), fileName, "Db Snapshot retrieved Successfully", editor, document, textRange);
+        const snapShotPath = args?.fsPath || path.join(Settings.paths.snapshotDir || 'snapshots', `/db-${Date.now()}.json`);
+        this.writeFile(JSON.stringify(snapShot, null, "\t"), snapShotPath, "Db Snapshot retrieved Successfully", editor, document, textRange);
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Db Snapshot retrieved Successfully`);
       } catch (err) {
         this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Failed to get Db Snapshot`);
@@ -174,7 +176,7 @@ export default class MockServer extends Utils {
     }
   };
 
-  generateMockFiles = async (args: any) => {
+  generateMockFiles = async (args?: any) => {
     this.output.appendLine('\nCreating Samples...');
     createSampleFiles(args?.fsPath || Settings.paths.root);
     this.output.appendLine('Sample files created !');

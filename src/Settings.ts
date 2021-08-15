@@ -60,6 +60,7 @@ export class Settings {
       rewriters: Settings.getValidPath(Settings.getSettings("paths.rewriters") as string, "rewriter.json", root),
       envDir: Settings.getValidPath(Settings.getSettings("paths.envDir") as string, "env", root),
       staticDir: Settings.getValidPath(Settings.getSettings("paths.staticDir") as string, "public", root),
+      snapshotDir: Settings.getValidPath(Settings.getSettings("paths.snapshotDir") as string, "snapshots", root)
     }
   }
   static get middleware() {
