@@ -1,3 +1,8 @@
+## v4.4.0
+
+- removed adding injectors config on transforming to Mock Server Db.
+- Synced with `@r35007/mock-server` package.
+
 ## v4.3.1
 
 - `mock-server.settings.paths.snapshotsDir` - Add a snapshot dir to get your d snapshots

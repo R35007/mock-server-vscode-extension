@@ -139,7 +139,7 @@ export class Utils {
         const newDbPath = dbPath.replace(".har", ".json");
         let db = this.mockServer.getValidDb(
           dbPath,
-          Settings.paths.injectors,
+          [],
           { reverse: Settings.reverse },
           Settings.entryCallback,
           Settings.finalCallback,

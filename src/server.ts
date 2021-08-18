@@ -15,7 +15,6 @@ export default class MockServer extends Utils {
   }
 
   transformToMockServerDB = async (args?: any) => {
-    
     this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Data Transform initiated`);
     const writable = await this.getWritable([".json"], TRANSFORM_TO_MOCK_SERVER_DB, args?.fsPath);
     if (writable) {
@@ -26,10 +25,9 @@ export default class MockServer extends Utils {
           reverse: Settings.reverse,
           isSnapshot: true
         }
-
         const db = this.mockServer.getValidDb(
           args?.fsPath || document?.uri?.fsPath,
-          Settings.paths.injectors,
+          [],
           options,
           Settings.entryCallback,
           Settings.finalCallback,
