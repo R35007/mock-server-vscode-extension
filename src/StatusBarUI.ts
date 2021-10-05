@@ -1,6 +1,6 @@
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 import { START_SERVER, STOP_SERVER } from './enum';
-import { Settings } from "./Settings";
+import { Settings } from './Settings';
 
 export class StatusbarUi {
   private static _statusBarItem: vscode.StatusBarItem;
@@ -21,21 +21,21 @@ export class StatusbarUi {
   }
 
   static init() {
-    StatusbarUi.working("loading...");
+    StatusbarUi.working('loading...');
     StatusbarUi.startServer(500);
   }
 
-  static working(workingMsg = "Working on it...") {
+  static working(workingMsg = 'Working on it...') {
     StatusbarUi.statusBarItem.text = `$(pulse) ${workingMsg}`;
-    StatusbarUi.statusBarItem.tooltip = "In case if it takes long time, try to close all browser window.";
+    StatusbarUi.statusBarItem.tooltip = 'In case if it takes long time, try to restart the vscode window.';
     StatusbarUi.statusBarItem.command = undefined;
   }
 
   static startServer(delay: number, showPopupMessage?: () => void) {
     setTimeout(() => {
-      StatusbarUi.statusBarItem.text = "$(broadcast) Mock it";
+      StatusbarUi.statusBarItem.text = '$(broadcast) Mock it';
       StatusbarUi.statusBarItem.command = START_SERVER;
-      StatusbarUi.statusBarItem.tooltip = "Click to start mock server";
+      StatusbarUi.statusBarItem.tooltip = 'Click to start mock server';
       showPopupMessage && showPopupMessage();
     }, delay);
   }
@@ -44,7 +44,7 @@ export class StatusbarUi {
     setTimeout(() => {
       StatusbarUi.statusBarItem.text = `$(circle-slash) Port : ${port}`;
       StatusbarUi.statusBarItem.command = STOP_SERVER;
-      StatusbarUi.statusBarItem.tooltip = "Click to stop mock server";
+      StatusbarUi.statusBarItem.tooltip = 'Click to stop mock server';
       showPopupMessage && showPopupMessage();
     }, delay);
   }

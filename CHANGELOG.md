@@ -1,3 +1,8 @@
+## v4.4.1
+
+- On clicking of Stop Server in editor context before starting the server makes the statusbar to show wrong info and become unable to start server - `Fixed`
+- Now Stop Sever in editor context will show only on `.json` and `.har` file
+
 ## v4.4.0
 
 - removed adding injectors config on transforming to Mock Server Db.

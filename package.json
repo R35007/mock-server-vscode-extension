@@ -2,7 +2,7 @@
 	"name": "mock-server",
 	"displayName": "Mock Server",
 	"description": "Customize Your Own Dynamic Local Mock Server",
-	"version": "4.4.0",
+	"version": "4.4.1",
 	"publisher": "Thinker",
 	"license": "MIT",
 	"icon": "images/mockserverlogo.png",
@@ -301,7 +301,7 @@
 					"group": "mock-server"
 				},
 				{
-					"when": "resourceExtname == .json",
+					"when": "resourceExtname == .json || resourceExtname == .har",
 					"command": "mockServer.getDbSnapShot",
 					"group": "mock-server"
 				},
@@ -311,6 +311,7 @@
 					"group": "mock-server"
 				},
 				{
+					"when": "resourceExtname == .json ||resourceExtname == .har",
 					"command": "mockServer.stopServer",
 					"group": "mock-server"
 				}
