@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { START_SERVER, STOP_SERVER } from './enum';
+import { Commands } from './enum';
 import { Settings } from './Settings';
 
 export class StatusbarUi {
@@ -34,7 +34,7 @@ export class StatusbarUi {
   static startServer(delay: number, showPopupMessage?: () => void) {
     setTimeout(() => {
       StatusbarUi.statusBarItem.text = '$(broadcast) Mock it';
-      StatusbarUi.statusBarItem.command = START_SERVER;
+      StatusbarUi.statusBarItem.command = Commands.START_SERVER;
       StatusbarUi.statusBarItem.tooltip = 'Click to start mock server';
       showPopupMessage && showPopupMessage();
     }, delay);
@@ -43,7 +43,7 @@ export class StatusbarUi {
   static stopServer(delay: number, port: number, showPopupMessage?: () => void) {
     setTimeout(() => {
       StatusbarUi.statusBarItem.text = `$(circle-slash) Port : ${port}`;
-      StatusbarUi.statusBarItem.command = STOP_SERVER;
+      StatusbarUi.statusBarItem.command = Commands.STOP_SERVER;
       StatusbarUi.statusBarItem.tooltip = 'Click to stop mock server';
       showPopupMessage && showPopupMessage();
     }, delay);

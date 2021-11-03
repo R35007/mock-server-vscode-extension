@@ -7,7 +7,7 @@ import * as fs from "fs";
 import { FSWatcher } from 'node:fs';
 import * as path from "path";
 import * as vscode from "vscode";
-import { TRANSFORM_TO_MOCK_SERVER_DB } from './enum';
+import { Commands } from './enum';
 import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
 
@@ -46,7 +46,7 @@ export class Utils {
     if (editorProps) {
       const { editor, document, textRange, editorText } = editorProps;
 
-      if ((action === TRANSFORM_TO_MOCK_SERVER_DB) && !editorProps.editorText.trim().length) {
+      if ((action === Commands.TRANSFORM_TO_MOCK_SERVER_DB) && !editorProps.editorText.trim().length) {
         const extension = path.extname(path.resolve(document.fileName));
         if (extensions.indexOf(extension) < 0) return false;
       }

@@ -17,6 +17,9 @@ export class Settings {
   static get port() {
     return (Settings.getSettings("port") as number) || 3000;
   }
+  static set port(value: number) {
+    Settings.setSettings("port", value || 3000);
+  }
   static get host() {
     return (Settings.getSettings("host") as string) || 'localhost';
   }
@@ -49,7 +52,7 @@ export class Settings {
     };
   }
   static get paths() {
-    const root = Settings.getValidPath(Settings.getSettings("paths.root") as string, "./") || 
+    const root = Settings.getValidPath(Settings.getSettings("paths.root") as string, "./") ||
       vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./";
     return {
       root,

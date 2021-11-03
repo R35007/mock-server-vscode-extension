@@ -37,4 +37,11 @@ export class Prompt {
       vscode.window.showWarningMessage(message);
     }
   };
+
+  static showInputBox = async (placeHolder: string, value?: number) => {
+    return vscode.window.showInputBox({
+      prompt: placeHolder,
+      value: value?.toString()
+    });
+  }
 }

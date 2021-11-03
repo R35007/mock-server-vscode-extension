@@ -1,6 +1,6 @@
 import { Db } from '@r35007/mock-server/dist/server/model';
 import { createSampleFiles, getDbSnapShot } from '@r35007/mock-server/dist/server/utils';
-import { TRANSFORM_TO_MOCK_SERVER_DB } from './enum';
+import { Commands } from './enum';
 import { Prompt } from './prompt';
 import { Settings } from './Settings';
 import { StatusbarUi } from './StatusBarUI';
@@ -16,7 +16,7 @@ export default class MockServer extends Utils {
 
   transformToMockServerDB = async (args?: any) => {
     this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Data Transform initiated`);
-    const writable = await this.getWritable(['.json'], TRANSFORM_TO_MOCK_SERVER_DB, args?.fsPath);
+    const writable = await this.getWritable(['.json'], Commands.TRANSFORM_TO_MOCK_SERVER_DB, args?.fsPath);
     if (writable) {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] Data Transforming...`);
       const { fileName, editor, document, textRange } = writable;
@@ -46,6 +46,14 @@ export default class MockServer extends Utils {
         this.output.appendLine(err);
         Prompt.showPopupMessage(`Failed to Transform Data. \n${err.message}`, 'error');
       }
+    }
+  };
+
+  setPort = async (args?: any) => {
+    const port = await Prompt.showInputBox('Enter Port Number', Settings.port);
+    if (port) {
+      Settings.port = parseInt(port);
+      this.output.appendLine(`[${new Date().toLocaleTimeString()}] [Done] Port Number Set to ${port}`);
     }
   };
 
@@ -163,7 +171,7 @@ export default class MockServer extends Utils {
 
   getDbSnapshot = async (args?: any) => {
     this.output.appendLine(`\n[${new Date().toLocaleTimeString()}] [Running] Db Snapshot initiated`);
-    const writable = await this.getWritable(['.json'], TRANSFORM_TO_MOCK_SERVER_DB, true);
+    const writable = await this.getWritable(['.json'], Commands.TRANSFORM_TO_MOCK_SERVER_DB, true);
     if (writable) {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] Getting Db Snapshot..`);
       const { editor, document, textRange } = writable;

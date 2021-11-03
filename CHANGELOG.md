@@ -1,3 +1,7 @@
+## v4.5.0
+
+- Added `Set Port` Command which is also available in editor context.
+
 ## v4.4.1
 
 - On clicking of Stop Server in editor context before starting the server makes the statusbar to show wrong info and become unable to start server - `Fixed`

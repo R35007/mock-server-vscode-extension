@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { HOMEPAGE } from './enum';
+import { Commands } from './enum';
 import Server from './server';
 
 export default class HomePage {
@@ -49,7 +49,7 @@ export default class HomePage {
     }
 
     const panel = vscode.window.createWebviewPanel(
-      HOMEPAGE, // Identifies the type of the webview. Used internally
+      Commands.HOMEPAGE, // Identifies the type of the webview. Used internally
       'Mock Server', // Title of the panel displayed to the user
       column || vscode.ViewColumn.One, // Editor column to show the new webview panel in.
       {
@@ -63,18 +63,18 @@ export default class HomePage {
   }
 
   public dispose() {
-		HomePage.currentPanel = undefined;
+    HomePage.currentPanel = undefined;
 
-		// Clean up our resources
-		this._panel.dispose();
+    // Clean up our resources
+    this._panel.dispose();
 
-		while (this._disposables.length) {
-			const x = this._disposables.pop();
-			if (x) {
-				x.dispose();
-			}
-		}
-	}
+    while (this._disposables.length) {
+      const x = this._disposables.pop();
+      if (x) {
+        x.dispose();
+      }
+    }
+  }
 
   private _update() {
     const webview = this._panel.webview;
