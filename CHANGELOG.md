@@ -1,6 +1,10 @@
+## v4.5.2
+
+- Updated `@r35007/mock-server@4.5.1`
+- 
 ## v4.5.1
 
-- Updated `@r35007/mock-server@4.4.2`
+- Updated `@r35007/mock-server@4.5.0`
 - Now can give .js file to the db, injectors, rewriters, store path
 ## v4.5.0
 
