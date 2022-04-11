@@ -1,3 +1,7 @@
+## v4.5.1
+
+- Updated `@r35007/mock-server@4.4.2`
+- Now can give .js file to the db, injectors, rewriters, store path
 ## v4.5.0
 
 - Added `Set Port` Command which is also available in editor context.
