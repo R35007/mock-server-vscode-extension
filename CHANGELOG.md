@@ -1,3 +1,6 @@
+## v5.0.1
+
+- Updated `@r35007/mock-server@5.0.1`
 ## v5.0.0
 
 - Updated `@r35007/mock-server@5.0.0`
