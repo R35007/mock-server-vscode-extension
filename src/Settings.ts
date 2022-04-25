@@ -1,4 +1,4 @@
-import { Config, User_Middleware } from "@r35007/mock-server/dist/server/model";
+import { Config, Middlewares } from "@r35007/mock-server/dist/server/model";
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
@@ -64,25 +64,25 @@ export class Settings {
       envDir: Settings.getValidPath(Settings.getSettings("paths.envDir") as string, "env", root),
       staticDir: Settings.getValidPath(Settings.getSettings("paths.staticDir") as string, "public", root),
       snapshotDir: Settings.getValidPath(Settings.getSettings("paths.snapshotDir") as string, "snapshots", root)
-    }
+    };
   }
   static get middleware() {
     const middlewarePath = Settings.paths.middleware;
     if (middlewarePath) {
       delete require.cache[middlewarePath];
-      return require(middlewarePath) as User_Middleware;
+      return require(middlewarePath) as Middlewares;
     }
   }
   static get entryCallback() {
     const middleware = Settings.middleware;
     if (middleware) {
-      return middleware["entryCallback"] as any;
+      return middleware["_entryCallback"] as any;
     }
   }
   static get finalCallback() {
     const middleware = Settings.middleware;
     if (middleware) {
-      return middleware["finalCallback"] as any;
+      return middleware["_finalCallback"] as any;
     }
   }
   static get reverse() {
@@ -107,9 +107,9 @@ export class Settings {
     Settings.setSettings("showInfoMsg", val);
   }
   static getValidPath(relativePath: string, defaults: string, rootPath?: string) {
-    if (relativePath.startsWith("http")) return relativePath;
+    if (relativePath.startsWith("http")) { return relativePath; }
     const root = rootPath || vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./";
     const resolvedPath = path.resolve(root, relativePath?.trim() || defaults);
-    if (fs.existsSync(resolvedPath)) return resolvedPath;
+    if (fs.existsSync(resolvedPath)) { return resolvedPath; }
   }
 }

@@ -30,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Home Page
   context.subscriptions.push(vscode.commands.registerCommand(Commands.HOMEPAGE, () => {
-    HomePage.createOrShow(context.extensionUri, server)
+    HomePage.createOrShow(context.extensionUri, server);
   }));
 
   if (vscode.window.registerWebviewPanelSerializer) {

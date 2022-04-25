@@ -11,7 +11,7 @@ export class StatusbarUi {
         vscode.StatusBarAlignment[Settings.statusBar.position],
         Settings.statusBar.priority
       );
-      if (Settings.statusBar.show) this.statusBarItem.show();
+      if (Settings.statusBar.show) { this.statusBarItem.show(); };
     }
     return StatusbarUi._statusBarItem;
   }

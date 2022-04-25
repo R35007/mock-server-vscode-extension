@@ -8,29 +8,31 @@ This Extension is built upon node package `@r35007/mock-server`.
 
 ## Table of contents
 
-- [Getting started](#getting-started)
-- [Commands](#commands)
-  - [Start Server](#start-server)
-  - [Stop Server](#stop-server)
-  - [Switch Environment](#switch-environment)
-  - [Get Db Snapshot](#get-db-snapshot)
-  - [Transform to Mock Server Db](#transform-to-mock-server-db)
-  - [Generate Mock Files](#generate-mock-files)
-  - [Home Page](#home-page)
-- [Settings](#settings)
-  - [Set Custom Port](#set-custom-port)
-  - [Set Custom host](#set-custom-host)
-  - [Set Base Path](#set-base-path)
-  - [Set Db Id](#set-db-id)
-  - [Set Data Paths](#set-data-paths)
+- [Mock Server [![](https://img.shields.io/npm/l/@r35007/mock-server?color=blue)](https://img.shields.io/npm/l/@r35007/mock-server?color=blue) [![](https://img.shields.io/npm/types/@r35007/mock-server)](https://img.shields.io/npm/types/@r35007/mock-server)](#mock-server--)
+  - [Table of contents](#table-of-contents)
+  - [Getting started](#getting-started)
+  - [Commands](#commands)
+    - [`Start Server`](#start-server)
+    - [`Stop Server`](#stop-server)
+    - [`Switch Environment`](#switch-environment)
+    - [`Get Db Snapshot`](#get-db-snapshot)
+    - [`Transform to Mock Server Db`](#transform-to-mock-server-db)
+    - [`Generate Mock Files`](#generate-mock-files)
+    - [`Home Page`](#home-page)
+  - [Settings](#settings)
+    - [`Set Custom Port`](#set-custom-port)
+    - [`Set Custom Host`](#set-custom-host)
+    - [`Set Base Path`](#set-base-path)
+    - [`Set Db Id`](#set-db-id)
+    - [`Set Data Paths`](#set-data-paths)
     - [DB](#db)
     - [Middleware](#middleware)
     - [Injectors](#injectors)
     - [Route Rewriters](#route-rewriters)
     - [Static File Server](#static-file-server)
-- [Documentation](#documentation)
-- [Author](#author)
-- [License](#license)
+  - [**Documentation**](#documentation)
+  - [Author](#author)
+  - [License](#license)
 
 ## Getting started
 
@@ -153,13 +155,25 @@ Helps to work in multiple data environments.
 
 ```js
 /* 
+  Global Middlewares
+  These middlewares will be addded to start of the the express app 
+*/
+exports._globals = [
+  (req, res, next) => {
+    console.log(req.path);
+    next();
+  }
+]
+
+
+/* 
   Used in VS Code Mock Server extension
   This method is called only on generating db suing MockServer: Generate Db Command
   It will be called for each entry in a HAR formatted data
   Here you can return your custom route and routeConfig
-  `entryCallback` is a reserved word for generating Db 
+  `_entryCallback` is a reserved word for generating Db 
 */
-exports.entryCallback = (entry, routePath, routeConfig) => {
+exports._entryCallback = (entry, routePath, routeConfig) => {
   // your code goes here ...
   return { [routePath]: routeConfig }
 };
@@ -170,9 +184,9 @@ exports.entryCallback = (entry, routePath, routeConfig) => {
   It will be called at last of all entry looping.
   Here you can return your custom db
   Whatever you return here will be pasted in the file
-  `finalCallback` is a reserved word for generating Db
+  `_finalCallback` is a reserved word for generating Db
 */
-exports.finalCallback = (data, db) => {
+exports._finalCallback = (data, db) => {
   // your code goes here ...
   return db;
 };
@@ -224,32 +238,32 @@ exports.GetStoreValue = (req, res, next) => {
 ```jsonc
 [
   {
-    "routeToMatch": "/injectors/:id",
+    "routes": ["/injectors/:id"],
     "description": "This description is injected using the injectors by matching the pattern '/injectors/:id'."
   },
   {
-    "routeToMatch": "/injectors/1",
+    "routes": ["/injectors/1"],
     "override": true,
     "mock": "This data is injected using the injectors by matching the pattern '/injectors/1'."
   },
   {
-    "routeToMatch": "/injectors/2",
+    "routes": ["/injectors/2"],
     "override": true,
     "mock": "This data is injected using the injectors by matching the pattern '/injectors/2'."
   },
   {
-    "routeToMatch": "/injectors/:id",
+    "routes": ["/injectors/:id"],
     "override": true,
     "exact": true,
     "statusCode": 200,
     "mock": "This data is injected using the injectors by exactly matching the route '/injectors/:id'."
   },
   {
-    "routeToMatch": "/(.*)",
+    "routes": ["/(.*)"],
     "description": "This Description is injected using the injectors. Set 'Override' flag to true to override the existing config values."
   },
   {
-    "routeToMatch": "/(.*)",
+    "routes": ["/(.*)"],
     "override": true,
     "middlewareNames": [
       "...",

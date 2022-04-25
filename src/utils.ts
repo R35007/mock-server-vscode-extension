@@ -1,6 +1,6 @@
 import { MockServer } from "@r35007/mock-server";
 import { Db, PathDetails } from '@r35007/mock-server/dist/server/model';
-import { getFilesList, getJSON } from "@r35007/mock-server/dist/server/utils/fetch";
+import { getFilesList, getObject } from "@r35007/mock-server/dist/server/utils/fetch";
 import axios from 'axios';
 import { watch } from 'chokidar';
 import * as fs from "fs";
@@ -48,7 +48,7 @@ export class Utils {
 
       if ((action === Commands.TRANSFORM_TO_MOCK_SERVER_DB) && !editorProps.editorText.trim().length) {
         const extension = path.extname(path.resolve(document.fileName));
-        if (extensions.indexOf(extension) < 0) return false;
+        if (extensions.indexOf(extension) < 0) { return false; }
       }
 
       if (noPrompt) {
@@ -100,7 +100,7 @@ export class Utils {
   };
 
   protected getDbWithEnv = async (dbPath?: string) => {
-    if (!dbPath) return;
+    if (!dbPath) { return; }
     const environmentList = this.getEnvironmentList(Settings.paths.envDir);
     const environment = this.environment.toLowerCase();
     if (!environment.trim().length || environment === "none" || !environmentList.find((e) => e.fileName === environment)) {
@@ -111,7 +111,7 @@ export class Utils {
     Settings.environment = environment;
     const db = await this.getDataFromUrl(dbPath);
     const envPath = environmentList.find((e) => e.fileName === environment)!.filePath;
-    const env = getJSON(envPath, []) as Db;
+    const env = getObject(envPath, []) as Db;
     const validDbData = this.mockServer.getValidDb(db);
     const validEnvData = this.mockServer.getValidDb(env);
     return { ...validDbData, ...validEnvData };
@@ -122,18 +122,18 @@ export class Utils {
       const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
       return data;
     } else {
-      return getJSON(mockPath);
+      return getObject(mockPath);
     }
-  }
+  };
 
   protected getEnvironmentList = (envDir?: string) => {
-    if (!envDir) return [];
+    if (!envDir) { return []; }
     return this.getEnvFilesList(envDir).map((f) => ({ ...f, fileName: f.fileName.toLowerCase() }));
   };
 
   protected getEnvFilesList = (envDir: string) => {
     return getFilesList(envDir).map((f) => {
-      if (![".har", ".json"].includes(f.extension)) return;
+      if (![".har", ".json"].includes(f.extension)) { return; }
       try {
         const dbPath = f.filePath;
         const newDbPath = dbPath.replace(".har", ".json");
@@ -172,15 +172,15 @@ export class Utils {
         restart();
       });
     }
-  }
+  };
 
   protected stopWatchingChanges = async () => {
     this.watcher && await this.watcher.close();
     this.watcher = undefined;
-  }
+  };
 
   protected isPlainObject = (obj: any) => {
-    return obj && typeof obj === 'object' && !Array.isArray(obj)
-  }
+    return obj && typeof obj === 'object' && !Array.isArray(obj);
+  };
 }
 

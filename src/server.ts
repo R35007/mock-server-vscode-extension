@@ -1,11 +1,11 @@
-import { Db } from '@r35007/mock-server/dist/server/model';
-import { createSampleFiles, getDbSnapShot } from '@r35007/mock-server/dist/server/utils';
+import * as path from 'path';
 import { Commands } from './enum';
 import { Prompt } from './prompt';
 import { Settings } from './Settings';
 import { StatusbarUi } from './StatusBarUI';
 import { Utils } from './utils';
-import * as path from 'path';
+import { Db } from '@r35007/mock-server/dist/server/model';
+import { createSampleFiles, getDbSnapShot } from '@r35007/mock-server/dist/server/utils';
 
 export default class MockServer extends Utils {
   constructor() {
@@ -65,7 +65,7 @@ export default class MockServer extends Utils {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] Server ${txt}ing...`);
       StatusbarUi.working(`${txt}ing...`);
 
-      const db = (await this.getDbWithEnv(_dbPath)) as Db;
+      const db = (await this.getDbWithEnv(_dbPath?.replace(/\\/g, '/'))) as Db;
       this.mockServer.setConfig(Settings.config);
       await this.mockServer.launchServer(db, paths.middleware, paths.injectors, paths.rewriters, paths.store);
       this.restartOnChange(this.restartServer);
@@ -176,7 +176,7 @@ export default class MockServer extends Utils {
       this.output.appendLine(`[${new Date().toLocaleTimeString()}] Getting Db Snapshot..`);
       const { editor, document, textRange } = writable;
       try {
-        const db = JSON.parse(JSON.stringify(this.mockServer.db));
+        const db = JSON.parse(JSON.stringify(this.mockServer.data.db));
         const snapShot = getDbSnapShot(db);
         const snapShotPath =
           args?.fsPath || path.join(Settings.paths.snapshotDir || 'snapshots', `/db-${Date.now()}.json`);

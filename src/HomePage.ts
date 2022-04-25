@@ -31,7 +31,7 @@ export default class HomePage {
       message => {
         switch (message.command) {
           case 'startServer':
-            this._server.restartServer().then(this._update.bind(this))
+            this._server.restartServer().then(this._update.bind(this));
             return;
         }
       }, null, this._disposables);
@@ -96,7 +96,7 @@ export default class HomePage {
 
   private getWebviewContent = (webview: vscode.Webview) => {
 
-    const config = this._server?.mockServer?.config || {};
+    const config = this._server?.mockServer?.data.config || {};
     const { port, host, base } = config;
     return `
     <!DOCTYPE html>
@@ -141,7 +141,7 @@ export default class HomePage {
         });
       }
     </script>
-    </html>`
-  }
+    </html>`;
+  };
 
 }
