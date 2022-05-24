@@ -8,12 +8,16 @@ This Extension is built upon node package `@r35007/mock-server`.
 
 ## Table of contents
 
-- [Mock Server [![](https://img.shields.io/npm/l/@r35007/mock-server?color=blue)](https://img.shields.io/npm/l/@r35007/mock-server?color=blue) [![](https://img.shields.io/npm/types/@r35007/mock-server)](https://img.shields.io/npm/types/@r35007/mock-server)](#mock-server--)
   - [Table of contents](#table-of-contents)
   - [Getting started](#getting-started)
   - [Commands](#commands)
     - [`Start Server`](#start-server)
     - [`Stop Server`](#stop-server)
+    - [`Reset Server`](#reset-server)
+    - [`Reset and Restart Server`](#reset-and-restart-server)
+    - [`Set Port`](#set-port)
+    - [`Set Root`](#set-root)
+    - [`Reset and Restart Server`](#reset-and-restart-server)
     - [`Switch Environment`](#switch-environment)
     - [`Get Db Snapshot`](#get-db-snapshot)
     - [`Transform to Mock Server Db`](#transform-to-mock-server-db)
@@ -59,6 +63,26 @@ Mock Server can be started in three ways.
 
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Stop Server`.
 - ShortCut using `Shift+Alt+Enter`
+- 
+### `Reset Server`
+
+- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Reset Server`.
+- This command clears all server cache and reset all data
+- 
+### `Reset and Restart Server`
+
+- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Reset and Restart Server`.
+- This command clears all server cache, reset all data and start the mock server in a new instance.
+- 
+### `Set Port`
+
+- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Set Port`.
+- This command helps prompts and sets the custom port to start the server.
+- 
+### `Set Root`
+
+- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Set as Server Root Folder`.
+- This command helps sets the current selected file or folder as a Server root folder.
 
 ### `Switch Environment`
 
@@ -156,7 +180,7 @@ Helps to work in multiple data environments.
 ```js
 /* 
   Global Middlewares
-  These middlewares will be addded to start of the the express app 
+  These middlewares will be added to start of the the express app 
 */
 exports._globals = [
   (req, res, next) => {
@@ -165,15 +189,14 @@ exports._globals = [
   }
 ]
 
-
 /* 
   Used in VS Code Mock Server extension
   This method is called only on generating db suing MockServer: Generate Db Command
   It will be called for each entry in a HAR formatted data
   Here you can return your custom route and routeConfig
-  `_entryCallback` is a reserved word for generating Db 
+  `_harEntryCallback` is a reserved word for generating Db 
 */
-exports._entryCallback = (entry, routePath, routeConfig) => {
+exports._harEntryCallback = (entry, routePath, routeConfig) => {
   // your code goes here ...
   return { [routePath]: routeConfig }
 };
@@ -184,9 +207,9 @@ exports._entryCallback = (entry, routePath, routeConfig) => {
   It will be called at last of all entry looping.
   Here you can return your custom db
   Whatever you return here will be pasted in the file
-  `_finalCallback` is a reserved word for generating Db
+  `_harDbCallback` is a reserved word for generating Db
 */
-exports._finalCallback = (data, db) => {
+exports._harDbCallback = (data, db) => {
   // your code goes here ...
   return db;
 };
@@ -198,7 +221,7 @@ exports._finalCallback = (data, db) => {
     "/customMiddleware": {
     "_config": true,
     "fetch": "http://jsonplaceholder.typicode.com/users",
-    "middlewareNames": [
+    "middlewares": [
       "DataWrapper"
     ]
   }
@@ -208,7 +231,7 @@ exports._finalCallback = (data, db) => {
 exports.DataWrapper = (req, res, next) => {
   res.locals.data = {
     status: "Success",
-    message: "Retrived Successfully",
+    message: "Retrieved Successfully",
     result: res.locals.data
   }
   next();
@@ -221,7 +244,8 @@ exports.CustomLog = (req, res, next) => {
 
 // Access store value
 exports.GetStoreValue = (req, res, next) => {
-  res.locals.data = "The store value is : " + res.locals.store.data;
+  const store = res.locals.getStore();
+  res.locals.data = "The store value is : " + store.data;
   next();
 };
 ```
@@ -265,7 +289,7 @@ exports.GetStoreValue = (req, res, next) => {
   {
     "routes": ["/(.*)"],
     "override": true,
-    "middlewareNames": [
+    "middlewares": [
       "...",
       "CustomLog"
     ]

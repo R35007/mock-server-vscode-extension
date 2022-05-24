@@ -1,6 +1,6 @@
-import { MockServer } from "@r35007/mock-server";
-import { Db, PathDetails } from '@r35007/mock-server/dist/server/model';
-import { getFilesList, getObject } from "@r35007/mock-server/dist/server/utils/fetch";
+import { HAR } from '@r35007/mock-server/dist/server/types/common.types';
+import { extractDbFromHAR } from '@r35007/mock-server/dist/server/utils';
+import { getFilesList, requireData } from "@r35007/mock-server/dist/server/utils/fetch";
 import axios from 'axios';
 import { watch } from 'chokidar';
 import * as fs from "fs";
@@ -13,14 +13,12 @@ import { Settings } from "./Settings";
 
 
 export class Utils {
-  mockServer: MockServer;
   environment = "none";
   output;
 
   watcher: FSWatcher | undefined;
 
   constructor() {
-    this.mockServer = new MockServer({ root: Settings.paths.root });
     this.output = vscode.window.createOutputChannel("Mock Server Log");
   }
 
@@ -103,18 +101,22 @@ export class Utils {
     if (!dbPath) { return; }
     const environmentList = this.getEnvironmentList(Settings.paths.envDir);
     const environment = this.environment.toLowerCase();
+
     if (!environment.trim().length || environment === "none" || !environmentList.find((e) => e.fileName === environment)) {
       Settings.environment = "none";
       return await this.getDataFromUrl(dbPath);
     }
 
     Settings.environment = environment;
-    const db = await this.getDataFromUrl(dbPath);
+
+    const dbData = await this.getDataFromUrl(dbPath);
     const envPath = environmentList.find((e) => e.fileName === environment)!.filePath;
-    const env = getObject(envPath, []) as Db;
-    const validDbData = this.mockServer.getValidDb(db);
-    const validEnvData = this.mockServer.getValidDb(env);
-    return { ...validDbData, ...validEnvData };
+
+    const userData = requireData(envPath, Settings.rootPath) as HAR;
+    let envData = extractDbFromHAR(userData, Settings._harEntryCallback, Settings._harDbCallback) || userData;
+    envData = this.isPlainObject(envData) ? envData : {};
+
+    return { ...dbData, ...envData };
   };
 
   protected getDataFromUrl = async (mockPath: string) => {
@@ -122,38 +124,13 @@ export class Utils {
       const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
       return data;
     } else {
-      return getObject(mockPath);
+      return requireData(mockPath, Settings.rootPath);
     }
   };
 
-  protected getEnvironmentList = (envDir?: string) => {
-    if (!envDir) { return []; }
-    return this.getEnvFilesList(envDir).map((f) => ({ ...f, fileName: f.fileName.toLowerCase() }));
-  };
-
-  protected getEnvFilesList = (envDir: string) => {
-    return getFilesList(envDir).map((f) => {
-      if (![".har", ".json"].includes(f.extension)) { return; }
-      try {
-        const dbPath = f.filePath;
-        const newDbPath = dbPath.replace(".har", ".json");
-        let db = this.mockServer.getValidDb(
-          dbPath,
-          [],
-          { reverse: Settings.reverse },
-          Settings.entryCallback,
-          Settings.finalCallback,
-        );
-        db = this.isPlainObject(db) ? db : {};
-        fs.writeFileSync(dbPath, JSON.stringify(db, null, "\t"));
-        fs.renameSync(dbPath, newDbPath);
-        return { ...f, extension: ".json", filePath: newDbPath };
-      } catch (err) {
-        console.log(err);
-        return;
-      }
-    }).filter(Boolean) as PathDetails[];
-  };
+  protected getEnvironmentList = (envDir: string = '') => getFilesList(envDir)
+    .filter(file => [".har", ".json"].includes(file.extension))
+    .map(file => ({ ...file, fileName: file.fileName.toLowerCase() }));
 
   protected restartOnChange = (restart: Function) => {
     if (!this.watcher) {

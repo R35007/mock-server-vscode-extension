@@ -1,3 +1,12 @@
+## v6.0.1
+
+- Updated `@r35007/mock-server@6.0.1`
+- `entryCallback` is now renamed to `_harEntryCallback`
+- `finalCallback` is now renamed to `_harDbCallback`
+- Added `Set as Server Root folder` command. Helps to set current selected folder as a mock server root folder. Also available in context menu
+- Added `Reset Server` command. Helps to clear mock server cache a, gracefully stops server and reset server data.
+- Added `Reset and Restart Server` command. Helps to reset and restart the server with new server instance.
+- Added `Mock Server Paths Log` and `Mock Server Config Log` output log.
 ## v5.0.1
 
 - Updated `@r35007/mock-server@5.0.1`
