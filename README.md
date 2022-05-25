@@ -17,7 +17,6 @@ This Extension is built upon node package `@r35007/mock-server`.
     - [`Reset and Restart Server`](#reset-and-restart-server)
     - [`Set Port`](#set-port)
     - [`Set Root`](#set-root)
-    - [`Reset and Restart Server`](#reset-and-restart-server)
     - [`Switch Environment`](#switch-environment)
     - [`Get Db Snapshot`](#get-db-snapshot)
     - [`Transform to Mock Server Db`](#transform-to-mock-server-db)
@@ -63,22 +62,22 @@ Mock Server can be started in three ways.
 
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Stop Server`.
 - ShortCut using `Shift+Alt+Enter`
-- 
+
 ### `Reset Server`
 
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Reset Server`.
 - This command clears all server cache and reset all data
-- 
+
 ### `Reset and Restart Server`
 
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Reset and Restart Server`.
 - This command clears all server cache, reset all data and start the mock server in a new instance.
-- 
+
 ### `Set Port`
 
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Set Port`.
 - This command helps prompts and sets the custom port to start the server.
-- 
+
 ### `Set Root`
 
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Set as Server Root Folder`.
@@ -186,8 +185,8 @@ exports._globals = [
   (req, res, next) => {
     console.log(req.path);
     next();
-  }
-]
+  },
+];
 
 /* 
   Used in VS Code Mock Server extension
@@ -198,7 +197,7 @@ exports._globals = [
 */
 exports._harEntryCallback = (entry, routePath, routeConfig) => {
   // your code goes here ...
-  return { [routePath]: routeConfig }
+  return { [routePath]: routeConfig };
 };
 
 /* 
@@ -232,8 +231,8 @@ exports.DataWrapper = (req, res, next) => {
   res.locals.data = {
     status: "Success",
     message: "Retrieved Successfully",
-    result: res.locals.data
-  }
+    result: res.locals.data,
+  };
   next();
 };
 
@@ -289,10 +288,7 @@ exports.GetStoreValue = (req, res, next) => {
   {
     "routes": ["/(.*)"],
     "override": true,
-    "middlewares": [
-      "...",
-      "CustomLog"
-    ]
+    "middlewares": ["...", "CustomLog"]
   }
 ]
 ```
