@@ -1,4 +1,5 @@
 import { HAR } from '@r35007/mock-server/dist/server/types/common.types';
+import { Db } from '@r35007/mock-server/dist/server/types/valid.types';
 import { extractDbFromHAR } from '@r35007/mock-server/dist/server/utils';
 import { getFilesList, requireData } from "@r35007/mock-server/dist/server/utils/fetch";
 import axios from 'axios';
@@ -14,13 +15,8 @@ import { Settings } from "./Settings";
 
 export class Utils {
   environment = "none";
-  output;
 
   watcher: FSWatcher | undefined;
-
-  constructor() {
-    this.output = vscode.window.createOutputChannel("Mock Server Log");
-  }
 
   protected getEditorProps = () => {
     const editor = vscode.window.activeTextEditor;
@@ -132,7 +128,16 @@ export class Utils {
     .filter(file => [".har", ".json"].includes(file.extension))
     .map(file => ({ ...file, fileName: file.fileName.toLowerCase() }));
 
-  protected restartOnChange = (restart: Function) => {
+  protected restartOnChange = (restart: Function, db: Db = {}) => {
+
+    const fetchPaths = Object.entries(db).map(([_key, obj]) => obj.fetch)
+      .filter(Boolean)
+      .filter(fetch => typeof fetch === 'string')
+
+    const additionPaths = [...Settings.watchForChanges, ...fetchPaths]
+      .filter(fetchPath => fs.existsSync(fetchPath as string || ''))
+      .filter(fetchPath => fs.statSync(fetchPath as string).isFile()) as string[]
+
     if (!this.watcher) {
       const filesToWatch = ([
         Settings.paths.db,
@@ -142,8 +147,8 @@ export class Utils {
         Settings.paths.store,
         Settings.paths.staticDir,
         Settings.paths.envDir,
+        ...additionPaths,
       ]).filter(p => !p?.startsWith("http")).filter(Boolean) as string[];
-
       this.watcher = watch(filesToWatch);
       this.watcher.on('change', (_event, _path) => {
         restart();

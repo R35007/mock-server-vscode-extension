@@ -110,6 +110,9 @@ export class Settings {
   static get reverse() {
     return Settings.getSettings("reverse") as boolean;
   }
+  static get watchForChanges(): string[] {
+    return Settings.getSettings("watchForChanges") as string[] || [];
+  }
   static get config(): UserTypes.Config {
     const config = {
       port: Settings.port,
@@ -138,19 +141,6 @@ export class Settings {
     if (!fs.existsSync(resolvedPath)) {
       Settings.pathsLog.appendLine(`Invalid ${type} Path : ` + resolvedPath);
       return;
-    }
-
-    const stats = getStats(resolvedPath)!;
-    if (stats.extension === ".js") {
-      try {
-        delete require.cache[require.resolve(resolvedPath)];
-        require(resolvedPath);
-        Settings.pathsLog.appendLine(`${type} Path : ` + resolvedPath);
-        return resolvedPath;
-      } catch (err) {
-        Settings.pathsLog.appendLine(`Invalid ${type} file : ` + resolvedPath);
-        return;
-      }
     }
 
     Settings.pathsLog.appendLine(`${type} Path : ` + resolvedPath);

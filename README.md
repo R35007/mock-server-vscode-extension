@@ -33,7 +33,7 @@ This Extension is built upon node package `@r35007/mock-server`.
     - [Injectors](#injectors)
     - [Route Rewriters](#route-rewriters)
     - [Static File Server](#static-file-server)
-  - [**Documentation**](#documentation)
+  - [Documentation](#documentation)
   - [Author](#author)
   - [License](#license)
 

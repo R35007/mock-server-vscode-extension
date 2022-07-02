@@ -1,3 +1,7 @@
+## v6.0.3
+
+ - Performance improvement
+ - `mock-server.settings.watchForChanges` - add custom paths to watch for file changes and restart server
 ## v6.0.2
 
  - Readme update

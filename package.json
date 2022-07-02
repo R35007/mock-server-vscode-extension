@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "6.0.2",
+  "version": "6.0.3",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -129,6 +129,15 @@
           "type": "string",
           "default": "none",
           "description": "Set custom mock environment"
+        },
+        "mock-server.settings.watchForChanges": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "additionalItems": true,
+          "description": "Set files and folder path to watch for changes"
         },
         "mock-server.settings.defaults": {
           "type": "object",
