@@ -1,10 +1,17 @@
+## v6.0.4
+
+- Updated `@r35007mock-server@6.0.2`
+- Now we can export a function in db.js which will be called on start and restart of the mock server.
+
 ## v6.0.3
 
- - Performance improvement
- - `mock-server.settings.watchForChanges` - add custom paths to watch for file changes and restart server
+- Performance improvement
+- `mock-server.settings.watchForChanges` - add custom paths to watch for file changes and restart server
+
 ## v6.0.2
 
- - Readme update
+- Readme update
+
 ## v6.0.1
 
 - Updated `@r35007/mock-server@6.0.1`
@@ -14,20 +21,25 @@
 - Added `Reset Server` command. Helps to clear mock server cache a, gracefully stops server and reset server data.
 - Added `Reset and Restart Server` command. Helps to reset and restart the server with new server instance.
 - Added `Mock Server Paths Log` and `Mock Server Config Log` output log.
+
 ## v5.0.1
 
 - Updated `@r35007/mock-server@5.0.1`
+
 ## v5.0.0
 
 - Updated `@r35007/mock-server@5.0.0`
+
 ## v4.5.2
 
 - Updated `@r35007/mock-server@4.5.1`
-- 
+-
+
 ## v4.5.1
 
 - Updated `@r35007/mock-server@4.5.0`
 - Now can give .js file to the db, injectors, rewriters, store path
+
 ## v4.5.0
 
 - Added `Set Port` Command which is also available in editor context.

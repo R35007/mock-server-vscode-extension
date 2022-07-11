@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
-import { HarMiddleware } from '@r35007/mock-server/dist/server/types/common.types';
+import { HarMiddleware, KibanaMiddleware } from '@r35007/mock-server/dist/server/types/common.types';
 import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
 import { getStats } from '@r35007/mock-server/dist/server/utils/fetch';
 
@@ -95,20 +95,22 @@ export class Settings {
       return require(middlewarePath) as UserTypes.Middlewares;
     }
   }
-  static get _harEntryCallback() {
+  static get callbacks() {
     const middleware = Settings.middleware;
     if (middleware) {
-      return middleware["_harEntryCallback"] as HarMiddleware["_harEntryCallback"];
-    }
-  }
-  static get _harDbCallback() {
-    const middleware = Settings.middleware;
-    if (middleware) {
-      return middleware["_harDbCallback"] as HarMiddleware["_harDbCallback"];
+      return {
+        _harEntryCallback: middleware["_harEntryCallback"] as HarMiddleware["_harEntryCallback"],
+        _harDbCallback: middleware["_harDbCallback"] as HarMiddleware["_harDbCallback"],
+        _kibanaHitsCallback: middleware["_kibanaHitsCallback"] as KibanaMiddleware["_kibanaHitsCallback"],
+        _kibanaDbCallback: middleware["_kibanaDbCallback"] as KibanaMiddleware["_kibanaDbCallback"]
+      };
     }
   }
   static get reverse() {
     return Settings.getSettings("reverse") as boolean;
+  }
+  static get allowDuplicates() {
+    return Settings.getSettings("allowDuplicates") as boolean;
   }
   static get watchForChanges(): string[] {
     return Settings.getSettings("watchForChanges") as string[] || [];

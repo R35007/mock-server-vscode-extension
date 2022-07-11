@@ -1,7 +1,8 @@
 import { MockServer } from "@r35007/mock-server";
-import { HAR } from '@r35007/mock-server/dist/server/types/common.types';
+import { HAR, KIBANA } from '@r35007/mock-server/dist/server/types/common.types';
+import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
 import * as ValidTypes from "@r35007/mock-server/dist/server/types/valid.types";
-import { cleanDb, createSampleFiles, extractDbFromHAR } from '@r35007/mock-server/dist/server/utils';
+import { cleanDb, createSampleFiles, extractDbFromHAR, extractDbFromKibana } from '@r35007/mock-server/dist/server/utils';
 import { requireData } from '@r35007/mock-server/dist/server/utils/fetch';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -41,13 +42,20 @@ export default class MockServerExt extends Utils {
     const writable = await this.getWritable(['.json'], Commands.TRANSFORM_TO_MOCK_SERVER_DB, args?.fsPath);
     if (writable) {
       const { fileName, editor, document, textRange } = writable;
-      const userData = requireData(args?.fsPath || document?.uri?.fsPath) as HAR;
+      const userData = requireData(args?.fsPath || document?.uri?.fsPath);
       const db = extractDbFromHAR(
-        userData,
-        Settings._harEntryCallback,
-        Settings._harDbCallback
+        userData as HAR,
+        Settings.callbacks?._harEntryCallback,
+        Settings.callbacks?._harDbCallback,
+        Settings.allowDuplicates
+      ) || extractDbFromKibana(
+        userData as KIBANA,
+        Settings.callbacks?._kibanaHitsCallback,
+        Settings.callbacks?._kibanaDbCallback,
+        Settings.allowDuplicates
       ) || userData;
-      cleanDb(db);
+
+      cleanDb(db as UserTypes.Db);
       this.writeFile(
         JSON.stringify(db, null, '\t'),
         fileName,
@@ -65,7 +73,7 @@ export default class MockServerExt extends Utils {
     const port = await Prompt.showInputBox('Enter Port Number', Settings.port);
     if (port) {
       Settings.port = parseInt(port);
-      Prompt.showPopupMessage(`Port Number Set to ${port}`, 'info')
+      Prompt.showPopupMessage(`Port Number Set to ${port}`, 'info');
       this.log(`[Done] Port Number Set to ${port}`);
     }
   };
@@ -75,7 +83,7 @@ export default class MockServerExt extends Utils {
     const stat = fs.statSync(args.fsPath);
     const rootPath = stat.isFile() ? path.dirname(args.fsPath) : args.fsPath;
     Settings.rootPath = rootPath;
-    Prompt.showPopupMessage(`Root Path Set to ${rootPath}`, 'info')
+    Prompt.showPopupMessage(`Root Path Set to ${rootPath}`, 'info');
     this.log(`[Done] Root Path Set to ${rootPath}`);
   };
 
@@ -93,7 +101,7 @@ export default class MockServerExt extends Utils {
       await this.mockServer.stopServer();
       await this.stopWatchingChanges();
     } else {
-      throw Error("No Server to Stop")
+      throw Error("No Server to Stop");
     }
   };
 

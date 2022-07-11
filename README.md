@@ -8,34 +8,34 @@ This Extension is built upon node package `@r35007/mock-server`.
 
 ## Table of contents
 
-  - [Table of contents](#table-of-contents)
-  - [Getting started](#getting-started)
-  - [Commands](#commands)
-    - [`Start Server`](#start-server)
-    - [`Stop Server`](#stop-server)
-    - [`Reset Server`](#reset-server)
-    - [`Reset and Restart Server`](#reset-and-restart-server)
-    - [`Set Port`](#set-port)
-    - [`Set Root`](#set-root)
-    - [`Switch Environment`](#switch-environment)
-    - [`Get Db Snapshot`](#get-db-snapshot)
-    - [`Transform to Mock Server Db`](#transform-to-mock-server-db)
-    - [`Generate Mock Files`](#generate-mock-files)
-    - [`Home Page`](#home-page)
-  - [Settings](#settings)
-    - [`Set Custom Port`](#set-custom-port)
-    - [`Set Custom Host`](#set-custom-host)
-    - [`Set Base Path`](#set-base-path)
-    - [`Set Db Id`](#set-db-id)
-    - [`Set Data Paths`](#set-data-paths)
-    - [DB](#db)
-    - [Middleware](#middleware)
-    - [Injectors](#injectors)
-    - [Route Rewriters](#route-rewriters)
-    - [Static File Server](#static-file-server)
-  - [Documentation](#documentation)
-  - [Author](#author)
-  - [License](#license)
+- [Table of contents](#table-of-contents)
+- [Getting started](#getting-started)
+- [Commands](#commands)
+  - [`Start Server`](#start-server)
+  - [`Stop Server`](#stop-server)
+  - [`Reset Server`](#reset-server)
+  - [`Reset and Restart Server`](#reset-and-restart-server)
+  - [`Set Port`](#set-port)
+  - [`Set Root`](#set-root)
+  - [`Switch Environment`](#switch-environment)
+  - [`Get Db Snapshot`](#get-db-snapshot)
+  - [`Transform to Mock Server Db`](#transform-to-mock-server-db)
+  - [`Generate Mock Files`](#generate-mock-files)
+  - [`Home Page`](#home-page)
+- [Settings](#settings)
+  - [`Set Custom Port`](#set-custom-port)
+  - [`Set Custom Host`](#set-custom-host)
+  - [`Set Base Path`](#set-base-path)
+  - [`Set Db Id`](#set-db-id)
+  - [`Set Data Paths`](#set-data-paths)
+  - [DB](#db)
+  - [Middleware](#middleware)
+  - [Injectors](#injectors)
+  - [Route Rewriters](#route-rewriters)
+  - [Static File Server](#static-file-server)
+- [Documentation](#documentation)
+- [Author](#author)
+- [License](#license)
 
 ## Getting started
 
@@ -191,11 +191,15 @@ exports._globals = [
 /* 
   Used in VS Code Mock Server extension
   This method is called only on generating db suing MockServer: Generate Db Command
-  It will be called for each entry in a HAR formatted data
+  It will be called for each entry/hits in a HAR/Kibana formatted data
   Here you can return your custom route and routeConfig
-  `_harEntryCallback` is a reserved word for generating Db 
+  `_harEntryCallback`, `_kibanaHitsCallback` is a reserved word for generating Db 
 */
 exports._harEntryCallback = (entry, routePath, routeConfig) => {
+  // your code goes here ...
+  return { [routePath]: routeConfig };
+};
+exports._kibanaHitsCallback = (hit, routePath, routeConfig) => {
   // your code goes here ...
   return { [routePath]: routeConfig };
 };
@@ -203,12 +207,16 @@ exports._harEntryCallback = (entry, routePath, routeConfig) => {
 /* 
   Used in VS Code Mock Server extension
   This method is called only on generating db suing MockServer: Generate Db Command
-  It will be called at last of all entry looping.
+  It will be called at last of all entry/hits looping.
   Here you can return your custom db
   Whatever you return here will be pasted in the file
-  `_harDbCallback` is a reserved word for generating Db
+  `_harDbCallback`, `_kibanaDbCallback` is a reserved word for generating Db
 */
 exports._harDbCallback = (data, db) => {
+  // your code goes here ...
+  return db;
+};
+exports._kibanaDbCallback = (data, db) => {
   // your code goes here ...
   return db;
 };
@@ -332,13 +340,13 @@ Now you can access resources using /api/
 - Now when you start the server, all files under this folder will be automatically hosted in the file server.
 - Set Custom directory using `mock-server.settings.paths.staticDir`
 
-## **Documentation**
+## Documentation
 
 - ReadMe - [https://r35007.github.io/Mock-Server/](https://r35007.github.io/Mock-Server/)
 
 ## Author
 
-**Sivaraman** - [sendmsg2siva.siva@gmail.com](sendmsg2siva.siva@gmail.com)
+Sivaraman - [sendmsg2siva.siva@gmail.com](sendmsg2siva.siva@gmail.com)
 
 - _GitHub_ - [https://github.com/R35007/Mock-Server](https://github.com/R35007/Mock-Server)
 

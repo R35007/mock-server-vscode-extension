@@ -1,6 +1,5 @@
-import { HAR } from '@r35007/mock-server/dist/server/types/common.types';
+import { HAR, PathDetails } from '@r35007/mock-server/dist/server/types/common.types';
 import { Db } from '@r35007/mock-server/dist/server/types/valid.types';
-import { extractDbFromHAR } from '@r35007/mock-server/dist/server/utils';
 import { getFilesList, requireData } from "@r35007/mock-server/dist/server/utils/fetch";
 import axios from 'axios';
 import { watch } from 'chokidar';
@@ -100,7 +99,8 @@ export class Utils {
 
     if (!environment.trim().length || environment === "none" || !environmentList.find((e) => e.fileName === environment)) {
       Settings.environment = "none";
-      return await this.getDataFromUrl(dbPath);
+      const dbData = await this.getDataFromUrl(dbPath);
+      return dbData;
     }
 
     Settings.environment = environment;
@@ -109,18 +109,18 @@ export class Utils {
     const envPath = environmentList.find((e) => e.fileName === environment)!.filePath;
 
     const userData = requireData(envPath, Settings.rootPath) as HAR;
-    let envData = extractDbFromHAR(userData, Settings._harEntryCallback, Settings._harDbCallback) || userData;
-    envData = this.isPlainObject(envData) ? envData : {};
+    const envData = this.isPlainObject(userData) ? userData : {};
 
-    return { ...dbData, ...envData };
+    return { ...envData, ...dbData, ...envData };
   };
 
   protected getDataFromUrl = async (mockPath: string) => {
     if (mockPath.startsWith("http")) {
       const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
-      return data;
+      return data || {};
     } else {
-      return requireData(mockPath, Settings.rootPath);
+      const data = requireData(mockPath, Settings.rootPath);
+      return typeof data === 'function' ? await data() : data || {};
     }
   };
 
@@ -132,24 +132,26 @@ export class Utils {
 
     const fetchPaths = Object.entries(db).map(([_key, obj]) => obj.fetch)
       .filter(Boolean)
-      .filter(fetch => typeof fetch === 'string')
+      .filter(fetch => typeof fetch === 'string' && !fetch.startsWith("http")) as string[];
 
-    const additionPaths = [...Settings.watchForChanges, ...fetchPaths]
-      .filter(fetchPath => fs.existsSync(fetchPath as string || ''))
-      .filter(fetchPath => fs.statSync(fetchPath as string).isFile()) as string[]
+    const filesToWatch = [
+      Settings.paths.db,
+      Settings.paths.middleware,
+      Settings.paths.injectors,
+      Settings.paths.rewriters,
+      Settings.paths.store,
+      Settings.paths.staticDir,
+      Settings.paths.envDir,
+      ...Settings.watchForChanges,
+      ...fetchPaths
+    ]
+      .filter(p => !p?.startsWith("http")).filter(Boolean)
+      .reduce((paths, p) => [...paths, ...getFilesList(p!)], [] as PathDetails[])
+      .filter(p => p.isFile)
+      .map(p => p.filePath);
 
     if (!this.watcher) {
-      const filesToWatch = ([
-        Settings.paths.db,
-        Settings.paths.middleware,
-        Settings.paths.injectors,
-        Settings.paths.rewriters,
-        Settings.paths.store,
-        Settings.paths.staticDir,
-        Settings.paths.envDir,
-        ...additionPaths,
-      ]).filter(p => !p?.startsWith("http")).filter(Boolean) as string[];
-      this.watcher = watch(filesToWatch);
+      this.watcher = watch([...new Set(filesToWatch)]);
       this.watcher.on('change', (_event, _path) => {
         restart();
       });
