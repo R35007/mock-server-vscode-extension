@@ -1,3 +1,8 @@
+## v6.0.7
+
+- Updated `@r35007/mock-server@6.0.5`
+- Now we can give `.js` file in env folder
+
 ## v6.0.6
 
 - Updated `@r35007/mock-server@6.0.4`

@@ -19,7 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
       log('[Running] Data Transform initiated', '\n');
       log('Data Transforming...');
       await server.transformToMockServerDB(args);
-      log('[Done] Data Transformed Successfully')
+      log('[Done] Data Transformed Successfully');
     } catch (error: any) {
       log('[Done] Failed to Transform Data');
       log(error);
@@ -33,22 +33,22 @@ export function activate(context: vscode.ExtensionContext) {
   // Stop Server
   context.subscriptions.push(vscode.commands.registerCommand(Commands.STOP_SERVER, async (args) => {
     try {
+      StatusbarUi.working('Stopping...');
       log(`[Running] Server Stop initiated`, '\n');
       log(`Server Stopping...`);
-      StatusbarUi.working('Stopping...');
-      await server.stopServer(args)
+      await server.stopServer(args);
+      StatusbarUi.startServer(150, () => Prompt.showPopupMessage(statusMsg, 'info'));
       const statusMsg = `Server is Stopped`;
       log(`[Done] ${statusMsg}`);
-      StatusbarUi.startServer(150, () => Prompt.showPopupMessage(statusMsg, 'info'));
     } catch (error: any) {
       if (error.message === "No Server to Stop") {
-        log(`[Done] No Server to Stop`);
         StatusbarUi.startServer(150, () => Prompt.showPopupMessage('No Server to Stop', 'error'));
+        log(`[Done] No Server to Stop`);
       } else {
-        log(`[Done] Server Failed to Stop`);
-        log(error);
         const statsMsg = `Server Failed to Stop. \n${error.message}`;
         StatusbarUi.stopServer(0, Settings.port, () => Prompt.showPopupMessage(statsMsg, 'error'));
+        log(`[Done] Server Failed to Stop`);
+        log(error);
       }
     }
   }));
@@ -58,16 +58,14 @@ export function activate(context: vscode.ExtensionContext) {
     try {
       log(`[Running] Server Reset initiated`, "\n");
       log(`Server Resetting...`);
-      StatusbarUi.working('Resetting...');
       await server.resetServer();
       const statusMsg = `Server Reset Done`;
       log(`[Done] ${statusMsg}`);
-      StatusbarUi.startServer(150, () => Prompt.showPopupMessage(statusMsg, 'info'));
     } catch (error: any) {
+      const statsMsg = `Server Failed to Reset. \n${error.message}`;
+      StatusbarUi.startServer(150, () => Prompt.showPopupMessage(statsMsg, 'error'));
       log(`[Done] Server Failed to Reset`);
       log(error);
-      const statsMsg = `Server Failed to Reset. \n${error.message}`;
-      Prompt.showPopupMessage(statsMsg, 'error')
     }
   }));
 
@@ -76,15 +74,14 @@ export function activate(context: vscode.ExtensionContext) {
     try {
       log(`[Running] Server Reset initiated`, "\n");
       log(`Server Resetting...`);
-      StatusbarUi.working('Resetting...');
       await server.resetServer();
       log(`[Done] Server Reset done`, "\n");
-      await server.restartServer(args)
+      await server.restartServer(args);
     } catch (error: any) {
+      const statsMsg = `Server Failed to Reset. \n${error.message}`;
+      StatusbarUi.startServer(150, () => Prompt.showPopupMessage(statsMsg, 'error'));
       log(`[Done] Server Failed to Reset`);
       log(error);
-      const statsMsg = `Server Failed to Reset. \n${error.message}`;
-      Prompt.showPopupMessage(statsMsg, 'error')
     }
   }));
 

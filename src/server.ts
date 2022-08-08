@@ -36,6 +36,7 @@ export default class MockServerExt extends Utils {
     StatusbarUi.working('Resetting...');
     await this.destroyServer();
     this.createServer();
+    StatusbarUi.startServer(150, () => Prompt.showPopupMessage('Server Reset Done', 'info'));
   };
 
   transformToMockServerDB = async (args?: any) => {
@@ -108,34 +109,34 @@ export default class MockServerExt extends Utils {
   restartServer = async (args?: any) => {
     if (this.mockServer.server) {
       try {
+        StatusbarUi.working('Restarting...');
         this.log(`[Running] Server Restart initiated`, '\n');
         this.log(`Server Restarting...`);
-        StatusbarUi.working('Restarting...');
         await this.stopServer(true);
         await this.startServer(args?.fsPath);
         const statusMsg = `Server is Restarted at port : ${Settings.port}`;
-        this.log(`[Done] ${statusMsg}`);
         StatusbarUi.stopServer(150, Settings.port, () => Prompt.showPopupMessage(statusMsg, 'info'));
+        this.log(`[Done] ${statusMsg}`);
       } catch (error: any) {
-        this.log(`[Done] Server Failed to Restart`);
-        this.log(error);
         const statusMsg = `Server Failed to Restart. \n${error.message}`;
         StatusbarUi.startServer(0, () => Prompt.showPopupMessage(statusMsg, 'error'));
+        this.log(`[Done] Server Failed to Restart`);
+        this.log(error);
       }
     } else {
       try {
+        StatusbarUi.working('Staring...');
         this.log(`[Running] Server Start initiated`, '\n');
         this.log(`Server Starting...`);
-        StatusbarUi.working('Staring...');
         await this.startServer(args?.fsPath);
         const statusMsg = `Server is Started at port : ${Settings.port}`;
-        this.log(`[Done] ${statusMsg}`);
         StatusbarUi.stopServer(150, Settings.port, () => Prompt.showPopupMessage(statusMsg, 'info'));
+        this.log(`[Done] ${statusMsg}`);
       } catch (error: any) {
-        this.log(`[Done] Server Failed to Start`);
-        this.log(error);
         const statusMsg = `Server Failed to Start. \n${error.message}`;
         StatusbarUi.startServer(0, () => Prompt.showPopupMessage(statusMsg, 'error'));
+        this.log(`[Done] Server Failed to Start`);
+        this.log(error);
       }
     }
   };

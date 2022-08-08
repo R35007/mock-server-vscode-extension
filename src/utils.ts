@@ -125,7 +125,7 @@ export class Utils {
   };
 
   protected getEnvironmentList = (envDir: string = '') => getFilesList(envDir)
-    .filter(file => [".har", ".json"].includes(file.extension))
+    .filter(file => [".har", ".json", ".js"].includes(file.extension))
     .map(file => ({ ...file, fileName: file.fileName.toLowerCase() }));
 
   protected restartOnChange = (restart: Function, db: Db = {}) => {
