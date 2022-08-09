@@ -1,11 +1,11 @@
 import { MockServer } from "@r35007/mock-server";
 import { HAR, KIBANA } from '@r35007/mock-server/dist/server/types/common.types';
 import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
-import * as ValidTypes from "@r35007/mock-server/dist/server/types/valid.types";
 import { cleanDb, createSampleFiles, extractDbFromHAR, extractDbFromKibana } from '@r35007/mock-server/dist/server/utils';
 import { requireData } from '@r35007/mock-server/dist/server/utils/fetch';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as vscode from "vscode";
 import { Commands } from './enum';
 import { Prompt } from './prompt';
 import { Settings } from './Settings';
@@ -13,12 +13,9 @@ import { StatusbarUi } from './StatusBarUI';
 import { Utils } from './utils';
 
 export default class MockServerExt extends Utils {
-  mockServer!: MockServer;
-  log: Function;
 
-  constructor(output: Function) {
-    super();
-    this.log = output;
+  constructor(context: vscode.ExtensionContext, output: Function) {
+    super(context, output);
     this.createServer();
     StatusbarUi.init();
     this.log('Mock Server Server Initiated', "\n");
@@ -48,12 +45,12 @@ export default class MockServerExt extends Utils {
         userData as HAR,
         Settings.callbacks?._harEntryCallback,
         Settings.callbacks?._harDbCallback,
-        Settings.allowDuplicates
+        Settings.iterateDuplicateRoutes,
       ) || extractDbFromKibana(
         userData as KIBANA,
         Settings.callbacks?._kibanaHitsCallback,
         Settings.callbacks?._kibanaDbCallback,
-        Settings.allowDuplicates
+        Settings.iterateDuplicateRoutes
       ) || userData;
 
       cleanDb(db as UserTypes.Db);
@@ -91,9 +88,15 @@ export default class MockServerExt extends Utils {
   startServer = async (dbPath?: string) => {
     const paths = Settings.paths;
     const _dbPath = dbPath || paths.db;
-    const db = (await this.getDbWithEnv(_dbPath?.replace(/\\/g, '/'))) as ValidTypes.Db;
+
+    const db = (await this.getDbWithEnv(_dbPath?.replace(/\\/g, '/')));
+    const injectors = await this.getDataFromUrl(paths.injectors, true);
+    const middlewares = await this.getDataFromUrl(paths.middleware);
+    const rewriters = await this.getDataFromUrl(paths.rewriters);
+    const store = await this.getDataFromUrl(paths.store);
+
     this.mockServer.setConfig(Settings.config);
-    await this.mockServer.launchServer(db, paths.injectors, paths.middleware, paths.rewriters, paths.store);
+    await this.mockServer.launchServer(db, injectors, middlewares, rewriters, store);
     this.restartOnChange(this.restartServer, db);
   };
 
@@ -114,7 +117,7 @@ export default class MockServerExt extends Utils {
         this.log(`Server Restarting...`);
         await this.stopServer(true);
         await this.startServer(args?.fsPath);
-        const statusMsg = `Server is Restarted at port : ${Settings.port}`;
+        const statusMsg = `Server Restarted at port : [${Settings.port}](http://${Settings.host}:${Settings.port})`;
         StatusbarUi.stopServer(150, Settings.port, () => Prompt.showPopupMessage(statusMsg, 'info'));
         this.log(`[Done] ${statusMsg}`);
       } catch (error: any) {
@@ -129,7 +132,7 @@ export default class MockServerExt extends Utils {
         this.log(`[Running] Server Start initiated`, '\n');
         this.log(`Server Starting...`);
         await this.startServer(args?.fsPath);
-        const statusMsg = `Server is Started at port : ${Settings.port}`;
+        const statusMsg = `Server Started at port : [${Settings.port}](http://${Settings.host}:${Settings.port})`;
         StatusbarUi.stopServer(150, Settings.port, () => Prompt.showPopupMessage(statusMsg, 'info'));
         this.log(`[Done] ${statusMsg}`);
       } catch (error: any) {
@@ -151,19 +154,21 @@ export default class MockServerExt extends Utils {
         if (envList && envList.length) {
           const environmentList = [...new Set(['none', ...envList.map((e) => e.fileName)])];
 
+          const mockEnv = this.storageManager.getValue("mockEnv", "none");
+
           // making the selected environment to appear in first of the list
-          const selectedEnvIndex = environmentList.findIndex((e) => e === Settings.environment.toLowerCase());
+          const selectedEnvIndex = environmentList.findIndex((e) => e === mockEnv);
           if (selectedEnvIndex >= 0) {
             environmentList.splice(selectedEnvIndex, 1);
-            environmentList.unshift(Settings.environment.toLowerCase());
+            environmentList.unshift(mockEnv);
           } else {
-            Settings.environment = 'none';
+            this.storageManager.setValue("mockEnv", "none");
           }
 
-          const env = await Prompt.getEnvironment(environmentList);
-          if (env) {
-            this.environment = env.toLowerCase();
-            this.log(`[Done] Environment Switched to ${this.environment}`);
+          const selectedMockEnv = await Prompt.getEnvironment(environmentList);
+          if (selectedMockEnv) {
+            this.storageManager.setValue("mockEnv", selectedMockEnv);
+            this.log(`[Done] Environment Switched to ${selectedMockEnv}`);
             this.restartServer();
           }
         } else {

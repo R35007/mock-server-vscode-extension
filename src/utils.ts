@@ -1,4 +1,6 @@
-import { HAR, PathDetails } from '@r35007/mock-server/dist/server/types/common.types';
+/* eslint-disable curly */
+import { MockServer } from '@r35007/mock-server';
+import { PathDetails } from '@r35007/mock-server/dist/server/types/common.types';
 import { Db } from '@r35007/mock-server/dist/server/types/valid.types';
 import { getFilesList, requireData } from "@r35007/mock-server/dist/server/utils/fetch";
 import axios from 'axios';
@@ -8,12 +10,23 @@ import { FSWatcher } from 'node:fs';
 import * as path from "path";
 import * as vscode from "vscode";
 import { Commands } from './enum';
+import { LocalStorageService } from './LocalStorageService';
 import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
 
 
 export class Utils {
-  environment = "none";
+  storageManager!: LocalStorageService;
+  mockServer!: MockServer;
+  log!: Function;
+
+  constructor(context: vscode.ExtensionContext, output: Function) {
+    this.log = output;
+    if (!this.storageManager) {
+      this.storageManager = new LocalStorageService(context.workspaceState);
+      this.storageManager.setValue("mockEnv", "none");
+    }
+  }
 
   watcher: FSWatcher | undefined;
 
@@ -95,32 +108,34 @@ export class Utils {
   protected getDbWithEnv = async (dbPath?: string) => {
     if (!dbPath) { return; }
     const environmentList = this.getEnvironmentList(Settings.paths.envDir);
-    const environment = this.environment.toLowerCase();
+    const environment = this.storageManager.getValue("mockEnv", "none");
 
     if (!environment.trim().length || environment === "none" || !environmentList.find((e) => e.fileName === environment)) {
-      Settings.environment = "none";
-      const dbData = await this.getDataFromUrl(dbPath);
+      const userDbData = await this.getDataFromUrl(dbPath);
+      const dbData = this.isPlainObject(userDbData) ? userDbData : {};
       return dbData;
     }
 
-    Settings.environment = environment;
+    const userDbData = await this.getDataFromUrl(dbPath);
+    const dbData = this.isPlainObject(userDbData) ? userDbData : {};
 
-    const dbData = await this.getDataFromUrl(dbPath);
     const envPath = environmentList.find((e) => e.fileName === environment)!.filePath;
 
-    const userData = requireData(envPath, Settings.rootPath) as HAR;
+    const userData = await this.getDataFromUrl(envPath);
     const envData = this.isPlainObject(userData) ? userData : {};
 
     return { ...envData, ...dbData, ...envData };
   };
 
-  protected getDataFromUrl = async (mockPath: string) => {
+  protected getDataFromUrl = async (mockPath?: string, isList: boolean = false) => {
+    if (!mockPath) return;
     if (mockPath.startsWith("http")) {
       const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
       return data || {};
     } else {
-      const data = requireData(mockPath, Settings.rootPath);
-      return typeof data === 'function' ? await data() : data || {};
+      const data = requireData(mockPath, Settings.rootPath, isList);
+      const env = this.storageManager.getValue("mockEnv", "none");
+      return typeof data === 'function' ? await data(this.mockServer, { ...Settings.config, env }) : data;
     }
   };
 
@@ -142,7 +157,7 @@ export class Utils {
       Settings.paths.store,
       Settings.paths.staticDir,
       Settings.paths.envDir,
-      ...Settings.watchForChanges,
+      ...Settings.watchPaths,
       ...fetchPaths
     ]
       .filter(p => !p?.startsWith("http")).filter(Boolean)
@@ -153,6 +168,7 @@ export class Utils {
     if (!this.watcher) {
       this.watcher = watch([...new Set(filesToWatch)]);
       this.watcher.on('change', (_event, _path) => {
+        if (!Settings.shouldWatch) return;
         restart();
       });
     }

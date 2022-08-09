@@ -11,7 +11,7 @@ export function activate(context: vscode.ExtensionContext) {
   const output = vscode.window.createOutputChannel("Mock Server Log");
   const log = (message: string, newLine: string = '') => output.appendLine(`${newLine}[${new Date().toLocaleTimeString()}] ${message}`);
 
-  const server = new Server(log);
+  const server = new Server(context, log);
 
   // Transform Mock
   context.subscriptions.push(vscode.commands.registerCommand(Commands.TRANSFORM_TO_MOCK_SERVER_DB, async (args) => {
@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
       log(`Server Stopping...`);
       await server.stopServer(args);
       StatusbarUi.startServer(150, () => Prompt.showPopupMessage(statusMsg, 'info'));
-      const statusMsg = `Server is Stopped`;
+      const statusMsg = `Server Stopped`;
       log(`[Done] ${statusMsg}`);
     } catch (error: any) {
       if (error.message === "No Server to Stop") {

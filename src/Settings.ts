@@ -1,9 +1,8 @@
+import { DbMode, HarMiddleware, KibanaMiddleware } from '@r35007/mock-server/dist/server/types/common.types';
+import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
-import { HarMiddleware, KibanaMiddleware } from '@r35007/mock-server/dist/server/types/common.types';
-import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
-import { getStats } from '@r35007/mock-server/dist/server/utils/fetch';
 
 export class Settings {
 
@@ -33,12 +32,6 @@ export class Settings {
   }
   static get id() {
     return Settings.getSettings("id") as string || 'id';
-  }
-  static get environment() {
-    return Settings.getSettings("environment") as string || "none";
-  }
-  static set environment(env: string) {
-    Settings.setSettings("environment", env ? env.toLowerCase() : "none");
   }
   static get defaults() {
     return Settings.getSettings("defaults") as {
@@ -109,14 +102,21 @@ export class Settings {
   static get reverse() {
     return Settings.getSettings("reverse") as boolean;
   }
-  static get allowDuplicates() {
-    return Settings.getSettings("allowDuplicates") as boolean;
+  static get iterateDuplicateRoutes() {
+    return Settings.getSettings("iterateDuplicateRoutes") as boolean;
   }
-  static get watchForChanges(): string[] {
-    return Settings.getSettings("watchForChanges") as string[] || [];
+  static get mode(): DbMode {
+    return Settings.getSettings("dbMode") as DbMode || "mock";
+  }
+  static get watchPaths(): string[] {
+    return Settings.getSettings("customWatchPaths") as string[] || [];
+  }
+  static get shouldWatch(): boolean {
+    return Settings.getSettings("watchForChanges") as boolean;
   }
   static get config(): UserTypes.Config {
     const config = {
+      mode: Settings.mode,
       port: Settings.port,
       host: Settings.host,
       id: Settings.id,
@@ -137,7 +137,7 @@ export class Settings {
     Settings.setSettings("showInfoMsg", val);
   }
   static getValidPath(type: string, relativePath: string, defaults: string) {
-    if (relativePath.startsWith("http")) { return relativePath; }
+    if (relativePath.startsWith("http")) { return relativePath?.replace(/\\/g, '/'); }
     const resolvedPath = path.resolve(Settings.rootPath, relativePath?.trim() || defaults);
 
     if (!fs.existsSync(resolvedPath)) {
@@ -146,6 +146,6 @@ export class Settings {
     }
 
     Settings.pathsLog.appendLine(`${type} Path : ` + resolvedPath);
-    return resolvedPath;
+    return resolvedPath?.replace(/\\/g, '/');
   }
 }

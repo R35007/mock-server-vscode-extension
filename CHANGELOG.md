@@ -1,3 +1,29 @@
+## v6.1.0
+
+- Updated `@r35007/mock-server@6.1.0`
+- addded `mock-server.settings.dbMode` - Helps to set a direct value of a route to `mock` or `fetch`
+- renamed `mock-server.settings.allowDuplicates` to `mock-server.settings.iterateDuplicateRoutes`
+- updated `mock-server.settings.watchForChanges` - Set to true to restart server on changes watched by `mock-server.settings.customWatchPaths`
+- added `mock-server.settings.customWatchPaths` - Provide your custom paths to watch for changes
+- removed `mock-server.settings.environment` - maintained by localStorage
+- added - On Start or Restart of the server the info popup comes with the link to open up the browser with the homepage
+- Now we pass the instance and config of the mockserver to the methods that are exported as a db, injectors etc...
+  For Example :
+  `db.js`
+  ```js
+  module.exports = (mockServer, config) => {
+    const db = {
+      post: {
+        userId: 1,
+        id: 1,
+        title: "New Post",
+      },
+    };
+
+    return db;
+  };
+  ```
+
 ## v6.0.7
 
 - Updated `@r35007/mock-server@6.0.5`
