@@ -1,7 +1,18 @@
+# Mock Server
+
+- Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
+- Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
+
+## v7.0.0
+
+- Updated `@r35007/mock-server@7.0.0`
+- added `mockServer.startWithNewPort` command - Helps to set a new port and start the server
+- If already a server is running at the same port it prompts the user to give a new port and start the server
+
 ## v6.1.0
 
 - Updated `@r35007/mock-server@6.1.0`
-- addded `mock-server.settings.dbMode` - Helps to set a direct value of a route to `mock` or `fetch`
+- added `mock-server.settings.dbMode` - Helps to set a direct value of a route to `mock` or `fetch`
 - renamed `mock-server.settings.allowDuplicates` to `mock-server.settings.iterateDuplicateRoutes`
 - updated `mock-server.settings.watchForChanges` - Set to true to restart server on changes watched by `mock-server.settings.customWatchPaths`
 - added `mock-server.settings.customWatchPaths` - Provide your custom paths to watch for changes
@@ -10,8 +21,9 @@
 - Now we pass the instance and config of the mockserver to the methods that are exported as a db, injectors etc...
   For Example :
   `db.js`
+
   ```js
-  module.exports = (mockServer, config) => {
+  module.exports = (mockServer, env) => {
     const db = {
       post: {
         userId: 1,

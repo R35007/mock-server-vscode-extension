@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "6.1.0",
+  "version": "7.0.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -77,6 +77,11 @@
         "category": "MockServer"
       },
       {
+        "command": "mockServer.startWithNewPort",
+        "title": "Start Server with New Port",
+        "category": "MockServer"
+      },
+      {
         "command": "mockServer.switchEnvironment",
         "title": "Switch Environment",
         "category": "MockServer"
@@ -111,7 +116,7 @@
           "type": "object",
           "default": {
             "root": "./",
-            "db": "db.json",
+            "db": "db.js",
             "middleware": "middleware.js",
             "injectors": "injectors.json",
             "rewriters": "rewriters.json",
@@ -123,64 +128,55 @@
           "properties": {
             "root": {
               "type": "string",
-              "default": "./mock",
               "description": "Set custom root path. Note : every other paths given in will be relative to this root path"
             },
             "db": {
               "type": "string",
-              "default": "db.json",
-              "description": "Set db.json file path"
+              "description": "Set .js or .json or http url here"
             },
             "middleware": {
               "type": "string",
-              "default": "middleware.js",
-              "description": "Set middleware.js file path"
+              "description": "Set .js path here"
             },
             "injectors": {
               "type": "string",
-              "default": "injectors.json",
-              "description": "Set injectors.json file path"
+              "description": "Set .js or .json or http url here"
             },
             "rewriters": {
               "type": "string",
-              "default": "rewriters.json",
-              "description": "Set rewriters.json file path"
+              "description": "Set .js or .json or http url here"
             },
             "store": {
               "type": "string",
-              "default": "store.json",
-              "description": "Set store.json file path"
+              "description": "Set .js or .json or http url here"
             },
             "staticDir": {
               "type": "string",
-              "default": "",
               "description": "Set path to static files"
             },
             "envDir": {
               "type": "string",
-              "default": "env",
               "description": "Set path to environment files"
             },
             "snapshotDir": {
               "type": "string",
-              "default": "snapshots",
               "description": "Set SnapShot Folder directory"
             }
           },
           "description": "Set Database config paths",
           "additionalProperties": false
         },
-        "mock-server.settings.port": {
-          "order": 2,
-          "type": "number",
-          "default": 3000,
-          "description": "Set custom port"
-        },
         "mock-server.settings.host": {
-          "order": 3,
+          "order": 2,
           "type": "string",
           "default": "localhost",
           "description": "Set custom host"
+        },
+        "mock-server.settings.port": {
+          "order": 3,
+          "type": "number",
+          "default": 3000,
+          "description": "Set custom port"
         },
         "mock-server.settings.base": {
           "order": 4,
@@ -406,7 +402,7 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@r35007/mock-server": "^6.1.0",
+    "@r35007/mock-server": "^7.0.0",
     "axios": "^0.21.1",
     "chokidar": "^3.5.2",
     "express": "^4.17.1"

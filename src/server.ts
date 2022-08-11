@@ -6,10 +6,9 @@ import { requireData } from '@r35007/mock-server/dist/server/utils/fetch';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from "vscode";
-import { Commands } from './enum';
+import { Commands, PromptAction } from './enum';
 import { Prompt } from './prompt';
 import { Settings } from './Settings';
-import { StatusbarUi } from './StatusBarUI';
 import { Utils } from './utils';
 
 export default class MockServerExt extends Utils {
@@ -17,7 +16,6 @@ export default class MockServerExt extends Utils {
   constructor(context: vscode.ExtensionContext, output: Function) {
     super(context, output);
     this.createServer();
-    StatusbarUi.init();
     this.log('Mock Server Server Initiated', "\n");
   }
 
@@ -30,10 +28,8 @@ export default class MockServerExt extends Utils {
   };
 
   resetServer = async () => {
-    StatusbarUi.working('Resetting...');
     await this.destroyServer();
     this.createServer();
-    StatusbarUi.startServer(150, () => Prompt.showPopupMessage('Server Reset Done', 'info'));
   };
 
   transformToMockServerDB = async (args?: any) => {
@@ -71,76 +67,42 @@ export default class MockServerExt extends Utils {
     const port = await Prompt.showInputBox('Enter Port Number', Settings.port);
     if (port) {
       Settings.port = parseInt(port);
-      Prompt.showPopupMessage(`Port Number Set to ${port}`, 'info');
+      Prompt.showPopupMessage(`Port Number Set to ${port}`);
       this.log(`[Done] Port Number Set to ${port}`);
+      return parseInt(port);
     }
   };
 
   setRoot = async (args?: any) => {
-    if (!args?.fsPath) { return; }
+    if (!args?.fsPath) return;
     const stat = fs.statSync(args.fsPath);
     const rootPath = stat.isFile() ? path.dirname(args.fsPath) : args.fsPath;
     Settings.rootPath = rootPath;
-    Prompt.showPopupMessage(`Root Path Set to ${rootPath}`, 'info');
+    Prompt.showPopupMessage(`Root Path Set to ${rootPath}`);
     this.log(`[Done] Root Path Set to ${rootPath}`);
   };
 
-  startServer = async (dbPath?: string) => {
+  startServer = async (dbPath?: string, port:number= Settings.port) => {
     const paths = Settings.paths;
     const _dbPath = dbPath || paths.db;
 
-    const db = (await this.getDbWithEnv(_dbPath?.replace(/\\/g, '/')));
-    const injectors = await this.getDataFromUrl(paths.injectors, true);
     const middlewares = await this.getDataFromUrl(paths.middleware);
+    const injectors = await this.getDataFromUrl(paths.injectors, true);
     const rewriters = await this.getDataFromUrl(paths.rewriters);
     const store = await this.getDataFromUrl(paths.store);
+    const db = (await this.getDbWithEnv(_dbPath?.replace(/\\/g, '/')));
 
-    this.mockServer.setConfig(Settings.config);
+    this.mockServer.setConfig({...Settings.config, port});
     await this.mockServer.launchServer(db, injectors, middlewares, rewriters, store);
-    this.restartOnChange(this.restartServer, db);
+    this.restartOnChange(db);
   };
 
-  stopServer = async (isRestarting?: boolean) => {
+  stopServer = async () => {
     if (this.mockServer.server) {
       await this.mockServer.stopServer();
       await this.stopWatchingChanges();
     } else {
       throw Error("No Server to Stop");
-    }
-  };
-
-  restartServer = async (args?: any) => {
-    if (this.mockServer.server) {
-      try {
-        StatusbarUi.working('Restarting...');
-        this.log(`[Running] Server Restart initiated`, '\n');
-        this.log(`Server Restarting...`);
-        await this.stopServer(true);
-        await this.startServer(args?.fsPath);
-        const statusMsg = `Server Restarted at port : [${Settings.port}](http://${Settings.host}:${Settings.port})`;
-        StatusbarUi.stopServer(150, Settings.port, () => Prompt.showPopupMessage(statusMsg, 'info'));
-        this.log(`[Done] ${statusMsg}`);
-      } catch (error: any) {
-        const statusMsg = `Server Failed to Restart. \n${error.message}`;
-        StatusbarUi.startServer(0, () => Prompt.showPopupMessage(statusMsg, 'error'));
-        this.log(`[Done] Server Failed to Restart`);
-        this.log(error);
-      }
-    } else {
-      try {
-        StatusbarUi.working('Staring...');
-        this.log(`[Running] Server Start initiated`, '\n');
-        this.log(`Server Starting...`);
-        await this.startServer(args?.fsPath);
-        const statusMsg = `Server Started at port : [${Settings.port}](http://${Settings.host}:${Settings.port})`;
-        StatusbarUi.stopServer(150, Settings.port, () => Prompt.showPopupMessage(statusMsg, 'info'));
-        this.log(`[Done] ${statusMsg}`);
-      } catch (error: any) {
-        const statusMsg = `Server Failed to Start. \n${error.message}`;
-        StatusbarUi.startServer(0, () => Prompt.showPopupMessage(statusMsg, 'error'));
-        this.log(`[Done] Server Failed to Start`);
-        this.log(error);
-      }
     }
   };
 
@@ -169,20 +131,20 @@ export default class MockServerExt extends Utils {
           if (selectedMockEnv) {
             this.storageManager.setValue("mockEnv", selectedMockEnv);
             this.log(`[Done] Environment Switched to ${selectedMockEnv}`);
-            this.restartServer();
+            vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server
           }
         } else {
-          this.log(`[Done] No Environment Found`);
-          Prompt.showPopupMessage('No Environment Found', 'error');
+          this.log(`[Error] No Environment Found`);
+          Prompt.showPopupMessage('No Environment Found',  PromptAction.ERROR);
         }
       } else {
-        this.log(`'mock-server.settings.paths.envPath' - Please provide a valid path here`);
-        Prompt.showPopupMessage(`'mock-server.settings.paths.envPath' - Please provide a valid path here`, 'error');
+        this.log(`[Error] 'mock-server.settings.paths.envDir' - Please provide a valid path here`);
+        Prompt.showPopupMessage(`mock-server.settings.paths.envDir - Please provide a valid path here`, PromptAction.ERROR);
       }
     } catch (err: any) {
-      this.log(`[Done] Something went wrong`);
+      this.log(`[Error] Something went wrong`);
       this.log(err);
-      Prompt.showPopupMessage(`Something went wrong`, 'error');
+      Prompt.showPopupMessage(`Something went wrong`, PromptAction.ERROR);
     }
   };
 

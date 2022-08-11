@@ -14,6 +14,7 @@ This Extension is built upon node package `@r35007/mock-server`.
   - [`Start Server`](#start-server)
   - [`Stop Server`](#stop-server)
   - [`Reset Server`](#reset-server)
+  - [`Start Server with New Port`](#start-server-with-new-port)
   - [`Reset and Restart Server`](#reset-and-restart-server)
   - [`Set Port`](#set-port)
   - [`Set Root`](#set-root)
@@ -28,11 +29,11 @@ This Extension is built upon node package `@r35007/mock-server`.
   - [`Set Base Path`](#set-base-path)
   - [`Set Db Id`](#set-db-id)
   - [`Set Data Paths`](#set-data-paths)
-  - [DB](#db)
-  - [Middleware](#middleware)
-  - [Injectors](#injectors)
-  - [Route Rewriters](#route-rewriters)
-  - [Static File Server](#static-file-server)
+- [DB](#db)
+- [Middleware](#middleware)
+- [Injectors](#injectors)
+- [Route Rewriters](#route-rewriters)
+- [Static File Server](#static-file-server)
 - [Documentation](#documentation)
 - [Author](#author)
 - [License](#license)
@@ -67,6 +68,11 @@ Mock Server can be started in three ways.
 
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Reset Server`.
 - This command clears all server cache and reset all data
+
+### `Start Server with New Port`
+
+- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Start Server with New Port`.
+- This command prompts to set a new port and starts the server with the given port.
 
 ### `Reset and Restart Server`
 
@@ -146,13 +152,14 @@ Helps to work in multiple data environments.
 ```jsonc
 {
   "root": "./", // all paths will be relative this path.
-  "db": "db.json", // If its a folder path, the server pick all the .json files and run the mock server.
+  "db": "db.js", // If its a folder path, the server pick all the .json files and run the mock server.
   "middleware": "middleware.js", // path to middlewares. Must be .js type file
   "injectors": "injectors.json", // path to injectors file
   "rewriters": "rewriters.json", // path to rewriters file
   "store": "store.json", // path to store file
   "staticDir": "public", // path to static file server.
-  "envDir": "env" // path to env. on `MockServer: Switch Environment` Command, picks all the .json files under this directory.
+  "envDir": "env", // path to env. on `MockServer: Switch Environment` Command, picks all the .json files under this directory.
+  "snapshotDir": "snapshots" // path to snapshot
 }
 ```
 
@@ -164,7 +171,16 @@ Helps to work in multiple data environments.
 - If provided as a folder path, then all the `.json` files will be joined together and starts the server.
 - Example 1 : `db.json`.
 - Example 2 : `./folder`.
-- Example 2 : `https://jsonplaceholder.typicode.com/db`.
+- Example 3 : `https://jsonplaceholder.typicode.com/db`.
+- Example 4 : `db.js`.
+
+```js
+module.exports = async (mockServer, env) => {
+  return {
+    route1: "My Response",
+  };
+};
+```
 
 ### Middleware
 
@@ -181,7 +197,7 @@ Helps to work in multiple data environments.
   Global Middlewares
   These middlewares will be added to start of the the express app 
 */
-exports._globals = [
+const _globals = [
   (req, res, next) => {
     console.log(req.path);
     next();
@@ -195,11 +211,11 @@ exports._globals = [
   Here you can return your custom route and routeConfig
   `_harEntryCallback`, `_kibanaHitsCallback` is a reserved word for generating Db 
 */
-exports._harEntryCallback = (entry, routePath, routeConfig) => {
+const _harEntryCallback = (entry, routePath, routeConfig) => {
   // your code goes here ...
   return { [routePath]: routeConfig };
 };
-exports._kibanaHitsCallback = (hit, routePath, routeConfig) => {
+const _kibanaHitsCallback = (hit, routePath, routeConfig) => {
   // your code goes here ...
   return { [routePath]: routeConfig };
 };
@@ -212,30 +228,17 @@ exports._kibanaHitsCallback = (hit, routePath, routeConfig) => {
   Whatever you return here will be pasted in the file
   `_harDbCallback`, `_kibanaDbCallback` is a reserved word for generating Db
 */
-exports._harDbCallback = (data, db) => {
+const _harDbCallback = (data, db) => {
   // your code goes here ...
   return db;
 };
-exports._kibanaDbCallback = (data, db) => {
+const _kibanaDbCallback = (data, db) => {
   // your code goes here ...
   return db;
 };
-
-/* 
-  This is a Express middleware used to call on a specific routes.
-  example in db.json
-  {
-    "/customMiddleware": {
-    "_config": true,
-    "fetch": "http://jsonplaceholder.typicode.com/users",
-    "middlewares": [
-      "DataWrapper"
-    ]
-  }
-*/
 
 // You can create n number of middlewares like this and can be used in any routes as mentioned in above example.
-exports.DataWrapper = (req, res, next) => {
+const DataWrapper = (req, res, next) => {
   res.locals.data = {
     status: "Success",
     message: "Retrieved Successfully",
@@ -244,16 +247,35 @@ exports.DataWrapper = (req, res, next) => {
   next();
 };
 
-exports.CustomLog = (req, res, next) => {
+const CustomLog = (req, res, next) => {
   console.log(new Date());
   next();
 };
 
 // Access store value
-exports.GetStoreValue = (req, res, next) => {
+const GetStoreValue = (req, res, next) => {
   const store = res.locals.getStore();
   res.locals.data = "The store value is : " + store.data;
   next();
+};
+
+module.exports = async (mockServer, env) => {
+  const app = mockServer.app;
+
+  // Add custom global middlewares
+  app.use((req, res) => {
+    console.log("Request path : " + req.path);
+  });
+
+  return {
+    _globals,
+    _harEntryCallback,
+    _harDbCallback,
+    _kibanaDbCallback,
+    DataWrapper,
+    CustomLog,
+    GetStoreValue,
+  };
 };
 ```
 

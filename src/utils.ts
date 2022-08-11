@@ -96,11 +96,11 @@ export class Utils {
       fs.writeFileSync(filePath, data);
       const doc = await vscode.workspace.openTextDocument(filePath);
       await vscode.window.showTextDocument(doc, undefined, true);
-      Prompt.showPopupMessage(notificationText, "info");
+      Prompt.showPopupMessage(notificationText);
     } else {
       editor.edit((editBuilder) => {
         editBuilder.replace(textRange, data);
-        Prompt.showPopupMessage(notificationText, "info");
+        Prompt.showPopupMessage(notificationText);
       });
     }
   };
@@ -135,7 +135,7 @@ export class Utils {
     } else {
       const data = requireData(mockPath, Settings.rootPath, isList);
       const env = this.storageManager.getValue("mockEnv", "none");
-      return typeof data === 'function' ? await data(this.mockServer, { ...Settings.config, env }) : data;
+      return typeof data === 'function' ? await data(this.mockServer, env) : data;
     }
   };
 
@@ -143,7 +143,9 @@ export class Utils {
     .filter(file => [".har", ".json", ".js"].includes(file.extension))
     .map(file => ({ ...file, fileName: file.fileName.toLowerCase() }));
 
-  protected restartOnChange = (restart: Function, db: Db = {}) => {
+  protected restartOnChange = (db: Db = {}) => {
+    // If watcher is already watching then do nothing
+    if(this.watcher) return;
 
     const fetchPaths = Object.entries(db).map(([_key, obj]) => obj.fetch)
       .filter(Boolean)
@@ -165,13 +167,11 @@ export class Utils {
       .filter(p => p.isFile)
       .map(p => p.filePath);
 
-    if (!this.watcher) {
       this.watcher = watch([...new Set(filesToWatch)]);
       this.watcher.on('change', (_event, _path) => {
         if (!Settings.shouldWatch) return;
-        restart();
+        vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server
       });
-    }
   };
 
   protected stopWatchingChanges = async () => {

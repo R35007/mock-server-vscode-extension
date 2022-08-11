@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Commands } from './enum';
+import { Commands, PromptAction, ServerStatus } from './enum';
 import HomePage from './HomePage';
 import { Prompt } from './prompt';
 import Server from "./server";
@@ -10,6 +10,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const output = vscode.window.createOutputChannel("Mock Server Log");
   const log = (message: string, newLine: string = '') => output.appendLine(`${newLine}[${new Date().toLocaleTimeString()}] ${message}`);
+  StatusbarUi.init(log);
 
   const server = new Server(context, log);
 
@@ -21,69 +22,82 @@ export function activate(context: vscode.ExtensionContext) {
       await server.transformToMockServerDB(args);
       log('[Done] Data Transformed Successfully');
     } catch (error: any) {
-      log('[Done] Failed to Transform Data');
+      log(`[Error] Failed to Transform Data. ${error.message}`);
       log(error);
-      Prompt.showPopupMessage(`Failed to Transform Data. \n${error.message}`, 'error');
+      Prompt.showPopupMessage(`Failed to Transform Data. \n${error.message}`, PromptAction.ERROR);
     }
   }));
 
   // Start Server
-  context.subscriptions.push(vscode.commands.registerCommand(Commands.START_SERVER, server.restartServer));
-
-  // Stop Server
-  context.subscriptions.push(vscode.commands.registerCommand(Commands.STOP_SERVER, async (args) => {
-    try {
-      StatusbarUi.working('Stopping...');
-      log(`[Running] Server Stop initiated`, '\n');
-      log(`Server Stopping...`);
-      await server.stopServer(args);
-      StatusbarUi.startServer(150, () => Prompt.showPopupMessage(statusMsg, 'info'));
-      const statusMsg = `Server Stopped`;
-      log(`[Done] ${statusMsg}`);
-    } catch (error: any) {
-      if (error.message === "No Server to Stop") {
-        StatusbarUi.startServer(150, () => Prompt.showPopupMessage('No Server to Stop', 'error'));
-        log(`[Done] No Server to Stop`);
-      } else {
-        const statsMsg = `Server Failed to Stop. \n${error.message}`;
-        StatusbarUi.stopServer(0, Settings.port, () => Prompt.showPopupMessage(statsMsg, 'error'));
-        log(`[Done] Server Failed to Stop`);
-        log(error);
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.START_SERVER, async (args) => {
+    if (server.mockServer.server) {
+      try {
+        StatusbarUi.working(ServerStatus.RESTART);
+        await server.stopServer();
+        await server.startServer(args?.fsPath);
+        StatusbarUi.stopServer(ServerStatus.RESTART, server.mockServer.listeningTo!);
+      } catch (error: any) {
+        await server.resetServer();
+        StatusbarUi.startServer(`Server Failed to Restart.`, error);
+      }
+    } else {
+      try {
+        StatusbarUi.working(ServerStatus.START);
+        await server.startServer(args?.fsPath);
+        StatusbarUi.stopServer(ServerStatus.START, server.mockServer.listeningTo!);
+      } catch (error: any) {
+        await server.resetServer();
+        StatusbarUi.startServer('Server Failed to Start.', error);
       }
     }
   }));
 
+  // Stop Server
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.STOP_SERVER, async (args) => {
+      StatusbarUi.working(ServerStatus.STOP);
+      await server.resetServer();
+      StatusbarUi.startServer('Server Stopped', undefined, 150);
+  }));
+
   // Reset Server
   context.subscriptions.push(vscode.commands.registerCommand(Commands.RESET_SERVER, async (args) => {
-    try {
-      log(`[Running] Server Reset initiated`, "\n");
-      log(`Server Resetting...`);
-      await server.resetServer();
-      const statusMsg = `Server Reset Done`;
-      log(`[Done] ${statusMsg}`);
-    } catch (error: any) {
-      const statsMsg = `Server Failed to Reset. \n${error.message}`;
-      StatusbarUi.startServer(150, () => Prompt.showPopupMessage(statsMsg, 'error'));
-      log(`[Done] Server Failed to Reset`);
-      log(error);
-    }
+    StatusbarUi.working(ServerStatus.RESET);
+    await server.resetServer();
+    StatusbarUi.startServer('Server Reset Done', undefined, 150);
   }));
 
   // Reset and Restart Server
   context.subscriptions.push(vscode.commands.registerCommand(Commands.RESET_AND_RESTART, async (args) => {
     try {
-      log(`[Running] Server Reset initiated`, "\n");
-      log(`Server Resetting...`);
+      const isServerRunning = server.mockServer.server;
+      StatusbarUi.working(ServerStatus.RESET);
       await server.resetServer();
-      log(`[Done] Server Reset done`, "\n");
-      await server.restartServer(args);
+      StatusbarUi.startServer('Server Reset Done', PromptAction.INFO, 150);
+
+      StatusbarUi.working(isServerRunning ? ServerStatus.RESTART : ServerStatus.START);
+      await server.startServer(args?.fsPath);
+      StatusbarUi.stopServer(isServerRunning ? ServerStatus.RESTART : ServerStatus.START, server.mockServer.listeningTo!);
     } catch (error: any) {
-      const statsMsg = `Server Failed to Reset. \n${error.message}`;
-      StatusbarUi.startServer(150, () => Prompt.showPopupMessage(statsMsg, 'error'));
-      log(`[Done] Server Failed to Reset`);
-      log(error);
+      await server.resetServer();
+      StatusbarUi.startServer('Server Failed to Reset and Restart.', error, 150);
     }
   }));
+
+    // Start Server with new Port
+    context.subscriptions.push(vscode.commands.registerCommand(Commands.START_WITH_NEW_PORT, async (args) => {
+      try {
+        const isServerRunning = server.mockServer.server;
+        const port = await server.setPort();
+        if(!port) return;
+        StatusbarUi.working(isServerRunning ? ServerStatus.RESTART : ServerStatus.START);
+        await server.resetServer();
+        await server.startServer(args?.fsPath, port);
+        StatusbarUi.stopServer(isServerRunning ? ServerStatus.RESTART : ServerStatus.START, server.mockServer.listeningTo!);
+      } catch (error: any) {
+        await server.resetServer();
+        StatusbarUi.startServer('Server Failed to Reset and Restart.', error, 150);
+      }
+    }));
 
   // Switch Environment
   context.subscriptions.push(vscode.commands.registerCommand(Commands.SWITCH_ENVIRONMENT, server.switchEnvironment));
@@ -96,9 +110,9 @@ export function activate(context: vscode.ExtensionContext) {
       await server.getDbSnapshot(args);
       log(`[Done] Db Snapshot retrieved Successfully`);
     } catch (error: any) {
-      log(`[Done] Failed to get Db Snapshot`);
+      log(`[Error] Failed to get Db Snapshot`);
       log(error);
-      Prompt.showPopupMessage(`Failed to get Db Snapshot. \n${error.message}`, 'error');
+      Prompt.showPopupMessage(`Failed to get Db Snapshot. \n${error.message}`, PromptAction.ERROR);
     }
   }));
 
@@ -116,9 +130,9 @@ export function activate(context: vscode.ExtensionContext) {
       await server.generateMockFiles(args);
       log('[Done] Sample files created.');
     } catch (error: any) {
-      log(`[Done] Failed to Create Samples`);
+      log(`[Error] Failed to Create Samples`);
       log(error);
-      Prompt.showPopupMessage(`Failed to Create Samples. \n${error.message}`, 'error');
+      Prompt.showPopupMessage(`Failed to Create Samples. \n${error.message}`, PromptAction.ERROR);
     }
   }));
 

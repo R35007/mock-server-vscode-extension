@@ -31,7 +31,7 @@ export default class HomePage {
       message => {
         switch (message.command) {
           case 'startServer':
-            this._server.restartServer().then(this._update.bind(this));
+            vscode.commands.executeCommand(Commands.START_SERVER);
             return;
         }
       }, null, this._disposables);

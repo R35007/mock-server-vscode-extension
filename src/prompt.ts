@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { PromptAction } from './enum';
 import { Settings } from "./Settings";
 
 export class Prompt {
@@ -27,13 +28,13 @@ export class Prompt {
     });
   };
 
-  static showPopupMessage = (message: string, action: "info" | "warning" | "error") => {
-    if (action === "info") {
+  static showPopupMessage = (message: string, action: PromptAction = PromptAction.INFO,) => {
+    if (action === PromptAction.INFO) {
       Settings.showInfoMsg &&
         vscode.window.showInformationMessage(message);
-    } else if (action === "error") {
+    } else if (action === PromptAction.ERROR) {
       vscode.window.showErrorMessage(message);
-    } else if (action === "warning") {
+    } else if (action === PromptAction.WARNING) {
       vscode.window.showWarningMessage(message);
     }
   };
