@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "7.0.0",
+  "version": "7.0.1",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -280,14 +280,18 @@
           "order": 14,
           "type": "object",
           "default": {
-            "show": true,
+            "show": "true",
             "position": "Right",
-            "priority": 0
+            "priority": "0"
           },
           "properties": {
             "show": {
-              "type": "boolean",
-              "default": true,
+              "type": "string",
+              "default": "true",
+              "enum": [
+                "true",
+                "false"
+              ],
               "description": "Change this to false if you don't want the button to show in statusbar"
             },
             "position": {
@@ -300,8 +304,8 @@
               "description": "Set a custom position of the statusbar. Note: Please reload the extension to take effect."
             },
             "priority": {
-              "type": "number",
-              "default": 0,
+              "type": "string",
+              "default": "0",
               "description": "helps to reorder the placement of the statusbar. Minimum priority moves the statusbar to left most. Note: Please reload the extension to take effect."
             }
           },
@@ -402,7 +406,7 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@r35007/mock-server": "^7.0.0",
+    "@r35007/mock-server": "^7.0.1",
     "axios": "^0.21.1",
     "chokidar": "^3.5.2",
     "express": "^4.17.1"

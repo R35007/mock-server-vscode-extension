@@ -5,6 +5,12 @@
 
 ## v7.0.0
 
+- Updated `@r35007/mock-server@7.0.1`
+- middleware callbacks are not working on `mockServer.transformToMockServerDB` command - `Fixed`
+- config not updated when using `mockServer` inside `middleware.js` exports - `Fixed`
+
+## v7.0.0
+
 - Updated `@r35007/mock-server@7.0.0`
 - added `mockServer.startWithNewPort` command - Helps to set a new port and start the server
 - If already a server is running at the same port it prompts the user to give a new port and start the server

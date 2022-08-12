@@ -37,19 +37,25 @@ export default class MockServerExt extends Utils {
     if (writable) {
       const { fileName, editor, document, textRange } = writable;
       const userData = requireData(args?.fsPath || document?.uri?.fsPath);
+
+      const middlewares = await this.getDataFromUrl(Settings.paths.middleware);
+
       const db = extractDbFromHAR(
         userData as HAR,
-        Settings.callbacks?._harEntryCallback,
-        Settings.callbacks?._harDbCallback,
+        middlewares?._harEntryCallback,
+        middlewares?._harDbCallback,
         Settings.iterateDuplicateRoutes,
       ) || extractDbFromKibana(
         userData as KIBANA,
-        Settings.callbacks?._kibanaHitsCallback,
-        Settings.callbacks?._kibanaDbCallback,
+        middlewares?._kibanaHitsCallback,
+        middlewares?._kibanaDbCallback,
         Settings.iterateDuplicateRoutes
-      ) || userData;
+      ) || {};
 
       cleanDb(db as UserTypes.Db);
+
+      if (!Object.keys(db).length) throw Error("Invalid Data");
+
       this.writeFile(
         JSON.stringify(db, null, '\t'),
         fileName,
@@ -82,17 +88,18 @@ export default class MockServerExt extends Utils {
     this.log(`[Done] Root Path Set to ${rootPath}`);
   };
 
-  startServer = async (dbPath?: string, port:number= Settings.port) => {
+  startServer = async (dbPath?: string, port: number = Settings.port) => {
     const paths = Settings.paths;
     const _dbPath = dbPath || paths.db;
+
+    this.mockServer.setConfig({ ...Settings.config, port });
 
     const middlewares = await this.getDataFromUrl(paths.middleware);
     const injectors = await this.getDataFromUrl(paths.injectors, true);
     const rewriters = await this.getDataFromUrl(paths.rewriters);
     const store = await this.getDataFromUrl(paths.store);
-    const db = (await this.getDbWithEnv(_dbPath?.replace(/\\/g, '/')));
+    const db = await this.getDbWithEnv(_dbPath?.replace(/\\/g, '/'));
 
-    this.mockServer.setConfig({...Settings.config, port});
     await this.mockServer.launchServer(db, injectors, middlewares, rewriters, store);
     this.restartOnChange(db);
   };
@@ -135,7 +142,7 @@ export default class MockServerExt extends Utils {
           }
         } else {
           this.log(`[Error] No Environment Found`);
-          Prompt.showPopupMessage('No Environment Found',  PromptAction.ERROR);
+          Prompt.showPopupMessage('No Environment Found', PromptAction.ERROR);
         }
       } else {
         this.log(`[Error] 'mock-server.settings.paths.envDir' - Please provide a valid path here`);

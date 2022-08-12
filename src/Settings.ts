@@ -88,17 +88,6 @@ export class Settings {
       return require(middlewarePath) as UserTypes.Middlewares;
     }
   }
-  static get callbacks() {
-    const middleware = Settings.middleware;
-    if (middleware) {
-      return {
-        _harEntryCallback: middleware["_harEntryCallback"] as HarMiddleware["_harEntryCallback"],
-        _harDbCallback: middleware["_harDbCallback"] as HarMiddleware["_harDbCallback"],
-        _kibanaHitsCallback: middleware["_kibanaHitsCallback"] as KibanaMiddleware["_kibanaHitsCallback"],
-        _kibanaDbCallback: middleware["_kibanaDbCallback"] as KibanaMiddleware["_kibanaDbCallback"]
-      };
-    }
-  }
   static get reverse() {
     return Settings.getSettings("reverse") as boolean;
   }
@@ -137,9 +126,9 @@ export class Settings {
     Settings.setSettings("showInfoMsg", val);
   }
   static getValidPath(type: string, relativePath: string, defaults: string) {
-    if (relativePath.startsWith("http")) { return relativePath?.replace(/\\/g, '/'); }
-    const resolvedPath = path.resolve(Settings.rootPath, relativePath?.trim() || defaults);
+    if (relativePath.startsWith("http")) return relativePath?.replace(/\\/g, '/');
 
+    const resolvedPath = path.resolve(Settings.rootPath, relativePath?.trim() || defaults);
     if (!fs.existsSync(resolvedPath)) {
       Settings.pathsLog.appendLine(`Invalid ${type} Path : ` + resolvedPath);
       return;
