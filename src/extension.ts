@@ -22,9 +22,9 @@ export function activate(context: vscode.ExtensionContext) {
       await server.transformToMockServerDB(args);
       log('[Done] Data Transformed Successfully');
     } catch (error: any) {
-      log(`[Error] Failed to Transform Data. ${error.message}`);
+      log(`[Error] Failed to Transform. ${error.message}`);
       log(error);
-      Prompt.showPopupMessage(`Failed to Transform Data. \n${error.message}`, PromptAction.ERROR);
+      Prompt.showPopupMessage(`Failed to Transform. \n${error.message}`, PromptAction.ERROR);
     }
   }));
 

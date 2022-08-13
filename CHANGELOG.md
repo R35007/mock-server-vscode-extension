@@ -3,7 +3,13 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
-## v7.0.0
+## v7.1.0
+
+- Updated `@r35007/mock-server@7.1.0`
+- added `cookieParser` in default middlewares.
+- file watcher not stopping on server stop - `Fixed`
+
+## v7.0.1
 
 - Updated `@r35007/mock-server@7.0.1`
 - middleware callbacks are not working on `mockServer.transformToMockServerDB` command - `Fixed`

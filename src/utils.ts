@@ -105,37 +105,33 @@ export class Utils {
     }
   };
 
-  protected getDbWithEnv = async (dbPath?: string) => {
-    if (!dbPath) { return; }
-    const environmentList = this.getEnvironmentList(Settings.paths.envDir);
+  protected getDbData = async (dbPath?: string, mockServer?: MockServer) => {
+    const userData = await this.getDataFromUrl(dbPath?.replace(/\\/g, '/'), mockServer);
+    const dbData = this.isPlainObject(userData) ? userData : {};
+    return dbData;
+  };
+
+  protected getEnvData = async () => {
     const environment = this.storageManager.getValue("mockEnv", "none");
+    if (environment === "none") return {};
 
-    if (!environment.trim().length || environment === "none" || !environmentList.find((e) => e.fileName === environment)) {
-      const userDbData = await this.getDataFromUrl(dbPath);
-      const dbData = this.isPlainObject(userDbData) ? userDbData : {};
-      return dbData;
-    }
-
-    const userDbData = await this.getDataFromUrl(dbPath);
-    const dbData = this.isPlainObject(userDbData) ? userDbData : {};
-
+    const environmentList = this.getEnvironmentList(Settings.paths.envDir);
     const envPath = environmentList.find((e) => e.fileName === environment)!.filePath;
 
     const userData = await this.getDataFromUrl(envPath);
     const envData = this.isPlainObject(userData) ? userData : {};
-
-    return { ...envData, ...dbData, ...envData };
+    return envData;
   };
 
-  protected getDataFromUrl = async (mockPath?: string, isList: boolean = false) => {
+  protected getDataFromUrl = async (mockPath?: string, mockServer?: MockServer, isList: boolean = false) => {
     if (!mockPath) return;
     if (mockPath.startsWith("http")) {
       const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
-      return data || {};
+      return data;
     } else {
       const data = requireData(mockPath, Settings.rootPath, isList);
       const env = this.storageManager.getValue("mockEnv", "none");
-      return typeof data === 'function' ? await data(this.mockServer, env) : data;
+      return typeof data === 'function' ? await data(mockServer, env) : data;
     }
   };
 
@@ -145,7 +141,7 @@ export class Utils {
 
   protected restartOnChange = (db: Db = {}) => {
     // If watcher is already watching then do nothing
-    if(this.watcher) return;
+    if (this.watcher) return;
 
     const fetchPaths = Object.entries(db).map(([_key, obj]) => obj.fetch)
       .filter(Boolean)
@@ -167,11 +163,11 @@ export class Utils {
       .filter(p => p.isFile)
       .map(p => p.filePath);
 
-      this.watcher = watch([...new Set(filesToWatch)]);
-      this.watcher.on('change', (_event, _path) => {
-        if (!Settings.shouldWatch) return;
-        vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server
-      });
+    this.watcher = watch([...new Set(filesToWatch)]);
+    this.watcher.on('change', (_event, _path) => {
+      if (!Settings.shouldWatch) return;
+      vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server
+    });
   };
 
   protected stopWatchingChanges = async () => {

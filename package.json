@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "7.0.1",
+  "version": "7.1.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -208,7 +208,8 @@
             "noCors": false,
             "readOnly": false,
             "logger": true,
-            "bodyParser": true
+            "bodyParser": true,
+            "cookieParser": true
           },
           "properties": {
             "noGzip": {
@@ -235,6 +236,11 @@
               "type": "boolean",
               "default": true,
               "description": "Enable body-parser middleware"
+            },
+            "cookieParser": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable cookie-parser middleware"
             }
           },
           "description": "Add Default middlewares",
@@ -406,7 +412,7 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@r35007/mock-server": "^7.0.1",
+    "@r35007/mock-server": "^7.1.0",
     "axios": "^0.21.1",
     "chokidar": "^3.5.2",
     "express": "^4.17.1"

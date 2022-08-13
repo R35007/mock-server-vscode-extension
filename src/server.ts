@@ -25,6 +25,7 @@ export default class MockServerExt extends Utils {
 
   destroyServer = async () => {
     await MockServer.Destroy(this.mockServer);
+    await this.stopWatchingChanges();
   };
 
   resetServer = async () => {
@@ -88,19 +89,42 @@ export default class MockServerExt extends Utils {
     this.log(`[Done] Root Path Set to ${rootPath}`);
   };
 
-  startServer = async (dbPath?: string, port: number = Settings.port) => {
+  startServer = async (fsPath?: string, port: number = Settings.port) => {
     const paths = Settings.paths;
-    const _dbPath = dbPath || paths.db;
+    const dbPath = fsPath || paths.db;
 
-    this.mockServer.setConfig({ ...Settings.config, port });
+    const mockServer = this.mockServer;
+    const app = mockServer.app;
 
-    const middlewares = await this.getDataFromUrl(paths.middleware);
-    const injectors = await this.getDataFromUrl(paths.injectors, true);
-    const rewriters = await this.getDataFromUrl(paths.rewriters);
-    const store = await this.getDataFromUrl(paths.store);
-    const db = await this.getDbWithEnv(_dbPath?.replace(/\\/g, '/'));
+    mockServer.setConfig({ ...Settings.config, port });
 
-    await this.mockServer.launchServer(db, injectors, middlewares, rewriters, store);
+    const defaults = mockServer.defaults();
+    app.use(defaults);
+
+    const middlewares = await this.getDataFromUrl(paths.middleware, mockServer);
+    const injectors = await this.getDataFromUrl(paths.injectors, mockServer, true);
+    const rewriters = await this.getDataFromUrl(paths.rewriters, mockServer);
+    const store = await this.getDataFromUrl(paths.store, mockServer);
+
+    const dbData = await this.getDbData(dbPath, mockServer);
+    const envData = await this.getEnvData();
+    const db = { ...envData, ...dbData, ...envData };
+
+    const rewriter = mockServer.rewriter(rewriters);
+    app.use(rewriter);
+
+    const resources = mockServer.resources(db, injectors, middlewares, store);
+    mockServer.middlewares._globals?.length && app.use(mockServer.middlewares._globals);
+    app.use(mockServer.config.base, resources);
+
+    const defaultRoutes = mockServer.defaultRoutes();
+    app.use(mockServer.config.base, defaultRoutes);
+
+    app.use(mockServer.pageNotFound);
+    app.use(mockServer.errorHandler);
+
+    await mockServer.startServer();
+
     this.restartOnChange(db);
   };
 

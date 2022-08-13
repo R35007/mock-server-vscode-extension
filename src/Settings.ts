@@ -40,6 +40,7 @@ export class Settings {
       logger: boolean;
       readOnly: boolean;
       bodyParser: boolean;
+      cookieParser: boolean;
     };
   }
   static get statusBar() {
