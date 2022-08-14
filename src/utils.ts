@@ -155,7 +155,7 @@ export class Utils {
       Settings.paths.store,
       Settings.paths.staticDir,
       Settings.paths.envDir,
-      ...Settings.watchPaths,
+      ...Settings.watchFiles,
       ...fetchPaths
     ]
       .filter(p => !p?.startsWith("http")).filter(Boolean)
@@ -163,7 +163,7 @@ export class Utils {
       .filter(p => p.isFile)
       .map(p => p.filePath);
 
-    this.watcher = watch([...new Set(filesToWatch)]);
+    this.watcher = watch([...new Set(filesToWatch)],{ ignored: Settings.ignoreFiles});
     this.watcher.on('change', (_event, _path) => {
       if (!Settings.shouldWatch) return;
       vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server

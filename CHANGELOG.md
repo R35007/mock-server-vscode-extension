@@ -3,6 +3,16 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v7.2.0
+
+- Updated `@r35007/mock-server@7.2.0`
+- added `mock-server.settings.useLocalIp` - uses Local Ip address instead of `mock-server.settings.host`
+- added `mock-server.settings.fullReload` - If true it always resets and restarts the server on changes.
+- added `mock-server.settings.ignoreFiles` - Ad list of files and folder path to ignore changes
+- renamed `mock-server.settings.customWatchPaths` to `mock-server.settings.watchFiles`
+- Set `mock-server.settings.port` to 0 (zero) to pick a dynamic available port.
+
+  
 ## v7.1.0
 
 - Updated `@r35007/mock-server@7.1.0`

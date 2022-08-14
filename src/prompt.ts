@@ -39,9 +39,10 @@ export class Prompt {
     }
   };
 
-  static showInputBox = async (placeHolder: string, value?: number) => {
+  static showInputBox = async (title: string, prompt: string, value?: number) => {
     return vscode.window.showInputBox({
-      prompt: placeHolder,
+      title,
+      prompt,
       value: value?.toString()
     });
   };

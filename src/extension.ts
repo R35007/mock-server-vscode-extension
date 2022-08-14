@@ -33,9 +33,18 @@ export function activate(context: vscode.ExtensionContext) {
     if (server.mockServer.server) {
       try {
         StatusbarUi.working(ServerStatus.RESTART);
-        await server.stopServer();
-        await server.startServer(args?.fsPath);
-        StatusbarUi.stopServer(ServerStatus.RESTART, server.mockServer.listeningTo!);
+        if (Settings.fullReload) {
+          log('Server Resetting...');
+          await server.resetServer();
+          log('[Done] Server Reset Done');
+          await server.startServer(args?.fsPath);
+        } else {
+          log('Server Stopping...');
+          await server.stopServer();
+          log('[Done] Server Stopped');
+          await server.startServer(args?.fsPath);
+        }
+        StatusbarUi.stopServer(ServerStatus.RESTART, server.mockServer.port!, server.mockServer.listeningTo!);
       } catch (error: any) {
         await server.resetServer();
         StatusbarUi.startServer(`Server Failed to Restart.`, error);
@@ -44,7 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
       try {
         StatusbarUi.working(ServerStatus.START);
         await server.startServer(args?.fsPath);
-        StatusbarUi.stopServer(ServerStatus.START, server.mockServer.listeningTo!);
+        StatusbarUi.stopServer(ServerStatus.START, server.mockServer.port!, server.mockServer.listeningTo!);
       } catch (error: any) {
         await server.resetServer();
         StatusbarUi.startServer('Server Failed to Start.', error);
@@ -54,9 +63,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Stop Server
   context.subscriptions.push(vscode.commands.registerCommand(Commands.STOP_SERVER, async (args) => {
-      StatusbarUi.working(ServerStatus.STOP);
-      await server.resetServer();
-      StatusbarUi.startServer('Server Stopped', undefined, 150);
+    StatusbarUi.working(ServerStatus.STOP);
+    await server.resetServer();
+    StatusbarUi.startServer('Server Stopped', undefined, 150);
   }));
 
   // Reset Server
@@ -68,36 +77,40 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Reset and Restart Server
   context.subscriptions.push(vscode.commands.registerCommand(Commands.RESET_AND_RESTART, async (args) => {
+    const isServerRunning = server.mockServer.server;
+    const status = isServerRunning ? ServerStatus.RESTART : ServerStatus.START;
+
     try {
-      const isServerRunning = server.mockServer.server;
       StatusbarUi.working(ServerStatus.RESET);
       await server.resetServer();
       StatusbarUi.startServer('Server Reset Done', PromptAction.INFO, 150);
 
-      StatusbarUi.working(isServerRunning ? ServerStatus.RESTART : ServerStatus.START);
+      StatusbarUi.working(status);
       await server.startServer(args?.fsPath);
-      StatusbarUi.stopServer(isServerRunning ? ServerStatus.RESTART : ServerStatus.START, server.mockServer.listeningTo!);
+      StatusbarUi.stopServer(status, server.mockServer.port!, server.mockServer.listeningTo!);
     } catch (error: any) {
       await server.resetServer();
       StatusbarUi.startServer('Server Failed to Reset and Restart.', error, 150);
     }
   }));
 
-    // Start Server with new Port
-    context.subscriptions.push(vscode.commands.registerCommand(Commands.START_WITH_NEW_PORT, async (args) => {
-      try {
-        const isServerRunning = server.mockServer.server;
-        const port = await server.setPort();
-        if(!port) return;
-        StatusbarUi.working(isServerRunning ? ServerStatus.RESTART : ServerStatus.START);
-        await server.resetServer();
-        await server.startServer(args?.fsPath, port);
-        StatusbarUi.stopServer(isServerRunning ? ServerStatus.RESTART : ServerStatus.START, server.mockServer.listeningTo!);
-      } catch (error: any) {
-        await server.resetServer();
-        StatusbarUi.startServer('Server Failed to Reset and Restart.', error, 150);
-      }
-    }));
+  // Start Server with new Port
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.START_WITH_NEW_PORT, async (args) => {
+    const isServerRunning = server.mockServer.server;
+    const status = isServerRunning ? ServerStatus.RESTART : ServerStatus.START;
+
+    try {
+      const port = await server.setPort();
+      if (typeof port === 'undefined') return;
+      StatusbarUi.working(status);
+      await server.resetServer();
+      await server.startServer(args?.fsPath, port);
+      StatusbarUi.stopServer(status, server.mockServer.port!, server.mockServer.listeningTo!);
+    } catch (error: any) {
+      await server.resetServer();
+      StatusbarUi.startServer('Server Failed to Reset and Restart.', error, 150);
+    }
+  }));
 
   // Switch Environment
   context.subscriptions.push(vscode.commands.registerCommand(Commands.SWITCH_ENVIRONMENT, server.switchEnvironment));

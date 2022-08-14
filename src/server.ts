@@ -4,6 +4,7 @@ import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
 import { cleanDb, createSampleFiles, extractDbFromHAR, extractDbFromKibana } from '@r35007/mock-server/dist/server/utils';
 import { requireData } from '@r35007/mock-server/dist/server/utils/fetch';
 import * as fs from 'fs';
+import * as ip from "ip";
 import * as path from 'path';
 import * as vscode from "vscode";
 import { Commands, PromptAction } from './enum';
@@ -71,13 +72,14 @@ export default class MockServerExt extends Utils {
   };
 
   setPort = async (_args?: any) => {
-    const port = await Prompt.showInputBox('Enter Port Number', Settings.port);
-    if (port) {
-      Settings.port = parseInt(port);
-      Prompt.showPopupMessage(`Port Number Set to ${port}`);
-      this.log(`[Done] Port Number Set to ${port}`);
-      return parseInt(port);
-    }
+    const port = await Prompt.showInputBox('Set Port Number', 'Set 0 if you want random port.', Settings.port);
+
+    if (typeof port === 'undefined') return;
+
+    Settings.port = parseInt(port);
+    Prompt.showPopupMessage(`Port Number Set to ${port}`);
+    this.log(`[Done] Port Number Set to ${port}`);
+    return parseInt(port);
   };
 
   setRoot = async (args?: any) => {
@@ -95,8 +97,13 @@ export default class MockServerExt extends Utils {
 
     const mockServer = this.mockServer;
     const app = mockServer.app;
-
-    mockServer.setConfig({ ...Settings.config, port });
+    
+    const config = {
+      ...Settings.config,
+      port,
+      host: Settings.useLocalIp ? ip.address() : Settings.host
+    };
+    mockServer.setConfig(config);
 
     const defaults = mockServer.defaults();
     app.use(defaults);

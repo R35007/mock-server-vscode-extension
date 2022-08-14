@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "7.1.0",
+  "version": "7.2.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -128,80 +128,92 @@
           "properties": {
             "root": {
               "type": "string",
-              "description": "Set custom root path. Note : every other paths given in will be relative to this root path"
+              "description": "Set custom root path. Note : every other paths given in will be relative to this root path."
             },
             "db": {
               "type": "string",
-              "description": "Set .js or .json or http url here"
+              "description": "Set .js or .json or http url here."
             },
             "middleware": {
               "type": "string",
-              "description": "Set .js path here"
+              "description": "Set .js path here."
             },
             "injectors": {
               "type": "string",
-              "description": "Set .js or .json or http url here"
+              "description": "Set .js or .json or http url here."
             },
             "rewriters": {
               "type": "string",
-              "description": "Set .js or .json or http url here"
+              "description": "Set .js or .json or http url here."
             },
             "store": {
               "type": "string",
-              "description": "Set .js or .json or http url here"
+              "description": "Set .js or .json or http url here."
             },
             "staticDir": {
               "type": "string",
-              "description": "Set path to static files"
+              "description": "Set path to static files."
             },
             "envDir": {
               "type": "string",
-              "description": "Set path to environment files"
+              "description": "Set path to environment files."
             },
             "snapshotDir": {
               "type": "string",
-              "description": "Set SnapShot Folder directory"
+              "description": "Set SnapShot Folder directory."
             }
           },
-          "description": "Set Database config paths",
+          "description": "Set Database config paths.",
           "additionalProperties": false
         },
         "mock-server.settings.host": {
           "order": 2,
           "type": "string",
           "default": "localhost",
-          "description": "Set custom host"
+          "description": "Set custom host or Ip address."
+        },
+        "mock-server.settings.useLocalIp": {
+          "order": 3,
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "If true it uses Local Ip address as host instead of `#mock-server.settings.host#`."
         },
         "mock-server.settings.port": {
-          "order": 3,
+          "order": 4,
           "type": "number",
           "default": 3000,
-          "description": "Set custom port"
+          "minimum": 0,
+          "maximum": 65535,
+          "description": "Set Custom Port number. Set 0 to pick a random available port."
         },
         "mock-server.settings.base": {
-          "order": 4,
-          "type": "string",
-          "default": "",
-          "description": "Set custom base url"
-        },
-        "mock-server.settings.id": {
           "order": 5,
           "type": "string",
+          "default": "",
+          "description": "Set custom base url."
+        },
+        "mock-server.settings.id": {
+          "order": 6,
+          "type": "string",
           "default": "id",
-          "description": "Set custom database id"
+          "description": "Set custom database id."
         },
         "mock-server.settings.dbMode": {
-          "order": 6,
+          "order": 7,
           "type": "string",
           "enum": [
             "mock",
             "fetch"
           ],
+          "enumDescriptions": [
+            "{ route: \"My Response\" } \n { route : { _config: true, mock: \"My Response\" } }",
+            "{ route: \"./path/to/file\" } \n { route : { _config: true, fetch: \"./path/to/file\" } }"
+          ],
           "default": "mock",
           "description": "Helps to set the direct route value to the selected attribute."
         },
         "mock-server.settings.defaults": {
-          "order": 7,
+          "order": 8,
           "type": "object",
           "default": {
             "noGzip": false,
@@ -220,46 +232,46 @@
             "noCors": {
               "type": "boolean",
               "default": false,
-              "description": "Disable CORS ( Cross Origin Resource Sharing) "
+              "description": "Disable CORS ( Cross Origin Resource Sharing )."
             },
             "readOnly": {
               "type": "boolean",
               "default": false,
-              "description": "Accept only GET requests"
+              "description": "Accept only GET requests."
             },
             "logger": {
               "type": "boolean",
               "default": true,
-              "description": "Enable logger middleware"
+              "description": "Enable logger middleware."
             },
             "bodyParser": {
               "type": "boolean",
               "default": true,
-              "description": "Enable body-parser middleware"
+              "description": "Enable body-parser middleware."
             },
             "cookieParser": {
               "type": "boolean",
               "default": true,
-              "description": "Enable cookie-parser middleware"
+              "description": "Enable cookie-parser middleware."
             }
           },
-          "description": "Add Default middlewares",
+          "description": "Add Default middlewares.",
           "additionalProperties": false
         },
         "mock-server.settings.reverse": {
-          "order": 8,
-          "type": "boolean",
-          "default": false,
-          "description": "Generate Routes in reverse order"
-        },
-        "mock-server.settings.iterateDuplicateRoutes": {
           "order": 9,
           "type": "boolean",
           "default": false,
-          "description": "If true, transformDb will iterate duplicate routes using _IterateRoutes middleware"
+          "description": "Generate Routes in reverse order."
         },
-        "mock-server.settings.customWatchPaths": {
+        "mock-server.settings.iterateDuplicateRoutes": {
           "order": 10,
+          "type": "boolean",
+          "default": false,
+          "description": "If true, transformDb will iterate duplicate routes using _IterateRoutes middleware."
+        },
+        "mock-server.settings.watchFiles": {
+          "order": 11,
           "type": "array",
           "items": {
             "type": "string"
@@ -269,21 +281,37 @@
           "scope": "window",
           "markdownDescription": "Set files and folder path to watch for changes. By default all the paths in `#mock-server.settings.paths#` are included for watches."
         },
+        "mock-server.settings.ignoreFiles": {
+          "order": 12,
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "additionalItems": true,
+          "description": "Set files and folder path to ignore changes."
+        },
         "mock-server.settings.watchForChanges": {
-          "order": 11,
+          "order": 13,
           "type": "boolean",
           "default": true,
           "scope": "window",
           "markdownDescription": "Watch for changes and restarts the server."
         },
+        "mock-server.settings.fullReload": {
+          "order": 14,
+          "type": "boolean",
+          "default": false,
+          "description": "If true it resets and restart the server on changes. By default mockserver uses the single server instance to restart on file changes."
+        },
         "mock-server.settings.showInfoMsg": {
-          "order": 13,
+          "order": 15,
           "type": "boolean",
           "default": true,
           "description": "Change this to false if you don't want to show information pop up messages."
         },
         "mock-server.settings.statusBar": {
-          "order": 14,
+          "order": 16,
           "type": "object",
           "default": {
             "show": "true",
@@ -298,7 +326,7 @@
                 "true",
                 "false"
               ],
-              "description": "Change this to false if you don't want the button to show in statusbar"
+              "description": "Change this to false if you don't want the button to show in statusbar."
             },
             "position": {
               "type": "string",
@@ -312,10 +340,10 @@
             "priority": {
               "type": "string",
               "default": "0",
-              "description": "helps to reorder the placement of the statusbar. Minimum priority moves the statusbar to left most. Note: Please reload the extension to take effect."
+              "description": "Helps to reorder the placement of the statusbar. Minimum priority moves the statusbar to left most. Note: Please reload the extension to take effect."
             }
           },
-          "description": "Set Statusbar Settings"
+          "description": "Set Statusbar Settings."
         }
       }
     },
@@ -408,13 +436,15 @@
     "@types/vscode": "^1.30.0",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",
+    "@types/ip": "^1.1.0",
     "eslint": "^7.19.0",
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@r35007/mock-server": "^7.1.0",
+    "@r35007/mock-server": "^7.2.0",
     "axios": "^0.21.1",
     "chokidar": "^3.5.2",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "ip": "^1.1.8"
   }
 }

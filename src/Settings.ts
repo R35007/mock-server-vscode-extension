@@ -18,53 +18,7 @@ export class Settings {
   static setSettings(key: string, val: any, isGlobal = true) {
     return Settings.configuration.update(key, val, isGlobal);
   }
-  static get port() {
-    return (Settings.getSettings("port") as number) || 3000;
-  }
-  static set port(value: number) {
-    Settings.setSettings("port", value || 3000);
-  }
-  static get host() {
-    return (Settings.getSettings("host") as string) || 'localhost';
-  }
-  static get base() {
-    return Settings.getSettings("base") as string;
-  }
-  static get id() {
-    return Settings.getSettings("id") as string || 'id';
-  }
-  static get defaults() {
-    return Settings.getSettings("defaults") as {
-      noGzip: boolean;
-      noCors: boolean;
-      logger: boolean;
-      readOnly: boolean;
-      bodyParser: boolean;
-      cookieParser: boolean;
-    };
-  }
-  static get statusBar() {
-    return Settings.getSettings("statusBar") as {
-      show: boolean;
-      position: "Right" | "Left";
-      priority: number;
-    };
-  }
-  static get rootPath() {
-    const rootPath = Settings.getSettings("paths.root") as string;
-    const resolvedRootPath = path.resolve((vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./"), rootPath);
-    if (!fs.existsSync(resolvedRootPath)) {
-      Settings.pathsLog.appendLine(`Invalid root Path : ` + resolvedRootPath);
-      return path.resolve(vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./");
-    }
-    return resolvedRootPath;
-  }
-  static set rootPath(root: string) {
-    Settings.setSettings("paths", {
-      ...(Settings.getSettings("paths") as object || {}),
-      root,
-    });
-  }
+
   static get paths() {
     Settings.pathsLog.clear();
     const paths = {
@@ -82,12 +36,36 @@ export class Settings {
     Settings.pathsLog.appendLine(JSON.stringify(paths, null, 2));
     return paths;
   }
-  static get middleware() {
-    const middlewarePath = Settings.paths.middleware;
-    if (middlewarePath) {
-      delete require.cache[middlewarePath];
-      return require(middlewarePath) as UserTypes.Middlewares;
-    }
+  static get host() {
+    return (Settings.getSettings("host") as string) || 'localhost';
+  }
+  static get useLocalIp() {
+    return (Settings.getSettings("useLocalIp") as boolean);
+  }
+  static get port() {
+    return (Settings.getSettings("port") as number);
+  }
+  static set port(value: number) {
+    Settings.setSettings("port", value);
+  }
+  static get base() {
+    return Settings.getSettings("base") as string;
+  }
+  static get id() {
+    return Settings.getSettings("id") as string || 'id';
+  }
+  static get dbMode(): DbMode {
+    return Settings.getSettings("dbMode") as DbMode || "mock";
+  }
+  static get defaults() {
+    return Settings.getSettings("defaults") as {
+      noGzip: boolean;
+      noCors: boolean;
+      logger: boolean;
+      readOnly: boolean;
+      bodyParser: boolean;
+      cookieParser: boolean;
+    };
   }
   static get reverse() {
     return Settings.getSettings("reverse") as boolean;
@@ -95,18 +73,51 @@ export class Settings {
   static get iterateDuplicateRoutes() {
     return Settings.getSettings("iterateDuplicateRoutes") as boolean;
   }
-  static get mode(): DbMode {
-    return Settings.getSettings("dbMode") as DbMode || "mock";
+  static get watchFiles(): string[] {
+    return Settings.getSettings("watchFiles") as string[] || [];
   }
-  static get watchPaths(): string[] {
-    return Settings.getSettings("customWatchPaths") as string[] || [];
+  static get ignoreFiles(): string[] {
+    return Settings.getSettings("ignoreFiles") as string[] || [];
   }
   static get shouldWatch(): boolean {
     return Settings.getSettings("watchForChanges") as boolean;
   }
+  static get fullReload(): boolean {
+    return Settings.getSettings("fullReload") as boolean;
+  }
+  static get showInfoMsg() {
+    return Settings.getSettings("showInfoMsg") as boolean;
+  }
+  static set showInfoMsg(val: boolean) {
+    Settings.setSettings("showInfoMsg", val);
+  }
+  static get statusBar() {
+    return Settings.getSettings("statusBar") as {
+      show: boolean;
+      position: "Right" | "Left";
+      priority: number;
+    };
+  }
+
+
+  static get rootPath() {
+    const rootPath = Settings.getSettings("paths.root") as string;
+    const resolvedRootPath = path.resolve((vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./"), rootPath);
+    if (!fs.existsSync(resolvedRootPath)) {
+      Settings.pathsLog.appendLine(`Invalid root Path : ` + resolvedRootPath);
+      return path.resolve(vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./");
+    }
+    return resolvedRootPath;
+  }
+  static set rootPath(root: string) {
+    Settings.setSettings("paths", {
+      ...(Settings.getSettings("paths") as object || {}),
+      root,
+    });
+  }
   static get config(): UserTypes.Config {
     const config = {
-      mode: Settings.mode,
+      mode: Settings.dbMode,
       port: Settings.port,
       host: Settings.host,
       id: Settings.id,
@@ -120,12 +131,7 @@ export class Settings {
     Settings.configLog.appendLine(JSON.stringify(config, null, 2));
     return config;
   }
-  static get showInfoMsg() {
-    return Settings.getSettings("showInfoMsg") as boolean;
-  }
-  static set showInfoMsg(val: boolean) {
-    Settings.setSettings("showInfoMsg", val);
-  }
+  
   static getValidPath(type: string, relativePath: string, defaults: string) {
     if (relativePath.startsWith("http")) return relativePath?.replace(/\\/g, '/');
 
