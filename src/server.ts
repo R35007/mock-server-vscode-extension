@@ -105,22 +105,27 @@ export default class MockServerExt extends Utils {
     };
     mockServer.setConfig(config);
 
+    const rewriters = await this.getDataFromUrl(paths.rewriters, mockServer);
+    const rewriter = mockServer.rewriter(rewriters);
+    app.use(rewriter);
+
     const defaults = mockServer.defaults();
     app.use(defaults);
 
     const middlewares = await this.getDataFromUrl(paths.middleware, mockServer);
+    mockServer.setMiddlewares(middlewares);
+
     const injectors = await this.getDataFromUrl(paths.injectors, mockServer, true);
-    const rewriters = await this.getDataFromUrl(paths.rewriters, mockServer);
+    mockServer.setInjectors(injectors);
+
     const store = await this.getDataFromUrl(paths.store, mockServer);
+    mockServer.setStore(store);
 
     const dbData = await this.getDbData(dbPath, mockServer);
     const envData = await this.getEnvData();
     const db = { ...envData, ...dbData, ...envData };
 
-    const rewriter = mockServer.rewriter(rewriters);
-    app.use(rewriter);
-
-    const resources = mockServer.resources(db, injectors, middlewares, store);
+    const resources = mockServer.resources(db);
     mockServer.middlewares._globals?.length && app.use(mockServer.middlewares._globals);
     app.use(mockServer.config.base, resources);
 

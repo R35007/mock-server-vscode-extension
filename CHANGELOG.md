@@ -3,6 +3,11 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v7.2.1
+
+- Updated `@r35007/mock-server@7.2.1`
+- rewriters not working - `Fixed`
+
 ## v7.2.0
 
 - Updated `@r35007/mock-server@7.2.0`
@@ -12,7 +17,6 @@
 - renamed `mock-server.settings.customWatchPaths` to `mock-server.settings.watchFiles`
 - Set `mock-server.settings.port` to 0 (zero) to pick a dynamic available port.
 
-  
 ## v7.1.0
 
 - Updated `@r35007/mock-server@7.1.0`
