@@ -6,29 +6,12 @@ Created with <3 for front-end developers who need a quick back-end for prototypi
 
 This Extension is built upon node package `@r35007/mock-server`.
 
+![Home Page](https://github.com/R35007/Mock-Server/blob/main/src/img/VSCode_Extension.gif?raw=true)
+
 ## Table of contents
 
-- [Table of contents](#table-of-contents)
 - [Getting started](#getting-started)
 - [Commands](#commands)
-  - [`Start Server`](#start-server)
-  - [`Stop Server`](#stop-server)
-  - [`Reset Server`](#reset-server)
-  - [`Start Server with New Port`](#start-server-with-new-port)
-  - [`Reset and Restart Server`](#reset-and-restart-server)
-  - [`Set Port`](#set-port)
-  - [`Set Root`](#set-root)
-  - [`Switch Environment`](#switch-environment)
-  - [`Get Db Snapshot`](#get-db-snapshot)
-  - [`Transform to Mock Server Db`](#transform-to-mock-server-db)
-  - [`Generate Mock Files`](#generate-mock-files)
-  - [`Home Page`](#home-page)
-- [Settings](#settings)
-  - [`Set Custom Port`](#set-custom-port)
-  - [`Set Custom Host`](#set-custom-host)
-  - [`Set Base Path`](#set-base-path)
-  - [`Set Db Id`](#set-db-id)
-  - [`Set Data Paths`](#set-data-paths)
 - [DB](#db)
 - [Middleware](#middleware)
 - [Injectors](#injectors)
@@ -41,11 +24,9 @@ This Extension is built upon node package `@r35007/mock-server`.
 ## Getting started
 
 - Install the Extension.
-- Right click on the workspace folder and select `Generate Mock Files` from the context.
+- Right click on the workspace folder and select `Generate Sample Mock Files` from the context.
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Start Server` (`Alt+Enter`)
-- To view the List of resources go to Command `MockServer: Home Page`
-
-![Home Page](https://github.com/R35007/Mock-Server/blob/main/src/img/VSCode_Extension.gif?raw=true)
+- To view the List of resources go to Command `MockServer: Home Page` or open any browser and hit the localhost url
 
 ## Commands
 
@@ -110,10 +91,10 @@ Helps to work in multiple data environments.
 - `MockServer: Transform to Mock Server Db` Command helps to generate a valid routes.
 - This also helps to convert the `.har` data to a valid `db.json` file.
 
-### `Generate Mock Files`
+### `Generate Sample Mock Files`
 
-- `MockServer: Generate Mock Files` Command helps to generate a sample mock files in the `mock-server.settings.paths.root` folder.
-- Alternatively you can also generate mock files by right clicking on the folder and click `Generate Mock Files` command in the context menu.
+- `MockServer: Generate Sample Mock Files` Command helps to generate a sample mock files in the `mock-server.settings.paths.root` folder.
+- Alternatively you can also generate mock files by right clicking on the folder and click `Generate Sample Mock Files` command in the context menu.
 
 ### `Home Page`
 
@@ -121,68 +102,37 @@ Helps to work in multiple data environments.
 - This window also helps to update or add new resources in runtime.
 - It can be opened in a separate browser window using [http://localhost:3000](http://localhost:3000)
 
-## Settings
-
-### `Set Custom Port`
-
-- Set a custom port using `mock-server.settings.port` in vscode settings.json.
-- Default: `3000`.
-
-### `Set Custom Host`
-
-- Set a custom host using `mock-server.settings.host` in vscode settings.json.
-- Default: `localhost`.
-
-### `Set Base Path`
-
-- You can mount the Mock Server on another endpoint using the base url.
-- Use `mock-server.settings.base` in vscode settings.json to set a custom base path.
-- Alternatively you can also set the base path using the [Route Rewriter](#route-rewriter).
-
-### `Set Db Id`
-
-- `mock-server.settings.id` set database id property (e.g. \_id).
-- Default: `id`
-
-### `Set Data Paths`
-
-- `mock-server.settings.paths` sets all the data paths to start the Mock Server.
-- Defaults:
-
-```jsonc
-{
-  "root": "./", // all paths will be relative this path.
-  "db": "db.js", // If its a folder path, the server pick all the .json files and run the mock server.
-  "middleware": "middleware.js", // path to middlewares. Must be .js type file
-  "injectors": "injectors.json", // path to injectors file
-  "rewriters": "rewriters.json", // path to rewriters file
-  "store": "store.json", // path to store file
-  "staticDir": "public", // path to static file server.
-  "envDir": "env", // path to env. on `MockServer: Switch Environment` Command, picks all the .json files under this directory.
-  "snapshotDir": "snapshots" // path to snapshot
-}
-```
-
-### DB
+## DB
 
 - Create `db.json`
 - Set custom Db path using setting `mock-server.settings.paths.db`.
 - This path can be either file path or folder path or also a server path.
 - If provided as a folder path, then all the `.json` files will be joined together and starts the server.
 - Example 1 : `db.json`.
+
+  ```json
+  {
+    "posts": [{ "id": 1, "title": "mock-server", "author": "r35007" }],
+    "comments": [{ "id": 1, "body": "some comment", "postId": 1 }],
+    "profile": { "name": "r35007" }
+  }
+  ```
+
 - Example 2 : `./folder`.
 - Example 3 : `https://jsonplaceholder.typicode.com/db`.
 - Example 4 : `db.js`.
 
-```js
-module.exports = async (mockServer, env) => {
-  return {
-    route1: "My Response",
+  ```js
+  module.exports = async (mockServer, env) => {
+    return {
+      posts: [{ id: 1, title: "mock-server", author: "r35007" }],
+      comments: [{ id: 1, body: "some comment", postId: 1 }],
+      profile: { name: "r35007" },
+    };
   };
-};
-```
+  ```
 
-### Middleware
+## Middleware
 
 - Create `middleware.js`
 - Set custom Middleware path using setting `mock-server.settings.paths.middleware`.
@@ -193,51 +143,25 @@ module.exports = async (mockServer, env) => {
 `middleware.js`
 
 ```js
-/* 
-  Global Middlewares
-  These middlewares will be added to start of the the express app 
-*/
-const _globals = [
-  (req, res, next) => {
-    console.log(req.path);
-    next();
-  },
-];
-
-/* 
-  Used in VS Code Mock Server extension
-  This method is called only on generating db suing MockServer: Generate Db Command
-  It will be called for each entry/hits in a HAR/Kibana formatted data
-  Here you can return your custom route and routeConfig
-  `_harEntryCallback`, `_kibanaHitsCallback` is a reserved word for generating Db 
-*/
 const _harEntryCallback = (entry, routePath, routeConfig) => {
-  // your code goes here ...
   return { [routePath]: routeConfig };
 };
 const _kibanaHitsCallback = (hit, routePath, routeConfig) => {
-  // your code goes here ...
   return { [routePath]: routeConfig };
 };
-
-/* 
-  Used in VS Code Mock Server extension
-  This method is called only on generating db suing MockServer: Generate Db Command
-  It will be called at last of all entry/hits looping.
-  Here you can return your custom db
-  Whatever you return here will be pasted in the file
-  `_harDbCallback`, `_kibanaDbCallback` is a reserved word for generating Db
-*/
 const _harDbCallback = (data, db) => {
-  // your code goes here ...
   return db;
 };
 const _kibanaDbCallback = (data, db) => {
-  // your code goes here ...
   return db;
 };
 
-// You can create n number of middlewares like this and can be used in any routes as mentioned in above example.
+const logPath = (req, res, next) => {
+  console.log(req.path);
+  next();
+};
+
+// You can create n number of middlewares like this and can be used in any routes as a middleware.
 const DataWrapper = (req, res, next) => {
   res.locals.data = {
     status: "Success",
@@ -260,15 +184,17 @@ const GetStoreValue = (req, res, next) => {
 };
 
 module.exports = async (mockServer, env) => {
-  const app = mockServer.app;
-
-  // Add custom global middlewares
-  app.use((req, res) => {
-    console.log("Request path : " + req.path);
-  });
+  // mockServer will be undefined when using Transform to Mock Server Db command
+  if (mockServer) {
+    const app = mockServer.app;
+    // Add custom global middlewares
+    app.use((req, res) => {
+      console.log("Request path : " + req.path);
+    });
+  }
 
   return {
-    _globals,
+    _globals: [logPath],
     _harEntryCallback,
     _harDbCallback,
     _kibanaDbCallback,
@@ -279,75 +205,71 @@ module.exports = async (mockServer, env) => {
 };
 ```
 
-### Injectors
+## Injectors
 
 - Create `injectors.json`.
 - Set custom Injectors path using `mock-server.settings.paths.injectors`.
 - Injectors helps to inject a route config to the routes in the `db.json`.
-- Example:
+- Example: `injectors.json`
 
-`injectors.json`
+  ```jsonc
+  [
+    {
+      "routes": ["/injectors/:id"],
+      "description": "This description is injected using the injectors by matching the pattern '/injectors/:id'."
+    },
+    {
+      "routes": ["/injectors/1"],
+      "override": true,
+      "mock": "This data is injected using the injectors by matching the pattern '/injectors/1'."
+    },
+    {
+      "routes": ["/injectors/2"],
+      "override": true,
+      "mock": "This data is injected using the injectors by matching the pattern '/injectors/2'."
+    },
+    {
+      "routes": ["/injectors/:id"],
+      "override": true,
+      "exact": true,
+      "statusCode": 200,
+      "mock": "This data is injected using the injectors by exactly matching the route '/injectors/:id'."
+    },
+    {
+      "routes": ["/(.*)"],
+      "description": "This Description is injected using the injectors. Set 'Override' flag to true to override the existing config values."
+    },
+    {
+      "routes": ["/(.*)"],
+      "override": true,
+      "middlewares": ["...", "CustomLog"]
+    }
+  ]
+  ```
 
-```jsonc
-[
-  {
-    "routes": ["/injectors/:id"],
-    "description": "This description is injected using the injectors by matching the pattern '/injectors/:id'."
-  },
-  {
-    "routes": ["/injectors/1"],
-    "override": true,
-    "mock": "This data is injected using the injectors by matching the pattern '/injectors/1'."
-  },
-  {
-    "routes": ["/injectors/2"],
-    "override": true,
-    "mock": "This data is injected using the injectors by matching the pattern '/injectors/2'."
-  },
-  {
-    "routes": ["/injectors/:id"],
-    "override": true,
-    "exact": true,
-    "statusCode": 200,
-    "mock": "This data is injected using the injectors by exactly matching the route '/injectors/:id'."
-  },
-  {
-    "routes": ["/(.*)"],
-    "description": "This Description is injected using the injectors. Set 'Override' flag to true to override the existing config values."
-  },
-  {
-    "routes": ["/(.*)"],
-    "override": true,
-    "middlewares": ["...", "CustomLog"]
-  }
-]
-```
-
-### Route Rewriters
+## Route Rewriters
 
 - Create `rewriters.json`.
 - Set custom Rewriters path using `mock-server.settings.paths.rewriter`.
 - This helps to create a custom route.
-- Example:
+- Example: `rewriters.json`
 
-`rewriters.json`
+  ```jsonc
+  {
+    "/posts/:id/comments": "/fetch/comments/proxy?postId=:id",
+    "/:resource/:id/show": "/:resource/:id",
+    "/posts/:category": "/posts?category=:category",
+    "/articlesS?id=:id": "/posts/:id"
+  }
+  ```
 
-```jsonc
-{
-  "/posts/:id/comments": "/fetch/comments/proxy?postId=:id",
-  "/:resource/:id/show": "/:resource/:id",
-  "/posts/:category": "/posts?category=:category",
-  "/articlesS?id=:id": "/posts/:id"
-}
-```
+- To mount on another endpoint you can use `mock-server.settings.base`. Alternatively you can also rewrite the url as follows
 
-To mount on another endpoint you can use `mock-server.settings.base`. Alternatively you can also rewrite the url as follows
-
-```jsonc
-{
-  "/api/*": "/$1"
-}
-```
+  ```jsonc
+  {
+    "/api/*": "/$1"
+  }
+  ```
 
 Now you can access resources using /api/
 
@@ -356,7 +278,7 @@ Now you can access resources using /api/
   /api/posts/1  # → /posts/1
 ```
 
-### Static File Server
+## Static File Server
 
 - Create a folder `public` in the project root folder.
 - Now when you start the server, all files under this folder will be automatically hosted in the file server.

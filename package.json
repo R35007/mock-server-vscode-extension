@@ -53,7 +53,7 @@
       },
       {
         "command": "mockServer.generateMockFiles",
-        "title": "Import Sample Mock Files",
+        "title": "Generate Sample Mock Files",
         "category": "MockServer"
       },
       {
