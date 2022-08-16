@@ -4,7 +4,6 @@ import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
 import { cleanDb, createSampleFiles, extractDbFromHAR, extractDbFromKibana } from '@r35007/mock-server/dist/server/utils';
 import { requireData } from '@r35007/mock-server/dist/server/utils/fetch';
 import * as fs from 'fs';
-import * as ip from "ip";
 import * as path from 'path';
 import * as vscode from "vscode";
 import { Commands, PromptAction } from './enum';
@@ -54,7 +53,7 @@ export default class MockServerExt extends Utils {
         Settings.iterateDuplicateRoutes
       ) || {};
 
-      cleanDb(db as UserTypes.Db);
+      cleanDb(db as UserTypes.Db, Settings.dbMode);
 
       if (!Object.keys(db).length) throw Error("Invalid Data");
 
@@ -97,12 +96,8 @@ export default class MockServerExt extends Utils {
 
     const mockServer = this.mockServer;
     const app = mockServer.app;
-    
-    const config = {
-      ...Settings.config,
-      port,
-      host: Settings.useLocalIp ? ip.address() : Settings.host
-    };
+
+    const config = { ...Settings.config, port };
     mockServer.setConfig(config);
 
     const rewriters = await this.getDataFromUrl(paths.rewriters, mockServer);

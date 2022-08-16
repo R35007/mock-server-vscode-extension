@@ -1,6 +1,7 @@
-import { DbMode, HarMiddleware, KibanaMiddleware } from '@r35007/mock-server/dist/server/types/common.types';
+import { DbMode } from '@r35007/mock-server/dist/server/types/common.types';
 import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
 import * as fs from "fs";
+import * as ip from "ip";
 import * as path from "path";
 import * as vscode from "vscode";
 
@@ -37,10 +38,8 @@ export class Settings {
     return paths;
   }
   static get host() {
-    return (Settings.getSettings("host") as string) || 'localhost';
-  }
-  static get useLocalIp() {
-    return (Settings.getSettings("useLocalIp") as boolean);
+    const host = Settings.getSettings("host") as string || '';
+    return host?.trim()?.length ? host : ip.address();
   }
   static get port() {
     return (Settings.getSettings("port") as number);
@@ -131,7 +130,7 @@ export class Settings {
     Settings.configLog.appendLine(JSON.stringify(config, null, 2));
     return config;
   }
-  
+
   static getValidPath(type: string, relativePath: string, defaults: string) {
     if (relativePath.startsWith("http")) return relativePath?.replace(/\\/g, '/');
 
