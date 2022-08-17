@@ -3,6 +3,10 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v7.3.1
+
+- `mock-server.settings.dbMode` not working issue - `Fixed`
+
 ## v7.3.0
 
 - Updated `@r35007/mock-server@7.3.0`

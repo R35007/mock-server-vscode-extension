@@ -116,7 +116,7 @@ export class Settings {
   }
   static get config(): UserTypes.Config {
     const config = {
-      mode: Settings.dbMode,
+      dbMode: Settings.dbMode,
       port: Settings.port,
       host: Settings.host,
       id: Settings.id,

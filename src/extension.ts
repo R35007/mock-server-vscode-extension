@@ -83,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
     try {
       StatusbarUi.working(ServerStatus.RESET);
       await server.resetServer();
-      StatusbarUi.startServer('Server Reset Done', PromptAction.INFO, 150);
+      StatusbarUi.startServer('Server Reset Done', undefined, 150);
 
       StatusbarUi.working(status);
       await server.startServer(args?.fsPath);
