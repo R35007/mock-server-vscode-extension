@@ -1,3 +1,4 @@
+import open from "open";
 import * as vscode from "vscode";
 import { Commands, PromptAction, ServerStatus } from './enum';
 import HomePage from './HomePage';
@@ -30,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Start Server
   context.subscriptions.push(vscode.commands.registerCommand(Commands.START_SERVER, async (args) => {
-    if (server.mockServer.server) {
+    if (server.mockServer.server) { // If server already running then restart the server
       try {
         StatusbarUi.working(ServerStatus.RESTART);
         if (Settings.fullReload) {
@@ -49,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
         await server.resetServer();
         StatusbarUi.startServer(`Server Failed to Restart.`, error);
       }
-    } else {
+    } else { // Start a new server
       try {
         StatusbarUi.working(ServerStatus.START);
         await server.startServer(args?.fsPath);
@@ -66,32 +67,6 @@ export function activate(context: vscode.ExtensionContext) {
     StatusbarUi.working(ServerStatus.STOP);
     await server.resetServer();
     StatusbarUi.startServer('Server Stopped', undefined, 150);
-  }));
-
-  // Reset Server
-  context.subscriptions.push(vscode.commands.registerCommand(Commands.RESET_SERVER, async (args) => {
-    StatusbarUi.working(ServerStatus.RESET);
-    await server.resetServer();
-    StatusbarUi.startServer('Server Reset Done', undefined, 150);
-  }));
-
-  // Reset and Restart Server
-  context.subscriptions.push(vscode.commands.registerCommand(Commands.RESET_AND_RESTART, async (args) => {
-    const isServerRunning = server.mockServer.server;
-    const status = isServerRunning ? ServerStatus.RESTART : ServerStatus.START;
-
-    try {
-      StatusbarUi.working(ServerStatus.RESET);
-      await server.resetServer();
-      StatusbarUi.startServer('Server Reset Done', undefined, 150);
-
-      StatusbarUi.working(status);
-      await server.startServer(args?.fsPath);
-      StatusbarUi.stopServer(status, server.mockServer.port!, server.mockServer.listeningTo!);
-    } catch (error: any) {
-      await server.resetServer();
-      StatusbarUi.startServer('Server Failed to Reset and Restart.', error, 150);
-    }
   }));
 
   // Start Server with new Port
@@ -150,12 +125,13 @@ export function activate(context: vscode.ExtensionContext) {
   }));
 
   // Home Page
-  context.subscriptions.push(vscode.commands.registerCommand(Commands.HOMEPAGE, () => {
-    HomePage.createOrShow(context.extensionUri, server);
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.OPEN_HOMEPAGE, () => {
+    if (Settings.openInside || !server.mockServer.listeningTo) return HomePage.createOrShow(context.extensionUri, server);
+    open(server.mockServer.listeningTo);
   }));
 
   if (vscode.window.registerWebviewPanelSerializer) {
-    vscode.window.registerWebviewPanelSerializer(Commands.HOMEPAGE, {
+    vscode.window.registerWebviewPanelSerializer(Commands.OPEN_HOMEPAGE, {
       async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, _state: any) {
         HomePage.revive(webviewPanel, context.extensionUri, server);
       }

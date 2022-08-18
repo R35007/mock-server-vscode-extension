@@ -30,9 +30,9 @@ This Extension is built upon node package `@r35007/mock-server`.
 
 ## Commands
 
-### `Start Server`
+### `Start or Restart Server`
 
-Mock Server can be started in three ways.
+This command Starts the Mock Server or Restart if its already running.
 
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Start Server`
 - Use `Alt+Enter` shortcut to start or restart the server.
@@ -40,32 +40,23 @@ Mock Server can be started in three ways.
 - Server will automatically will restarted if any changes are made.
 - You can also manually restart the server bu giving the same `MockServer: Start Server` Command
 
-### `Stop Server`
+### `Stop or Reset Server`
 
-- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Stop Server`.
+This command Stops the current running Mock Server or Reset Mock Server instance if any error occur.
+
+- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Stop or Reset Server`.
 - ShortCut using `Shift+Alt+Enter`
 
-### `Reset Server`
-
-- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Reset Server`.
-- This command clears all server cache and reset all data
-
-### `Start Server with New Port`
-
-- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Start Server with New Port`.
-- This command prompts to set a new port and starts the server with the given port.
-
-### `Reset and Restart Server`
-
-- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Reset and Restart Server`.
-- This command clears all server cache, reset all data and start the mock server in a new instance.
-
 ### `Set Port`
+
+This command helps to set the port of the server in setting `mock-server.settings.port`.
 
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Set Port`.
 - This command helps prompts and sets the custom port to start the server.
 
-### `Set Root`
+### `Set as Server Root Folder`
+
+This command sets current folder as the server root folder in setting `mock-server.settings.paths.root`.
 
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Set as Server Root Folder`.
 - This command helps sets the current selected file or folder as a Server root folder.
@@ -96,11 +87,12 @@ Helps to work in multiple data environments.
 - `MockServer: Generate Sample Mock Files` Command helps to generate a sample mock files in the `mock-server.settings.paths.root` folder.
 - Alternatively you can also generate mock files by right clicking on the folder and click `Generate Sample Mock Files` command in the context menu.
 
-### `Home Page`
+### `Open Home Page`
 
-- `MockServer: Home Page` Command opens a new window which shows you all the list of resources.
+- `MockServer: Open Home Page` Command opens a new window which shows you all the list of resources.
 - This window also helps to update or add new resources in runtime.
-- It can be opened in a separate browser window using [http://localhost:3000](http://localhost:3000)
+- It can also be opened in a separate browser window.
+  ![HomePage](./images/HomePage.png)
 
 ## DB
 

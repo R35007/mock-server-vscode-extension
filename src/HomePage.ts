@@ -19,19 +19,17 @@ export default class HomePage {
     this._extensionUri = extensionUri;
     this._server = server;
 
-    // Set the webview's initial html content
-    this._update();
-
     // Listen for when the panel is disposed
     // This happens when the user closes the panel or when the panel is closed programmatically
     this._panel.onDidDispose(this.dispose, null, this._disposables);
+    this._panel.onDidChangeViewState(this.update.bind(this));
 
     // Handle messages from the webview
     this._panel.webview.onDidReceiveMessage(
       message => {
         switch (message.command) {
           case 'startServer':
-            vscode.commands.executeCommand(Commands.START_SERVER);
+            vscode.commands.executeCommand(Commands.START_SERVER).then(this.update.bind(this));
             return;
         }
       }, null, this._disposables);
@@ -49,7 +47,7 @@ export default class HomePage {
     }
 
     const panel = vscode.window.createWebviewPanel(
-      Commands.HOMEPAGE, // Identifies the type of the webview. Used internally
+      Commands.OPEN_HOMEPAGE, // Identifies the type of the webview. Used internally
       'Mock Server', // Title of the panel displayed to the user
       column || vscode.ViewColumn.One, // Editor column to show the new webview panel in.
       {
@@ -60,6 +58,8 @@ export default class HomePage {
     );
 
     HomePage.currentPanel = new HomePage(panel, extensionUri, server);
+    // Set the webview's initial html content
+    HomePage.currentPanel.update();
   }
 
   public dispose() {
@@ -70,22 +70,20 @@ export default class HomePage {
 
     while (this._disposables.length) {
       const x = this._disposables.pop();
-      if (x) {
-        x.dispose();
-      }
+      if (x) return x.dispose();
     }
   }
 
-  private _update() {
-    const webview = this._panel.webview;
+  public update() {
+    const panel = HomePage.currentPanel?._panel;
 
     // Vary the webview's content based on where it is located in the editor.
-    switch (this._panel.viewColumn) {
+    switch (panel?.viewColumn) {
       case vscode.ViewColumn.Three:
       case vscode.ViewColumn.Two:
       case vscode.ViewColumn.One:
       default:
-        this._panel.webview.html = this.getWebviewContent(webview);
+        panel!.webview.html = this.getWebviewContent();
         return;
     }
   }
@@ -94,10 +92,82 @@ export default class HomePage {
     HomePage.currentPanel = new HomePage(panel, extensionUri, server);
   }
 
-  private getWebviewContent = (webview: vscode.Webview) => {
+  private getWebviewContent = () => {
+    const mockServer = this._server?.mockServer;
+    const iFrameSrc = `${mockServer?.listeningTo}?_fontSize=13px&_dataFontSize=0.9rem&_dataLineHeight=1.2`;
 
-    const config = this._server?.mockServer?.data.config || {};
-    const { port, host, base } = config;
+    const styles = `
+    <style>
+        #welcome-container{
+          text-align: center;
+          height: 100vh;
+          padding: 0;
+          max-width: 110vh;
+          margin: auto;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        #welcome-container .banner{
+          text-decoration: none;
+          background: #141414 !important;
+          padding: 15px 30px;
+          align-items: center;
+          text-align: center;
+          border-radius: 4px;
+        }
+        #welcome-container .banner a {
+          text-decoration: none !important;
+          outline: none;
+        }
+        
+        #welcome-container .start-server-btn {
+          cursor: pointer;
+          color: var(--vscode-button-foreground);
+          background: var(--vscode-button-background);
+          border: 0;
+          padding: 8px;
+        }
+        #welcome-container .start-server-btn:hover {
+          background: var(--vscode-button-hoverBackground);
+        }
+
+        #welcome-container .demo-container {
+          text-align: center; 
+          border: 1px solid #302e2e; 
+          flex: 1; 
+          display: flex;
+          overflow: hidden;
+          border-radius: 4px;
+        }
+      </style>`;
+
+    const iFrame = `<iframe id="iframe-data" style="width: 100%; height: 100%" src="${iFrameSrc}" frameborder="0"></iframe>`
+
+    const welcomeScreen = `<div id="welcome-container">
+    <div class="banner">
+      <h1 id="mock-server" style="position: relative;align-items: center;display: inline-block;margin: auto;border: 0;">
+        <a style="position: absolute; text-decoration: none;" href="https://github.com/R35007/mock-server" target="_blank">
+          <img height="40px" src="https://r35007.github.io/Mock-Server/images/mockserverlogo.png" alt="">
+        </a>
+        <a style="margin-left: 40px; text-decoration: none;" href="https://github.com/R35007/mock-server" target="_blank">Mock Server</a>
+        <a href="https://img.shields.io/npm/v/@r35007/mock-server?label=npm">
+          <img src="https://img.shields.io/npm/v/@r35007/mock-server?label=npm" alt="">
+        </a>
+        <a href="https://img.shields.io/npm/l/@r35007/mock-server?color=blue">
+          <img src="https://img.shields.io/npm/l/@r35007/mock-server?color=blue" alt="">
+        </a>
+        <a href="https://img.shields.io/npm/types/@r35007/mock-server">
+          <img src="https://img.shields.io/npm/types/@r35007/mock-server" alt="">
+        </a>
+      </h1>
+      <p>Get a full REST API with <strong>zero coding</strong> in <strong>less than 30 seconds</strong> (seriously)</p>
+      <p>Created with &lt;3 for front-end developers who need a quick back-end for prototyping and mocking.</p>
+    </div>
+    <div style="text-align: center; margin: 1rem;"><button class="start-server-btn" onclick="startServer()">Click here to Start Mock Server</button></div>
+    <div class="demo-container"><img src="https://github.com/R35007/Mock-Server/blob/main/src/img/VSCode_Extension.gif?raw=true" alt="Home Page" /></div>
+  </div>`;
+
     return `
     <!DOCTYPE html>
     <html lang="en">
@@ -106,33 +176,13 @@ export default class HomePage {
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <meta name="viewport" content="width=device-width, initial-scale=0.6, maximum-scale=0.6">
       <title>Mock Server</title>
-      <style>
-        #start-server{
-          text-align: center;
-          padding-top: 20%;
-          font-size: 1.1rem;
-        }
-        #start-server a{
-          cursor: pointer;
-          color: #66adff;
-        }
-        #start-server a:hover{
-          text-decoration: underline;
-        }
-      </style>
+      ${styles}
       <script>
         var vscode = acquireVsCodeApi();
       </script>
     </head>
     <body style="margin: 0; padding: 0; height: 100vh; width: 100%">
-    ${this._server?.mockServer?.server ?
-        `<iframe id="iframe-data"
-      style="width: 100%; height: 100%" 
-      src="http://${host}:${port}${base}?_fontSize=13px&_dataFontSize=0.9rem&_dataLineHeight=1.2"
-      frameborder="0"></iframe>`
-        :
-        `<div id="start-server"><a onclick="startServer()">Click Here to Start the Mock Server</a></div>`
-      }
+    ${mockServer?.listeningTo ? iFrame : welcomeScreen}
     </body>
     <script>
       function startServer() {

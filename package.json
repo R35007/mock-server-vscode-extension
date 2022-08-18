@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "7.3.1",
+  "version": "8.0.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -47,63 +47,48 @@
   "contributes": {
     "commands": [
       {
-        "command": "mockServer.transformToMockServerDB",
-        "title": "Transform To Mock Server DB",
+        "command": "mock-server.startServer",
+        "title": "Start or Restart Server",
         "category": "MockServer"
       },
       {
-        "command": "mockServer.generateMockFiles",
-        "title": "Generate Sample Mock Files",
+        "command": "mock-server.stopServer",
+        "title": "Stop or Reset Server",
         "category": "MockServer"
       },
       {
-        "command": "mockServer.startServer",
-        "title": "Start Server",
-        "category": "MockServer"
-      },
-      {
-        "command": "mockServer.stopServer",
-        "title": "Stop Server",
-        "category": "MockServer"
-      },
-      {
-        "command": "mockServer.resetServer",
-        "title": "Reset Server",
-        "category": "MockServer"
-      },
-      {
-        "command": "mockServer.resetAndRestart",
-        "title": "Reset and Restart Server",
-        "category": "MockServer"
-      },
-      {
-        "command": "mockServer.startWithNewPort",
-        "title": "Start Server with New Port",
-        "category": "MockServer"
-      },
-      {
-        "command": "mockServer.switchEnvironment",
+        "command": "mock-server.switchEnvironment",
         "title": "Switch Environment",
         "category": "MockServer"
       },
       {
-        "command": "mockServer.getDbSnapShot",
+        "command": "mock-server.getDbSnapShot",
         "title": "Get Db Snapshot",
         "category": "MockServer"
       },
       {
-        "command": "mockServer.homePage",
+        "command": "mock-server.openHomePage",
         "title": "Open Home Page",
         "category": "MockServer"
       },
       {
-        "command": "mockServer.setPort",
+        "command": "mock-server.setPort",
         "title": "Set Port",
         "category": "MockServer"
       },
       {
-        "command": "mockServer.setRoot",
-        "title": "Set as Server Root folder",
+        "command": "mock-server.transformToMockServerDB",
+        "title": "Transform to Mock Server DB",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.setRoot",
+        "title": "Set as Server Root Folder",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.generateMockFiles",
+        "title": "Generate Sample Mock Files",
         "category": "MockServer"
       }
     ],
@@ -300,14 +285,20 @@
           "default": false,
           "description": "If true it resets and restart the server on changes. By default mockserver uses the single server instance to restart on file changes."
         },
-        "mock-server.settings.showInfoMsg": {
+        "mock-server.settings.openHomePageInsideVSCode": {
           "order": 15,
+          "type": "boolean",
+          "default": true,
+          "description": "Open Home Page inside VS Code, instead of default browser."
+        },
+        "mock-server.settings.showInfoMsg": {
+          "order": 16,
           "type": "boolean",
           "default": true,
           "description": "Change this to false if you don't want to show information pop up messages."
         },
         "mock-server.settings.statusBar": {
-          "order": 16,
+          "order": 17,
           "type": "object",
           "default": {
             "show": "true",
@@ -345,32 +336,32 @@
     },
     "keybindings": [
       {
-        "command": "mockServer.transformToMockServerDB",
+        "command": "mock-server.transformToMockServerDB",
         "key": "alt+t",
         "mac": "alt+t"
       },
       {
-        "command": "mockServer.startServer",
+        "command": "mock-server.startServer",
         "key": "alt+enter",
         "mac": "alt+enter"
       },
       {
-        "command": "mockServer.stopServer",
+        "command": "mock-server.stopServer",
         "key": "shift+alt+enter",
         "mac": "shift+alt+enter"
       },
       {
-        "command": "mockServer.switchEnvironment",
+        "command": "mock-server.switchEnvironment",
         "key": "alt+e",
         "mac": "alt+e"
       },
       {
-        "command": "mockServer.getDbSnapShot",
+        "command": "mock-server.getDbSnapShot",
         "key": "alt+s",
         "mac": "alt+s"
       },
       {
-        "command": "mockServer.homePage",
+        "command": "mock-server.openHomePage",
         "key": "alt+h",
         "mac": "alt+h"
       }
@@ -379,40 +370,29 @@
       "explorer/context": [
         {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
-          "command": "mockServer.generateMockFiles",
+          "command": "mock-server.generateMockFiles",
           "group": "mock-server"
         },
         {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
-          "command": "mockServer.setRoot",
+          "command": "mock-server.setRoot",
           "group": "mock-server"
         }
       ],
       "editor/context": [
         {
-          "command": "mockServer.setPort",
-          "group": "mock-server"
-        },
-        {
-          "command": "mockServer.setRoot",
+          "when": "resourceExtname == .json || resourceExtname == .har",
+          "command": "mock-server.transformToMockServerDB",
           "group": "mock-server"
         },
         {
           "when": "resourceExtname == .json || resourceExtname == .har",
-          "command": "mockServer.transformToMockServerDB",
+          "command": "mock-server.getDbSnapShot",
           "group": "mock-server"
         },
         {
           "when": "resourceExtname == .json || resourceExtname == .har",
-          "command": "mockServer.getDbSnapShot",
-          "group": "mock-server"
-        },
-        {
-          "command": "mockServer.startServer",
-          "group": "mock-server"
-        },
-        {
-          "command": "mockServer.stopServer",
+          "command": "mock-server.startServer",
           "group": "mock-server"
         }
       ]
@@ -430,6 +410,7 @@
     "@types/express": "^4.17.13",
     "@types/ip": "^1.1.0",
     "@types/node": "^16.0.0",
+    "@types/open": "^6.2.1",
     "@types/vscode": "^1.30.0",
     "@typescript-eslint/eslint-plugin": "^4.14.1",
     "@typescript-eslint/parser": "^4.14.1",
@@ -441,6 +422,7 @@
     "axios": "^0.21.1",
     "chokidar": "^3.5.2",
     "express": "^4.17.1",
-    "ip": "^1.1.8"
+    "ip": "^1.1.8",
+    "open": "^8.4.0"
   }
 }

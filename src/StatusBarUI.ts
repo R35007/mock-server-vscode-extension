@@ -68,9 +68,7 @@ export class StatusbarUi {
       StatusbarUi.statusBarItem.text = `$(circle-slash) Port : ${port}`;
       StatusbarUi.statusBarItem.command = Commands.STOP_SERVER;
       StatusbarUi.statusBarItem.tooltip = 'Click to stop mock server';
-
-      const statusMsg = `Server ${status}ed : [${url}](${url})`;
-      Prompt.showPopupMessage(statusMsg);
+      Prompt.showPopupMessage(`Server ${status}ed : [${url}](command:${Commands.OPEN_HOMEPAGE})`);
       StatusbarUi.log(`[Done] Server ${status}ed : ${url}`);
     }, 150);
   }

@@ -46,48 +46,15 @@ export class Utils {
     return false;
   };
 
-  protected getWritable = async (extensions: string[], action: string, noPrompt: boolean = false) => {
-    const editorProps = this.getEditorProps();
-
-    if (editorProps) {
-      const { editor, document, textRange, editorText } = editorProps;
-
-      if ((action === Commands.TRANSFORM_TO_MOCK_SERVER_DB) && !editorProps.editorText.trim().length) {
-        const extension = path.extname(path.resolve(document.fileName));
-        if (extensions.indexOf(extension) < 0) { return false; }
-      }
-
-      if (noPrompt) {
-        return { editorText, fileName: "", editor, document, textRange };
-      }
-
-      const shouldSaveAsNewFile = await Prompt.shouldSaveAsNewFile();
-
-      if (shouldSaveAsNewFile) {
-        if (shouldSaveAsNewFile === "yes") {
-          const fileName = await Prompt.getFilePath(extensions);
-          if (fileName && fileName.length) {
-            return { editorText, fileName, editor, document, textRange };
-          }
-          return false;
-        } else {
-          return { editorText, fileName: "", editor, document, textRange };
-        }
-      }
-      return false;
-    }
-    return false;
-  };
-
   protected writeFile = async (
     data: any,
-    fileName: string,
     notificationText: string,
     editor: vscode.TextEditor,
     document: vscode.TextDocument,
-    textRange: vscode.Range
+    textRange: vscode.Range,
+    fileName?: string,
   ) => {
-    if (fileName.length) {
+    if (fileName) {
       const filePath = path.resolve(path.dirname(document.fileName), fileName);
       const folderPath = path.dirname(filePath) || "/";
       if (!fs.existsSync(folderPath)) {
@@ -163,7 +130,7 @@ export class Utils {
       .filter(p => p.isFile)
       .map(p => p.filePath);
 
-    this.watcher = watch([...new Set(filesToWatch)],{ ignored: Settings.ignoreFiles});
+    this.watcher = watch([...new Set(filesToWatch)], { ignored: Settings.ignoreFiles });
     this.watcher.on('change', (_event, _path) => {
       if (!Settings.shouldWatch) return;
       vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server

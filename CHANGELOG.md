@@ -3,6 +3,16 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v8.0.0
+
+- removed MockServer: Reset - `mock-server.reset` command.
+- removed MockServer: Reset and Restart - `mock-server.resetAndRestart` command.
+- removed Start Server with New Port - `mock-server.startWithNewPort` command.
+- added `mock-server.settings.openHomePageInsideVSCode` - By default it open the homepage inside VS Code. If false it open in a default browser.
+- Home Page improved.
+  ![HomePage](./images/HomePage.png)
+- Home Page not refreshing on start or stop of the server - `Fixed`
+
 ## v7.3.1
 
 - `mock-server.settings.dbMode` not working issue - `Fixed`
@@ -36,13 +46,13 @@
 ## v7.0.1
 
 - Updated `@r35007/mock-server@7.0.1`
-- middleware callbacks are not working on `mockServer.transformToMockServerDB` command - `Fixed`
+- middleware callbacks are not working on `mock-server.transformToMockServerDB` command - `Fixed`
 - config not updated when using `mockServer` inside `middleware.js` exports - `Fixed`
 
 ## v7.0.0
 
 - Updated `@r35007/mock-server@7.0.0`
-- added `mockServer.startWithNewPort` command - Helps to set a new port and start the server
+- added `mock-server.startWithNewPort` command - Helps to set a new port and start the server
 - If already a server is running at the same port it prompts the user to give a new port and start the server
 
 ## v6.1.0
@@ -199,7 +209,7 @@
 
 ## v2.0.5
 
-- `mockServer.resetServer` command bug fix.
+- `mock-server.resetServer` command bug fix.
 
 ## v2.0.4
 

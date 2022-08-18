@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from "vscode";
 import { Commands, PromptAction } from './enum';
+import HomePage from './HomePage';
 import { Prompt } from './prompt';
 import { Settings } from './Settings';
 import { Utils } from './utils';
@@ -31,43 +32,41 @@ export default class MockServerExt extends Utils {
   resetServer = async () => {
     await this.destroyServer();
     this.createServer();
+    HomePage.currentPanel?.update();
   };
 
   transformToMockServerDB = async (args?: any) => {
-    const writable = await this.getWritable(['.json'], Commands.TRANSFORM_TO_MOCK_SERVER_DB, args?.fsPath);
-    if (writable) {
-      const { fileName, editor, document, textRange } = writable;
-      const userData = requireData(args?.fsPath || document?.uri?.fsPath);
+    const editorProps = this.getEditorProps();
+    if (!editorProps) throw Error("Invalid File or path");
 
-      const middlewares = await this.getDataFromUrl(Settings.paths.middleware);
+    const { editor, document, textRange } = editorProps;
+    
+    const userData = requireData(args?.fsPath || document?.uri?.fsPath);
+    const middlewares = await this.getDataFromUrl(Settings.paths.middleware);
 
-      const db = extractDbFromHAR(
-        userData as HAR,
-        middlewares?._harEntryCallback,
-        middlewares?._harDbCallback,
-        Settings.iterateDuplicateRoutes,
-      ) || extractDbFromKibana(
-        userData as KIBANA,
-        middlewares?._kibanaHitsCallback,
-        middlewares?._kibanaDbCallback,
-        Settings.iterateDuplicateRoutes
-      ) || {};
+    const db = extractDbFromHAR(
+      userData as HAR,
+      middlewares?._harEntryCallback,
+      middlewares?._harDbCallback,
+      Settings.iterateDuplicateRoutes,
+    ) || extractDbFromKibana(
+      userData as KIBANA,
+      middlewares?._kibanaHitsCallback,
+      middlewares?._kibanaDbCallback,
+      Settings.iterateDuplicateRoutes
+    ) || {};
 
-      cleanDb(db as UserTypes.Db, Settings.dbMode);
+    cleanDb(db as UserTypes.Db, Settings.dbMode);
 
-      if (!Object.keys(db).length) throw Error("Invalid Data");
+    if (!Object.keys(db).length) throw Error("Invalid Data");
 
-      this.writeFile(
-        JSON.stringify(db, null, '\t'),
-        fileName,
-        'Data Transformed Successfully',
-        editor,
-        document,
-        textRange
-      );
-    } else {
-      throw Error("Invalid File or path");
-    }
+    this.writeFile(
+      JSON.stringify(db, null, '\t'),
+      'Data Transformed Successfully',
+      editor,
+      document,
+      textRange
+    );
   };
 
   setPort = async (_args?: any) => {
@@ -133,6 +132,7 @@ export default class MockServerExt extends Utils {
     await mockServer.startServer();
 
     this.restartOnChange(db);
+    HomePage.currentPanel?.update();
   };
 
   stopServer = async () => {
@@ -142,6 +142,7 @@ export default class MockServerExt extends Utils {
     } else {
       throw Error("No Server to Stop");
     }
+    HomePage.currentPanel?.update();
   };
 
   switchEnvironment = async () => {
@@ -187,23 +188,24 @@ export default class MockServerExt extends Utils {
   };
 
   getDbSnapshot = async (_args?: any) => {
-    const writable = await this.getWritable(['.json'], Commands.TRANSFORM_TO_MOCK_SERVER_DB, true);
-    if (writable) {
-      const { editor, document, textRange } = writable;
-      const db = JSON.parse(JSON.stringify(this.mockServer.db));
-      cleanDb(db);
-      const snapShotPath = path.join(Settings.paths.snapshotDir || 'snapshots', `/db-${Date.now()}.json`);
-      this.writeFile(
-        JSON.stringify(db, null, '\t'),
-        snapShotPath,
-        'Db Snapshot retrieved Successfully',
-        editor,
-        document,
-        textRange
-      );
-    } else {
-      throw Error("Invalid File or path");
-    }
+    const editorProps = this.getEditorProps();
+    if (!editorProps) throw Error("Invalid File or path");
+    
+    const { editor, document, textRange } = editorProps;
+    
+    const db = JSON.parse(JSON.stringify(this.mockServer.db));
+    cleanDb(db);
+    
+    const snapShotPath = path.join(Settings.paths.snapshotDir || 'snapshots', `/db-${Date.now()}.json`);
+    
+    this.writeFile(
+      JSON.stringify(db, null, '\t'),
+      'Db Snapshot retrieved Successfully',
+      editor,
+      document,
+      textRange,
+      snapShotPath
+    );
   };
 
   generateMockFiles = async (args?: any) => {
