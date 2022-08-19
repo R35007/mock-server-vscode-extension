@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -41,7 +41,17 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "*"
+    "onCommand:mock-server.startServer",
+    "onCommand:mock-server.stopServer",
+    "onCommand:mock-server.switchEnvironment",
+    "onCommand:mock-server.getDbSnapShot",
+    "onCommand:mock-server.openHomePage",
+    "onCommand:mock-server.setPort",
+    "onCommand:mock-server.setRoot",
+    "onCommand:mock-server.transformToMockServerDB",
+    "onCommand:mock-server.generateMockFiles",
+    "onCommand:mock-server.startWithNewPort",
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {

@@ -2,6 +2,7 @@
 import { MockServer } from '@r35007/mock-server';
 import { PathDetails } from '@r35007/mock-server/dist/server/types/common.types';
 import { Db } from '@r35007/mock-server/dist/server/types/valid.types';
+import { normalizeDb } from '@r35007/mock-server/dist/server/utils';
 import { getFilesList, requireData } from "@r35007/mock-server/dist/server/utils/fetch";
 import axios from 'axios';
 import { watch } from 'chokidar';
@@ -74,7 +75,7 @@ export class Utils {
 
   protected getDbData = async (dbPath?: string, mockServer?: MockServer) => {
     const userData = await this.getDataFromUrl(dbPath?.replace(/\\/g, '/'), mockServer);
-    const dbData = this.isPlainObject(userData) ? userData : {};
+    const dbData = this.isPlainObject(userData) ? normalizeDb(userData, Settings.dbMode) : {};
     return dbData;
   };
 
@@ -86,7 +87,7 @@ export class Utils {
     const envPath = environmentList.find((e) => e.fileName === environment)!.filePath;
 
     const userData = await this.getDataFromUrl(envPath);
-    const envData = this.isPlainObject(userData) ? userData : {};
+    const envData = this.isPlainObject(userData) ? normalizeDb(userData, Settings.dbMode) : {};
     return envData;
   };
 
