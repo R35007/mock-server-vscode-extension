@@ -122,13 +122,13 @@ export default class MockServerExt extends Utils {
 
     mockServer.middlewares._globals?.length && app.use(mockServer.middlewares._globals);
 
-    const resources = mockServer.resources();
-    app.use(mockServer.config.base, resources);
-
     if (Settings.homePage) {
       const homePage = mockServer.homePage();
       app.use(mockServer.config.base, homePage);
     }
+
+    const resources = mockServer.resources();
+    app.use(mockServer.config.base, resources);
 
     app.use(mockServer.pageNotFound);
     app.use(mockServer.errorHandler);

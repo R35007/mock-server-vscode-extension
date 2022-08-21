@@ -8,19 +8,6 @@ This Extension is built upon node package `@r35007/mock-server`.
 
 ![Home Page](https://github.com/R35007/Mock-Server/blob/main/src/img/VSCode_Extension.gif?raw=true)
 
-## Table of contents
-
-- [Getting started](#getting-started)
-- [Commands](#commands)
-- [DB](#db)
-- [Middleware](#middleware)
-- [Injectors](#injectors)
-- [Route Rewriters](#route-rewriters)
-- [Static File Server](#static-file-server)
-- [Documentation](#documentation)
-- [Author](#author)
-- [License](#license)
-
 ## Getting started
 
 - Install the Extension.
