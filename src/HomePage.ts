@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { Commands } from './enum';
 import Server from './server';
+import { Settings } from './Settings';
 
 export default class HomePage {
 
@@ -26,10 +27,13 @@ export default class HomePage {
 
     // Handle messages from the webview
     this._panel.webview.onDidReceiveMessage(
-      message => {
+      async (message) => {
         switch (message.command) {
           case 'startServer':
-            vscode.commands.executeCommand(Commands.START_SERVER).then(this.update.bind(this));
+            await vscode.commands.executeCommand(Commands.START_SERVER).then(this.update.bind(this));
+            return;
+          case 'enableHomePage':
+            await vscode.commands.executeCommand('workbench.action.openSettings', 'mock-server.settings.homePage');
             return;
         }
       }, null, this._disposables);
@@ -142,6 +146,11 @@ export default class HomePage {
         }
       </style>`;
 
+    const enableHomePage = `<div style="text-align: center;">
+      <p style="font-size: 1rem;">Click <a style="cursor: pointer" onclick="enableHomePage()">here</a> enable Mock Server HomePage and restart the server to take effect.</p>
+    </div>`;
+    const startServerBtn = `<div style="text-align: center; margin: 1rem;"><button class="start-server-btn" onclick="startServer()">Click here to Start Mock Server</button></div>`;
+
     const iFrame = `<iframe id="iframe-data" style="width: 100%; height: 100%" src="${iFrameSrc}" frameborder="0"></iframe>`
 
     const welcomeScreen = `<div id="welcome-container">
@@ -164,7 +173,7 @@ export default class HomePage {
       <p>Get a full REST API with <strong>zero coding</strong> in <strong>less than 30 seconds</strong> (seriously)</p>
       <p>Created with &lt;3 for front-end developers who need a quick back-end for prototyping and mocking.</p>
     </div>
-    <div style="text-align: center; margin: 1rem;"><button class="start-server-btn" onclick="startServer()">Click here to Start Mock Server</button></div>
+    ${Settings.homePage ? startServerBtn : enableHomePage}
     <div class="demo-container"><img src="https://github.com/R35007/Mock-Server/blob/main/src/img/VSCode_Extension.gif?raw=true" alt="Home Page" /></div>
   </div>`;
 
@@ -182,12 +191,17 @@ export default class HomePage {
       </script>
     </head>
     <body style="margin: 0; padding: 0; height: 100vh; width: 100%">
-    ${mockServer?.listeningTo ? iFrame : welcomeScreen}
+    ${!mockServer?.listeningTo || !Settings.homePage ? welcomeScreen : iFrame}
     </body>
     <script>
       function startServer() {
         vscode.postMessage({
           command: 'startServer',
+        });
+      }
+      function enableHomePage() {
+        vscode.postMessage({
+          command: 'enableHomePage',
         });
       }
     </script>

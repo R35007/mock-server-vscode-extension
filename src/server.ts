@@ -40,7 +40,7 @@ export default class MockServerExt extends Utils {
     if (!editorProps) throw Error("Invalid File or path");
 
     const { editor, document, textRange } = editorProps;
-    
+
     const userData = requireData(args?.fsPath || document?.uri?.fsPath);
     const middlewares = await this.getDataFromUrl(Settings.paths.middleware);
 
@@ -118,13 +118,17 @@ export default class MockServerExt extends Utils {
     const dbData = await this.getDbData(dbPath, mockServer);
     const envData = await this.getEnvData();
     const db = { ...envData, ...dbData, ...envData };
+    mockServer.setDb(db);
 
-    const resources = mockServer.resources(db);
     mockServer.middlewares._globals?.length && app.use(mockServer.middlewares._globals);
+
+    const resources = mockServer.resources();
     app.use(mockServer.config.base, resources);
 
-    const defaultRoutes = mockServer.defaultRoutes();
-    app.use(mockServer.config.base, defaultRoutes);
+    if (Settings.homePage) {
+      const homePage = mockServer.homePage();
+      app.use(mockServer.config.base, homePage);
+    }
 
     app.use(mockServer.pageNotFound);
     app.use(mockServer.errorHandler);
@@ -190,14 +194,14 @@ export default class MockServerExt extends Utils {
   getDbSnapshot = async (_args?: any) => {
     const editorProps = this.getEditorProps();
     if (!editorProps) throw Error("Invalid File or path");
-    
+
     const { editor, document, textRange } = editorProps;
-    
+
     const db = JSON.parse(JSON.stringify(this.mockServer.db));
     cleanDb(db);
-    
+
     const snapShotPath = path.join(Settings.paths.snapshotDir || 'snapshots', `/db-${Date.now()}.json`);
-    
+
     this.writeFile(
       JSON.stringify(db, null, '\t'),
       'Db Snapshot retrieved Successfully',

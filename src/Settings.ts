@@ -84,6 +84,9 @@ export class Settings {
   static get fullReload(): boolean {
     return Settings.getSettings("fullReload") as boolean;
   }
+  static get homePage(): boolean {
+    return Settings.getSettings("homePage") as boolean;
+  }
   static get openInside(): boolean {
     return Settings.getSettings("openHomePageInsideVSCode") as boolean;
   }
