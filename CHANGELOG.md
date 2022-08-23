@@ -3,6 +3,10 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v9.0.1
+
+- updated - `@r35007/mock-server@9.0.1`.
+
 ## v9.0.0
 
 - updated - `@r35007/mock-server@9.0.0`.

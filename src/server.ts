@@ -100,7 +100,9 @@ export default class MockServerExt extends Utils {
     mockServer.setConfig(config);
 
     const rewriters = await this.getDataFromUrl(paths.rewriters, mockServer);
-    const rewriter = mockServer.rewriter(rewriters);
+    mockServer.setRewriters(rewriters);
+
+    const rewriter = mockServer.rewriter();
     app.use(rewriter);
 
     const defaults = mockServer.defaults();
@@ -108,6 +110,7 @@ export default class MockServerExt extends Utils {
 
     const middlewares = await this.getDataFromUrl(paths.middleware, mockServer);
     mockServer.setMiddlewares(middlewares);
+    
     mockServer.middlewares._globals?.length && app.use(mockServer.middlewares._globals);
 
     const injectors = await this.getDataFromUrl(paths.injectors, mockServer, true);

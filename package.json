@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -111,7 +111,7 @@
           "type": "object",
           "default": {
             "root": "./",
-            "db": "db.js",
+            "db": "db.json",
             "middleware": "middleware.js",
             "injectors": "injectors.json",
             "rewriters": "rewriters.json",
@@ -434,7 +434,7 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@r35007/mock-server": "^9.0.0",
+    "@r35007/mock-server": "^9.0.1",
     "axios": "^0.21.1",
     "chokidar": "^3.5.2",
     "express": "^4.17.1",
