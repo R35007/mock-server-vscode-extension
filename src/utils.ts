@@ -79,14 +79,14 @@ export class Utils {
     return dbData;
   };
 
-  protected getEnvData = async () => {
+  protected getEnvData = async (mockServer?: MockServer) => {
     const environment = this.storageManager.getValue("mockEnv", "none");
     if (environment === "none") return {};
 
     const environmentList = this.getEnvironmentList(Settings.paths.envDir);
     const envPath = environmentList.find((e) => e.fileName === environment)!.filePath;
 
-    const userData = await this.getDataFromUrl(envPath);
+    const userData = await this.getDataFromUrl(envPath, mockServer);
     const envData = this.isPlainObject(userData) ? normalizeDb(userData, Settings.dbMode) : {};
     return envData;
   };
@@ -103,7 +103,7 @@ export class Utils {
     }
   };
 
-  protected getEnvironmentList = (envDir: string = '') => getFilesList(envDir)
+  protected getEnvironmentList = (envDir: string = '') => getFilesList(envDir, [], true, false)
     .filter(file => [".har", ".json", ".js"].includes(file.extension))
     .map(file => ({ ...file, fileName: file.fileName.toLowerCase() }));
 

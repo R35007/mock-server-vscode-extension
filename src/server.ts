@@ -108,6 +108,7 @@ export default class MockServerExt extends Utils {
 
     const middlewares = await this.getDataFromUrl(paths.middleware, mockServer);
     mockServer.setMiddlewares(middlewares);
+    mockServer.middlewares._globals?.length && app.use(mockServer.middlewares._globals);
 
     const injectors = await this.getDataFromUrl(paths.injectors, mockServer, true);
     mockServer.setInjectors(injectors);
@@ -115,27 +116,25 @@ export default class MockServerExt extends Utils {
     const store = await this.getDataFromUrl(paths.store, mockServer);
     mockServer.setStore(store);
 
-    const dbData = await this.getDbData(dbPath, mockServer);
-    const envData = await this.getEnvData();
-    const db = { ...envData, ...dbData, ...envData };
-    mockServer.setDb(db);
-
-    mockServer.middlewares._globals?.length && app.use(mockServer.middlewares._globals);
-
     if (Settings.homePage) {
       const homePage = mockServer.homePage();
       app.use(mockServer.config.base, homePage);
     }
 
-    const resources = mockServer.resources();
-    app.use(mockServer.config.base, resources);
+    const envData = await this.getEnvData(mockServer);
+    const envResources = mockServer.resources(envData);
+    app.use(mockServer.config.base, envResources);
+
+    const dbData = await this.getDbData(dbPath, mockServer);
+    const dbResources = mockServer.resources(dbData);
+    app.use(mockServer.config.base, dbResources);
 
     app.use(mockServer.pageNotFound);
     app.use(mockServer.errorHandler);
 
     await mockServer.startServer();
 
-    this.restartOnChange(db);
+    this.restartOnChange(mockServer.db);
     HomePage.currentPanel?.update();
   };
 
