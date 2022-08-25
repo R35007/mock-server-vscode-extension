@@ -15,7 +15,6 @@ import { LocalStorageService } from './LocalStorageService';
 import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
 
-
 export class Utils {
   storageManager!: LocalStorageService;
   mockServer!: MockServer;
@@ -80,13 +79,10 @@ export class Utils {
   };
 
   protected getEnvData = async (mockServer?: MockServer) => {
-    const environment = this.storageManager.getValue("mockEnv", "none");
-    if (environment === "none") return {};
+    const environment = this.storageManager.getValue("mockEnv", { fileName: "none" }) as PathDetails;
+    if (environment.fileName === "none") return {};
 
-    const environmentList = this.getEnvironmentList(Settings.paths.envDir);
-    const envPath = environmentList.find((e) => e.fileName === environment)!.filePath;
-
-    const userData = await this.getDataFromUrl(envPath, mockServer);
+    const userData = await this.getDataFromUrl(environment.filePath, mockServer);
     const envData = this.isPlainObject(userData) ? normalizeDb(userData, Settings.dbMode) : {};
     return envData;
   };
@@ -105,7 +101,7 @@ export class Utils {
 
   protected getEnvironmentList = (envDir: string = '') => getFilesList(envDir, [], true, false)
     .filter(file => [".har", ".json", ".js"].includes(file.extension))
-    .map(file => ({ ...file, fileName: file.fileName.toLowerCase() }));
+    .map(file => ({ ...file, fileName: file.fileName.toLowerCase() })) as PathDetails[];
 
   protected restartOnChange = (db: Db = {}) => {
     // If watcher is already watching then do nothing
