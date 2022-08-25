@@ -9,7 +9,7 @@ export class Prompt {
     const pickList = envNameList.map(env => ({
       ...env,
       label: env.fileName,
-      description: env.filePath ? path.relative(Settings.rootPath, env.filePath) : ''
+      description: env.filePath && Settings.paths.envDir ? path.relative(Settings.paths.envDir, env.filePath) : ''
     }));
     return vscode.window.showQuickPick(pickList, {
       placeHolder: "Please select a file",

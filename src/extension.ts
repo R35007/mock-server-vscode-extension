@@ -10,10 +10,15 @@ import { StatusbarUi } from "./StatusBarUI";
 export function activate(context: vscode.ExtensionContext) {
 
   const output = vscode.window.createOutputChannel("Mock Server Log");
-  const log = (message: string, newLine: string = '') => output.appendLine(`${newLine}[${new Date().toLocaleTimeString()}] ${message}`);
+  const log = (message: string, newLine: string = '', noDate: boolean = false) => {
+    if (noDate) return output.appendLine(`${newLine}${message}`);
+    return output.appendLine(`${newLine}[${new Date().toLocaleTimeString()}] ${message}`)
+  };
+  const clearLog = output.clear;
+  
   StatusbarUi.init(log);
 
-  const server = new Server(context, log);
+  const server = new Server(context, log, clearLog);
 
   // Transform Mock
   context.subscriptions.push(vscode.commands.registerCommand(Commands.TRANSFORM_TO_MOCK_SERVER_DB, async (args) => {

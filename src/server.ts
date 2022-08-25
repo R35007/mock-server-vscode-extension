@@ -14,14 +14,19 @@ import { Utils } from './utils';
 
 export default class MockServerExt extends Utils {
 
-  constructor(context: vscode.ExtensionContext, output: Function) {
-    super(context, output);
+  constructor(context: vscode.ExtensionContext, output: Function, clearLog: Function) {
+    super(context, output, clearLog);
     this.createServer();
-    this.log('Mock Server Server Initiated', "\n");
   }
 
   createServer = () => {
     this.mockServer = new MockServer({ root: Settings.rootPath });
+    this.clearLog();
+    this.log('Mock Server Server Initiated', "\n");
+    this.log("Paths - mock-server.settings.paths: ", "\n");
+    this.log(JSON.stringify(Settings.paths, null, 2), "", true);
+    this.log("Server Configs: ", "\n");
+    this.log(JSON.stringify(Settings.config, null, 2), "", true);
   };
 
   destroyServer = async () => {

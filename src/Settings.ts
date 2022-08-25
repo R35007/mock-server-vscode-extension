@@ -7,9 +7,6 @@ import * as vscode from "vscode";
 
 export class Settings {
 
-  static pathsLog = vscode.window.createOutputChannel("Mock Server Paths Log");
-  static configLog = vscode.window.createOutputChannel("Mock Server Config Log");
-
   static get configuration() {
     return vscode.workspace.getConfiguration("mock-server.settings");
   }
@@ -21,7 +18,6 @@ export class Settings {
   }
 
   static get paths() {
-    Settings.pathsLog.clear();
     const paths = {
       root: Settings.rootPath,
       db: Settings.getValidPath('db', Settings.getSettings("paths.db") as string, "db.json"),
@@ -33,8 +29,6 @@ export class Settings {
       staticDir: Settings.getValidPath('staticDir', Settings.getSettings("paths.staticDir") as string, "public"),
       snapshotDir: Settings.getValidPath('snapshotDir', Settings.getSettings("paths.snapshotDir") as string, "snapshots") || path.resolve(Settings.rootPath, "snapshots")
     };
-    Settings.pathsLog.appendLine("\n");
-    Settings.pathsLog.appendLine(JSON.stringify(paths, null, 2));
     return paths;
   }
   static get host() {
@@ -108,11 +102,8 @@ export class Settings {
   static get rootPath() {
     const rootPath = Settings.getSettings("paths.root") as string;
     const resolvedRootPath = path.resolve((vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./"), rootPath);
-    if (!fs.existsSync(resolvedRootPath)) {
-      Settings.pathsLog.appendLine(`Invalid root Path : ` + resolvedRootPath);
-      return path.resolve(vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./");
-    }
-    return resolvedRootPath;
+    if (fs.existsSync(resolvedRootPath)) return resolvedRootPath;
+    return path.resolve(vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./");
   }
   static set rootPath(root: string) {
     Settings.setSettings("paths", {
@@ -132,8 +123,6 @@ export class Settings {
       staticDir: Settings.paths.staticDir || "/public",
       ...Settings.defaults
     };
-    Settings.configLog.clear();
-    Settings.configLog.appendLine(JSON.stringify(config, null, 2));
     return config;
   }
 
@@ -141,12 +130,7 @@ export class Settings {
     if (relativePath.startsWith("http")) return relativePath?.replace(/\\/g, '/');
 
     const resolvedPath = path.resolve(Settings.rootPath, relativePath?.trim() || defaults);
-    if (!fs.existsSync(resolvedPath)) {
-      Settings.pathsLog.appendLine(`Invalid ${type} Path : ` + resolvedPath);
-      return;
-    }
-
-    Settings.pathsLog.appendLine(`${type} Path : ` + resolvedPath);
+    if (!fs.existsSync(resolvedPath)) return;
     return resolvedPath?.replace(/\\/g, '/');
   }
 }

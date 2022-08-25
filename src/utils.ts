@@ -19,9 +19,11 @@ export class Utils {
   storageManager!: LocalStorageService;
   mockServer!: MockServer;
   log!: Function;
+  clearLog!: Function;
 
-  constructor(context: vscode.ExtensionContext, output: Function) {
+  constructor(context: vscode.ExtensionContext, output: Function, clearLog: Function) {
     this.log = output;
+    this.clearLog = clearLog;
     if (!this.storageManager) {
       this.storageManager = new LocalStorageService(context.workspaceState);
       this.storageManager.setValue("mockEnv", "none");

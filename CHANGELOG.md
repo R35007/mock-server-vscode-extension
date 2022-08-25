@@ -3,9 +3,14 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v9.2.2
+
+- updated - Switch Environment pick list shows relative File path of the `env` directory.
+- removed - `Mock Server Config Logs` and `Mock Server Path Log` in output panel. Now both will show at `Mock Server Log`
+
 ## v9.2.1
 
-- updated - Switch Environment pick list shows relative File path of the root directory.
+- updated - Switch Environment pick list shows relative File path of the `root` directory.
 
 ## v9.2.0
 
