@@ -3,6 +3,10 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v9.2.1
+
+- updated - Switch Environment pick list shows relative File path of the root directory.
+
 ## v9.2.0
 
 - updated - `@r35007/mock-server@9.2.0`.
