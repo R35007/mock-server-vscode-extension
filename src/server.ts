@@ -1,5 +1,5 @@
 import { MockServer } from "@r35007/mock-server";
-import { HAR, KIBANA, PathDetails } from '@r35007/mock-server/dist/server/types/common.types';
+import { HAR, KIBANA } from '@r35007/mock-server/dist/server/types/common.types';
 import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
 import { cleanDb, createSampleFiles, extractDbFromHAR, extractDbFromKibana } from '@r35007/mock-server/dist/server/utils';
 import { requireData } from '@r35007/mock-server/dist/server/utils/fetch';
@@ -105,7 +105,7 @@ export default class MockServerExt extends Utils {
     const config = { ...Settings.config, port };
     mockServer.setConfig(config, { log });
 
-    const rewriters = await this.getDataFromUrl(paths.rewriters, mockServer);
+    const rewriters = await this.getDataFromUrl(paths.rewriters, { mockServer });
     mockServer.setRewriters(rewriters, { log });
 
     const rewriter = mockServer.rewriter();
@@ -114,15 +114,15 @@ export default class MockServerExt extends Utils {
     const defaults = mockServer.defaults();
     app.use(defaults);
 
-    const middlewares = await this.getDataFromUrl(paths.middleware, mockServer);
+    const middlewares = await this.getDataFromUrl(paths.middleware, { mockServer });
     mockServer.setMiddlewares(middlewares, { log });
 
     mockServer.middlewares._globals?.length && app.use(mockServer.middlewares._globals);
 
-    const injectors = await this.getDataFromUrl(paths.injectors, mockServer, true);
+    const injectors = await this.getDataFromUrl(paths.injectors, { mockServer, isList: true });
     mockServer.setInjectors(injectors, { log });
 
-    const store = await this.getDataFromUrl(paths.store, mockServer);
+    const store = await this.getDataFromUrl(paths.store, { mockServer });
     mockServer.setStore(store, { log });
 
     if (Settings.homePage) {
@@ -130,8 +130,12 @@ export default class MockServerExt extends Utils {
       app.use(mockServer.config.base, homePage);
     }
 
-    const envData = await this.getEnvData(mockServer);
-    const envResources = mockServer.resources(envData, { log });
+    const env = await this.getEnvData(mockServer);
+    const envResources = mockServer.resources(env.db, {
+      injectors: env.injectors,
+      middlewares: env.middlewares,
+      log
+    });
     app.use(mockServer.config.base, envResources);
 
     const dbData = await this.getDbData(dbPath, mockServer);
@@ -161,35 +165,12 @@ export default class MockServerExt extends Utils {
     this.log(`[Running] Switch Environment initiated`, "\n");
     this.log(`Switching Environment...`);
     try {
-      const envDir = Settings.paths.envDir;
-      if (envDir?.length) {
-        const environmentList = [{ fileName: "none" }, ...this.getEnvironmentList(envDir)] as PathDetails[];
-        if (environmentList?.length) {
-
-          // making the selected environment to appear in first of the list
-          const selectedEnv = this.storageManager.getValue("mockEnv", { fileName: "none" }) as PathDetails;
-          const selectedEnvIndex = environmentList.findIndex((e) => e.fileName === selectedEnv.fileName);
-          if (selectedEnvIndex >= 0) {
-            environmentList.splice(selectedEnvIndex, 1);
-            environmentList.unshift(selectedEnv);
-          } else {
-            this.storageManager.setValue("mockEnv", { fileName: "none" });
-          }
-
-          const selectedMockEnv = await Prompt.getEnvironment(environmentList);
-          if (selectedMockEnv) {
-            this.storageManager.setValue("mockEnv", selectedMockEnv);
-            this.log(`[Done] Environment Switched to ${selectedMockEnv.fileName}`);
-            vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server
-          }
-        } else {
-          this.log(`[Error] No Environment Found`);
-          Prompt.showPopupMessage('No Environment Found', PromptAction.ERROR);
-        }
-      } else {
-        this.log(`[Error] 'mock-server.settings.paths.envDir' - Please provide a valid path here`);
-        Prompt.showPopupMessage(`mock-server.settings.paths.envDir - Please provide a valid path here`, PromptAction.ERROR);
-      }
+      const environmentList = await this.getEnvironmentList(this.mockServer);
+      const selectedEnv = await Prompt.getEnvironment(environmentList);
+      if (!selectedEnv) return;
+      this.storageManager.setValue("environment", selectedEnv);
+      this.log(`[Done] Environment Switched to ${selectedEnv.envName}`);
+      vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server
     } catch (err: any) {
       this.log(`[Error] Something went wrong`);
       this.log(err);

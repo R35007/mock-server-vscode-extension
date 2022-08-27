@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+import * as vscode from "vscode";
 
 export enum Commands {
   TRANSFORM_TO_MOCK_SERVER_DB = "mock-server.transformToMockServerDB",
@@ -26,3 +27,13 @@ export enum PromptAction {
   ERROR = 'error',
   WARNING = 'warning'
 }
+
+export const NO_ENV = {
+  envName: "none",
+  db: [],
+  injectors: [],
+  middlewares: [],
+  label: "none",
+  description: "",
+  kind: vscode.QuickPickItemKind.Default
+};

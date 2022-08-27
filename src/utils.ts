@@ -10,7 +10,7 @@ import * as fs from "fs";
 import { FSWatcher } from 'node:fs';
 import * as path from "path";
 import * as vscode from "vscode";
-import { Commands } from './enum';
+import { Commands, NO_ENV } from './enum';
 import { LocalStorageService } from './LocalStorageService';
 import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
@@ -75,35 +75,128 @@ export class Utils {
   };
 
   protected getDbData = async (dbPath?: string, mockServer?: MockServer) => {
-    const userData = await this.getDataFromUrl(dbPath?.replace(/\\/g, '/'), mockServer);
+    const userData = await this.getDataFromUrl(dbPath?.replace(/\\/g, '/'), { mockServer });
     const dbData = this.isPlainObject(userData) ? normalizeDb(userData, Settings.dbMode) : {};
     return dbData;
   };
 
   protected getEnvData = async (mockServer?: MockServer) => {
-    const environment = this.storageManager.getValue("mockEnv", { fileName: "none" }) as PathDetails;
-    if (environment.fileName === "none") return {};
+    const environment = this.storageManager.getValue("environment", NO_ENV);
+    if (environment.envName === NO_ENV.envName) return {};
 
-    const userData = await this.getDataFromUrl(environment.filePath, mockServer);
-    const envData = this.isPlainObject(userData) ? normalizeDb(userData, Settings.dbMode) : {};
-    return envData;
+    const result: any = {};
+    const rootPath = Settings.paths.envDir;
+
+    if (environment.db.length) {
+      try {
+        const promises = environment.db.map(dbPath => this.getDataFromUrl(dbPath, { mockServer, rootPath }));
+        const dbList = await Promise.all(promises);
+        const db = dbList.reduce((res, dbObj) => ({ ...res, ...dbObj }), {});
+        result.db = db;
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    if (environment.injectors.length) {
+      try {
+        const promises = environment.injectors.map(injectorPath => this.getDataFromUrl(injectorPath, { mockServer, rootPath, isList: true }));
+        const injectorsList = await Promise.all(promises);
+        const injectors = injectorsList.reduce((res, injectorList) => ([...res, ...injectorList]), []);
+        result.injectors = injectors;
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    if (environment.middlewares.length) {
+      try {
+        const promises = environment.middlewares.map(middlewaresPath => this.getDataFromUrl(middlewaresPath, { mockServer, rootPath }));
+        const middlewaresList = await Promise.all(promises);
+        const middlewares = middlewaresList.reduce((res, middlewareObj) => ({ ...res, ...middlewareObj }), {});
+        result.middlewares = middlewares;
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    return result;
   };
 
-  protected getDataFromUrl = async (mockPath?: string, mockServer?: MockServer, isList: boolean = false) => {
+  protected getDataFromUrl = async (mockPath?: string, {
+    mockServer,
+    isList = false,
+    rootPath = Settings.rootPath
+  }: { mockServer?: MockServer, isList?: boolean, rootPath?: string } = {}) => {
     if (!mockPath) return;
     if (mockPath.startsWith("http")) {
       const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
       return data;
     } else {
-      const data = requireData(mockPath, Settings.rootPath, isList);
-      const env = this.storageManager.getValue("mockEnv", "none");
+      const data = requireData(mockPath, rootPath, isList);
+      const env = this.storageManager.getValue("mockEnv", NO_ENV);
       return typeof data === 'function' ? await data(mockServer, env) : data;
     }
   };
 
-  protected getEnvironmentList = (envDir: string = '') => getFilesList(envDir, [], true, false)
-    .filter(file => [".har", ".json", ".js"].includes(file.extension))
-    .map(file => ({ ...file, fileName: file.fileName.toLowerCase() })) as PathDetails[];
+  protected getEnvironmentList = async (mockServer?: MockServer) => {
+    const envDir = Settings.paths.envDir;
+    if (!envDir) return [NO_ENV];
+
+    const envFilesList = getFilesList(envDir, [], true, false)
+      .filter(file => [".har", ".json", ".js"].includes(file.extension))
+      .map((file: any) => ({
+        envName: file.fileName,
+        db: [].concat(file.filePath).filter(Boolean),
+        injectors: [],
+        middlewares: [],
+        label: file.fileName,
+        description: Settings.paths.envDir ? path.relative(Settings.paths.envDir, file.filePath) : '',
+        kind: vscode.QuickPickItemKind.Default
+      }))
+      .filter(file =>
+        !["injectors", "middlewares", "env.config"].includes(file.envName) &&
+        !file.description.startsWith("injectors\\") &&
+        !file.description.startsWith("middlewares\\")
+      );
+
+    let envConfig = await this.getDataFromUrl("./env.config.json", { mockServer, rootPath: envDir });
+    envConfig = this.isPlainObject(envConfig) ? envConfig : {};
+
+    const envConfigList = Object.entries(envConfig).map(([envName, envConfig]: [string, any]) => ({
+      envName,
+      db: [].concat(envConfig.db).filter(Boolean),
+      injectors: [].concat(envConfig.injectors).filter(Boolean),
+      middlewares: [].concat(envConfig.middlewares).filter(Boolean),
+      label: envName,
+      description: envConfig.description || "env.config.json",
+      kind: vscode.QuickPickItemKind.Default
+    }));
+
+    const environmentList = [NO_ENV, ...envConfigList, ...envFilesList];
+
+    // making the selected environment to appear in first of the list
+    const selectedEnv = this.storageManager.getValue("environment", NO_ENV);
+    const selectedEnvIndex = environmentList.findIndex((environment) => JSON.stringify(environment) === JSON.stringify(selectedEnv));
+
+    if (selectedEnvIndex >= 0) {
+      const existing = environmentList.splice(selectedEnvIndex, 1);
+      environmentList.unshift(existing[0]);
+      environmentList.unshift({
+        envName: "",
+        label: "recently used",
+        db: [],
+        injectors: [],
+        middlewares: [],
+        description: "",
+        kind: vscode.QuickPickItemKind.Separator
+      });
+    } else {
+      this.storageManager.setValue("environment", NO_ENV);
+    }
+
+    return environmentList;
+  };
 
   protected restartOnChange = (db: Db = {}) => {
     // If watcher is already watching then do nothing

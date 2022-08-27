@@ -56,9 +56,25 @@ Helps to work in multiple data environments.
 - Keep you different db data of extension `.json` or `.har`
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Switch Environment`
 - Use`Alt+S` shortcut to switch environment.
-- Now All the `.json` will be listed down. You can pick a data to launch the server.
-- Note `.har` will automatically converted into `.json` with a valid db routes.
 - This path can be modified using the settings `mock-server.settings.paths.envDir`.
+- Now all the `.json`, `.har`, `.js` files will be listed down. You can pick a data to launch the server.
+- You can create a `env.config.json` file to create a custom database environment.
+  For Example: `env/env.config.json`
+  ```json
+  // These names will be listed in the environment pick list
+  {
+    "Your Environment Name": {
+      "db": "./testDb.json",
+      "injectors": "./testInjectors.json",
+      "middlewares": "./testMiddlewares.js",
+      "description": "Your description here" // This description will be shown in the switch environment pick list
+    },
+    "Your New  Environment Name": {
+      "db": ["./testDb2.json", "./testDb2.json"] // Can also provide multiple paths
+    }
+  }
+  ```
+  > Note: All the paths given in the `env.config.json` will be relative to the path given in `mock-server.settings.paths.envDir`. File or Folder name with `injectors` and `middlewares` will not list in the pick list.
 
 ### `Get Db Snapshot`
 

@@ -1,7 +1,6 @@
 import { DbMode } from '@r35007/mock-server/dist/server/types/common.types';
 import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
 import * as fs from "fs";
-import * as ip from "ip";
 import * as path from "path";
 import * as vscode from "vscode";
 
@@ -32,8 +31,7 @@ export class Settings {
     return paths;
   }
   static get host() {
-    const host = Settings.getSettings("host") as string || '';
-    return host?.trim()?.length ? host : ip.address();
+    return Settings.getSettings("host") as string || '';
   }
   static get port() {
     return (Settings.getSettings("port") as number);

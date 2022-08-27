@@ -3,6 +3,26 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v9.3.0
+
+- added - Create a custom database test environment using `env.config.json`.
+  For Example: `env/env.config.json`
+  ```json
+  // These names will be listed in the environment pick list
+  {
+    "Your Environment Name": {
+      "db": "./testDb.json",
+      "injectors": "./testInjectors.json",
+      "middlewares": "./testMiddlewares.js",
+      "description": "Your description here" // This description will be shown in the switch environment pick list
+    },
+    "Your New  Environment Name": {
+      "db": ["./testDb2.json", "./testDb2.json"] // Can also provide multiple paths
+    }
+  }
+  ```
+  > Note: All the paths given in the `env.config.json` will be relative to the path given in `mock-server.settings.paths.envDir`. File or Folder name with `injectors` and `middlewares` will not list in the pick list.
+
 ## v9.2.2
 
 - updated - Switch Environment pick list shows relative File path of the `env` directory.

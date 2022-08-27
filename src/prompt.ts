@@ -1,18 +1,11 @@
-import { PathDetails } from '@r35007/mock-server/dist/server/types/common.types';
-import * as path from "path";
 import * as vscode from "vscode";
 import { PromptAction } from './enum';
 import { Settings } from "./Settings";
 
 export class Prompt {
-  static getEnvironment = async (envNameList: PathDetails[]) => {
-    const pickList = envNameList.map(env => ({
-      ...env,
-      label: env.fileName,
-      description: env.filePath && Settings.paths.envDir ? path.relative(Settings.paths.envDir, env.filePath) : ''
-    }));
-    return vscode.window.showQuickPick(pickList, {
-      placeHolder: "Please select a file",
+  static getEnvironment = async <T extends vscode.QuickPickItem>(envNameList: T[]): Promise<T | undefined> => {
+    return vscode.window.showQuickPick(envNameList, {
+      placeHolder: "Please select a Environment",
     });
   };
 
