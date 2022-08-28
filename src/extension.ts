@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
     return output.appendLine(`${newLine}[${new Date().toLocaleTimeString()}] ${message}`)
   };
   const clearLog = output.clear;
-  
+
   StatusbarUi.init(log);
 
   const server = new Server(context, log, clearLog);
@@ -25,13 +25,16 @@ export function activate(context: vscode.ExtensionContext) {
     try {
       log('[Running] Data Transform initiated', '\n');
       log('Data Transforming...');
-      await server.transformToMockServerDB(args);
+      await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: "Please wait. Data Transforming...",
+      }, async () => await server.transformToMockServerDB(args));
       log('[Done] Data Transformed Successfully');
     } catch (error: any) {
       log(`[Error] Failed to Transform. ${error.message}`);
       log(error);
       Prompt.showPopupMessage(`Failed to Transform. \n${error.message}`, PromptAction.ERROR);
-    }
+    };
   }));
 
   // Start Server
@@ -100,7 +103,10 @@ export function activate(context: vscode.ExtensionContext) {
     try {
       log(`[Running] Db Snapshot initiated`, "\n");
       log(`Getting Db Snapshot..`);
-      await server.getDbSnapshot(args);
+      await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: "Please wait. Getting Db Snapshot...",
+      }, async () => await server.getDbSnapshot(args));
       log(`[Done] Db Snapshot retrieved Successfully`);
     } catch (error: any) {
       log(`[Error] Failed to get Db Snapshot`);
@@ -120,7 +126,10 @@ export function activate(context: vscode.ExtensionContext) {
     try {
       log(`[Running] Creating Samples initiated`, "\n");
       log('\nCreating Samples...');
-      await server.generateMockFiles(args);
+      await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: "Please wait. Generating Sample Mock Files...",
+      }, async () => await server.generateMockFiles(args));
       log('[Done] Sample files created.');
     } catch (error: any) {
       log(`[Error] Failed to Create Samples`);

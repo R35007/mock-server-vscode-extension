@@ -12,6 +12,8 @@ import { Prompt } from './prompt';
 import { Settings } from './Settings';
 import { Utils } from './utils';
 
+const delay = (milliSeconds: number) => new Promise(resolve => setTimeout(() => resolve(true), milliSeconds));
+
 export default class MockServerExt extends Utils {
 
   constructor(context: vscode.ExtensionContext, output: Function, clearLog: Function) {
@@ -41,6 +43,7 @@ export default class MockServerExt extends Utils {
   };
 
   transformToMockServerDB = async (args?: any) => {
+    await delay(1000);
     const editorProps = this.getEditorProps();
     if (!editorProps) throw Error("Invalid File or path");
 
@@ -65,7 +68,7 @@ export default class MockServerExt extends Utils {
 
     if (!Object.keys(db).length) throw Error("Invalid Data");
 
-    this.writeFile(
+    await this.writeFile(
       JSON.stringify(db, null, '\t'),
       'Data Transformed Successfully',
       editor,
@@ -179,6 +182,7 @@ export default class MockServerExt extends Utils {
   };
 
   getDbSnapshot = async (_args?: any) => {
+    await delay(1000);
     const editorProps = this.getEditorProps();
     if (!editorProps) throw Error("Invalid File or path");
 
@@ -200,6 +204,7 @@ export default class MockServerExt extends Utils {
   };
 
   generateMockFiles = async (args?: any) => {
+    await delay(1000);
     await createSampleFiles(args?.fsPath || Settings.rootPath);
   };
 }

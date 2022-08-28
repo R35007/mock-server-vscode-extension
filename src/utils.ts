@@ -26,7 +26,7 @@ export class Utils {
     this.clearLog = clearLog;
     if (!this.storageManager) {
       this.storageManager = new LocalStorageService(context.workspaceState);
-      this.storageManager.setValue("mockEnv", "none");
+      this.storageManager.setValue("environment", NO_ENV);
     }
   }
 
@@ -134,7 +134,7 @@ export class Utils {
       return data;
     } else {
       const data = requireData(mockPath, rootPath, isList);
-      const env = this.storageManager.getValue("mockEnv", NO_ENV);
+      const env = this.storageManager.getValue("environment", NO_ENV);
       return typeof data === 'function' ? await data(mockServer, env) : data;
     }
   };
@@ -160,8 +160,12 @@ export class Utils {
         !file.description.startsWith("middlewares\\")
       );
 
-    let envConfig = await this.getDataFromUrl("./env.config.json", { mockServer, rootPath: envDir });
-    envConfig = this.isPlainObject(envConfig) ? envConfig : {};
+    let envConfigJson = await this.getDataFromUrl("./env.config.json", { mockServer, rootPath: envDir });
+    envConfigJson = this.isPlainObject(envConfigJson) ? envConfigJson : {};
+    let envConfigJs = await this.getDataFromUrl("./env.config.js", { mockServer, rootPath: envDir });
+    envConfigJs = this.isPlainObject(envConfigJs) ? envConfigJs : {};
+
+    const envConfig = { ...envConfigJson, ...envConfigJs };
 
     const envConfigList = Object.entries(envConfig).map(([envName, envConfig]: [string, any]) => ({
       envName,

@@ -3,6 +3,11 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v9.3.1
+
+- fixed - `Switch Environment` not working issue fixed.
+- added - progress bar for `Transform to Mock Server Db`, `Get Db Snapshot`, `Generate Sample Mock Files`.
+
 ## v9.3.0
 
 - added - Create a custom database test environment using `env.config.json`.
