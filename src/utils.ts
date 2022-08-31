@@ -7,6 +7,7 @@ import { getFilesList, requireData } from "@r35007/mock-server/dist/server/utils
 import axios from 'axios';
 import { watch } from 'chokidar';
 import * as fs from "fs";
+import * as fsx from "fs-extra";
 import { FSWatcher } from 'node:fs';
 import * as path from "path";
 import * as vscode from "vscode";
@@ -133,7 +134,7 @@ export class Utils {
       const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
       return data;
     } else {
-      const data = requireData(mockPath, rootPath, isList);
+      const data = requireData(mockPath, { rootPath, isList });
       const env = this.storageManager.getValue("environment", NO_ENV);
       return typeof data === 'function' ? await data(mockServer, env) : data;
     }
@@ -143,7 +144,7 @@ export class Utils {
     const envDir = Settings.paths.envDir;
     if (!envDir) return [NO_ENV];
 
-    const envFilesList = getFilesList(envDir, [], true, false)
+    const envFilesList = getFilesList(envDir, { onlyIndex: false })
       .filter(file => [".har", ".json", ".js"].includes(file.extension))
       .map((file: any) => ({
         envName: file.fileName,
@@ -240,6 +241,10 @@ export class Utils {
 
   protected isPlainObject = (obj: any) => {
     return obj && typeof obj === 'object' && !Array.isArray(obj);
+  };
+
+  protected createSampleFiles = (rootPath: string = process.cwd()) => {
+    fsx.copySync(path.join(__dirname, '../samples'), rootPath);
   };
 }
 

@@ -1,7 +1,7 @@
 import { MockServer } from "@r35007/mock-server";
 import { HAR, KIBANA } from '@r35007/mock-server/dist/server/types/common.types';
 import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
-import { cleanDb, createSampleFiles, extractDbFromHAR, extractDbFromKibana } from '@r35007/mock-server/dist/server/utils';
+import { cleanDb, extractDbFromHAR, extractDbFromKibana } from '@r35007/mock-server/dist/server/utils';
 import { requireData } from '@r35007/mock-server/dist/server/utils/fetch';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -22,7 +22,7 @@ export default class MockServerExt extends Utils {
   }
 
   createServer = () => {
-    this.mockServer = new MockServer({ root: Settings.rootPath });
+    this.mockServer = new MockServer({ rootPath: Settings.rootPath });
     this.clearLog();
     this.log('Mock Server Server Initiated', "\n");
     this.log("Paths - mock-server.settings.paths: ", "\n");
@@ -137,7 +137,7 @@ export default class MockServerExt extends Utils {
     const envResources = mockServer.resources(env.db, {
       injectors: env.injectors,
       middlewares: env.middlewares,
-      log
+      log: "Environment Resource"
     });
     app.use(mockServer.config.base, envResources);
 
@@ -205,6 +205,6 @@ export default class MockServerExt extends Utils {
 
   generateMockFiles = async (args?: any) => {
     await delay(1000);
-    await createSampleFiles(args?.fsPath || Settings.rootPath);
+    await this.createSampleFiles(args?.fsPath || Settings.rootPath);
   };
 }

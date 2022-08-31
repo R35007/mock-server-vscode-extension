@@ -73,9 +73,6 @@ export class Settings {
   static get shouldWatch(): boolean {
     return Settings.getSettings("watchForChanges") as boolean;
   }
-  static get fullReload(): boolean {
-    return Settings.getSettings("fullReload") as boolean;
-  }
   static get homePage(): boolean {
     return Settings.getSettings("homePage") as boolean;
   }
@@ -115,7 +112,7 @@ export class Settings {
       port: Settings.port,
       host: Settings.host,
       id: Settings.id,
-      root: Settings.rootPath,
+      rootPath: Settings.rootPath,
       base: Settings.base,
       reverse: Settings.reverse,
       staticDir: Settings.paths.staticDir || "/public",

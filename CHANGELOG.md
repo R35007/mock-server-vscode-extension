@@ -3,6 +3,11 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v10.0.0
+
+- Updated `@r35007/mock-server@10.1.0`.
+- Removed - `mock-server.settings.fullReload`. By default It always resets and restarts the server on changes.
+
 ## v9.3.1
 
 - fixed - `Switch Environment` not working issue fixed.

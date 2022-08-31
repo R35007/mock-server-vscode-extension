@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
   const output = vscode.window.createOutputChannel("Mock Server Log");
   const log = (message: string, newLine: string = '', noDate: boolean = false) => {
     if (noDate) return output.appendLine(`${newLine}${message}`);
-    return output.appendLine(`${newLine}[${new Date().toLocaleTimeString()}] ${message}`)
+    return output.appendLine(`${newLine}[${new Date().toLocaleTimeString()}] ${message}`);
   };
   const clearLog = output.clear;
 
@@ -42,17 +42,10 @@ export function activate(context: vscode.ExtensionContext) {
     if (server.mockServer.server) { // If server already running then restart the server
       try {
         StatusbarUi.working(ServerStatus.RESTART);
-        if (Settings.fullReload) {
-          log('Server Resetting...');
-          await server.resetServer();
-          log('[Done] Server Reset Done');
-          await server.startServer(args?.fsPath);
-        } else {
-          log('Server Stopping...');
-          await server.stopServer();
-          log('[Done] Server Stopped');
-          await server.startServer(args?.fsPath);
-        }
+        log('Server Resetting...');
+        await server.resetServer();
+        log('[Done] Server Reset Done');
+        await server.startServer(args?.fsPath);
         StatusbarUi.stopServer(ServerStatus.RESTART, server.mockServer.port!, server.mockServer.listeningTo!);
       } catch (error: any) {
         await server.resetServer();
