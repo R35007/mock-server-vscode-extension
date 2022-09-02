@@ -82,15 +82,15 @@ export class Utils {
   };
 
   protected getEnvData = async (mockServer?: MockServer) => {
-    const environment = this.storageManager.getValue("environment", NO_ENV);
-    if (environment.envName === NO_ENV.envName) return {};
+    const selectedEnv = this.storageManager.getValue("environment", NO_ENV);
+    if (selectedEnv.envName === NO_ENV.envName) return {};
 
     const result: any = {};
-    const rootPath = Settings.paths.envDir;
+    const root = Settings.paths.environment;
 
-    if (environment.db.length) {
+    if (selectedEnv.db.length) {
       try {
-        const promises = environment.db.map(dbPath => this.getDataFromUrl(dbPath, { mockServer, rootPath }));
+        const promises = selectedEnv.db.map(dbPath => this.getDataFromUrl(dbPath, { mockServer, root }));
         const dbList = await Promise.all(promises);
         const db = dbList.reduce((res, dbObj) => ({ ...res, ...dbObj }), {});
         result.db = db;
@@ -99,9 +99,9 @@ export class Utils {
       }
     }
 
-    if (environment.injectors.length) {
+    if (selectedEnv.injectors.length) {
       try {
-        const promises = environment.injectors.map(injectorPath => this.getDataFromUrl(injectorPath, { mockServer, rootPath, isList: true }));
+        const promises = selectedEnv.injectors.map(injectorPath => this.getDataFromUrl(injectorPath, { mockServer, root, isList: true }));
         const injectorsList = await Promise.all(promises);
         const injectors = injectorsList.reduce((res, injectorList) => ([...res, ...injectorList]), []);
         result.injectors = injectors;
@@ -110,9 +110,9 @@ export class Utils {
       }
     }
 
-    if (environment.middlewares.length) {
+    if (selectedEnv.middlewares.length) {
       try {
-        const promises = environment.middlewares.map(middlewaresPath => this.getDataFromUrl(middlewaresPath, { mockServer, rootPath }));
+        const promises = selectedEnv.middlewares.map(middlewaresPath => this.getDataFromUrl(middlewaresPath, { mockServer, root }));
         const middlewaresList = await Promise.all(promises);
         const middlewares = middlewaresList.reduce((res, middlewareObj) => ({ ...res, ...middlewareObj }), {});
         result.middlewares = middlewares;
@@ -127,24 +127,24 @@ export class Utils {
   protected getDataFromUrl = async (mockPath?: string, {
     mockServer,
     isList = false,
-    rootPath = Settings.rootPath
-  }: { mockServer?: MockServer, isList?: boolean, rootPath?: string } = {}) => {
+    root = Settings.root
+  }: { mockServer?: MockServer, isList?: boolean, root?: string } = {}) => {
     if (!mockPath) return;
     if (mockPath.startsWith("http")) {
       const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
       return data;
     } else {
-      const data = requireData(mockPath, { rootPath, isList });
+      const data = requireData(mockPath, { root, isList });
       const env = this.storageManager.getValue("environment", NO_ENV);
       return typeof data === 'function' ? await data(mockServer, env) : data;
     }
   };
 
   protected getEnvironmentList = async (mockServer?: MockServer) => {
-    const envDir = Settings.paths.envDir;
-    if (!envDir) return [NO_ENV];
+    const environment = Settings.paths.environment;
+    if (!environment) return [NO_ENV];
 
-    const envFilesList = getFilesList(envDir, { onlyIndex: false })
+    const envFilesList = getFilesList(environment, { onlyIndex: false })
       .filter(file => [".har", ".json", ".js"].includes(file.extension))
       .map((file: any) => ({
         envName: file.fileName,
@@ -152,7 +152,7 @@ export class Utils {
         injectors: [],
         middlewares: [],
         label: file.fileName,
-        description: Settings.paths.envDir ? path.relative(Settings.paths.envDir, file.filePath) : '',
+        description: Settings.paths.environment ? path.relative(Settings.paths.environment, file.filePath) : '',
         kind: vscode.QuickPickItemKind.Default
       }))
       .filter(file =>
@@ -161,9 +161,9 @@ export class Utils {
         !file.description.startsWith("middlewares\\")
       );
 
-    let envConfigJson = await this.getDataFromUrl("./env.config.json", { mockServer, rootPath: envDir });
+    let envConfigJson = await this.getDataFromUrl("./env.config.json", { mockServer, root: environment });
     envConfigJson = this.isPlainObject(envConfigJson) ? envConfigJson : {};
-    let envConfigJs = await this.getDataFromUrl("./env.config.js", { mockServer, rootPath: envDir });
+    let envConfigJs = await this.getDataFromUrl("./env.config.js", { mockServer, root: environment });
     envConfigJs = this.isPlainObject(envConfigJs) ? envConfigJs : {};
 
     const envConfig = { ...envConfigJson, ...envConfigJs };
@@ -217,8 +217,8 @@ export class Utils {
       Settings.paths.injectors,
       Settings.paths.rewriters,
       Settings.paths.store,
-      Settings.paths.staticDir,
-      Settings.paths.envDir,
+      Settings.paths.static,
+      Settings.paths.environment,
       ...Settings.watchFiles,
       ...fetchPaths
     ]
@@ -243,8 +243,8 @@ export class Utils {
     return obj && typeof obj === 'object' && !Array.isArray(obj);
   };
 
-  protected createSampleFiles = (rootPath: string = process.cwd()) => {
-    fsx.copySync(path.join(__dirname, '../samples'), rootPath);
+  protected createSampleFiles = (root: string = process.cwd()) => {
+    fsx.copySync(path.join(__dirname, '../samples'), root);
   };
 }
 

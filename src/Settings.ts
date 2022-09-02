@@ -18,15 +18,15 @@ export class Settings {
 
   static get paths() {
     const paths = {
-      root: Settings.rootPath,
-      db: Settings.getValidPath('db', Settings.getSettings("paths.db") as string, "db.json"),
-      middleware: Settings.getValidPath('middleware', Settings.getSettings("paths.middleware") as string, "middleware.js"),
-      injectors: Settings.getValidPath('injectors', Settings.getSettings("paths.injectors") as string, "injectors.json"),
-      store: Settings.getValidPath('store', Settings.getSettings("paths.store") as string, "store.json"),
-      rewriters: Settings.getValidPath('rewriters', Settings.getSettings("paths.rewriters") as string, "rewriter.json"),
-      envDir: Settings.getValidPath('envDir', Settings.getSettings("paths.envDir") as string, "env"),
-      staticDir: Settings.getValidPath('staticDir', Settings.getSettings("paths.staticDir") as string, "public"),
-      snapshotDir: Settings.getValidPath('snapshotDir', Settings.getSettings("paths.snapshotDir") as string, "snapshots") || path.resolve(Settings.rootPath, "snapshots")
+      root: Settings.root,
+      db: Settings.getValidPath(Settings.getSettings("paths.db") as string, "db.json"),
+      middleware: Settings.getValidPath(Settings.getSettings("paths.middleware") as string, "middleware.js"),
+      injectors: Settings.getValidPath(Settings.getSettings("paths.injectors") as string, "injectors.json"),
+      store: Settings.getValidPath(Settings.getSettings("paths.store") as string, "store.json"),
+      rewriters: Settings.getValidPath(Settings.getSettings("paths.rewriters") as string, "rewriter.json"),
+      environment: Settings.getValidPath(Settings.getSettings("paths.environment") as string, "env"),
+      static: Settings.getValidPath(Settings.getSettings("paths.static") as string, "public"),
+      snapshots: Settings.getValidPath(Settings.getSettings("paths.snapshots") as string, "snapshots") || path.resolve(Settings.root, "snapshots")
     };
     return paths;
   }
@@ -94,16 +94,16 @@ export class Settings {
   }
 
 
-  static get rootPath() {
-    const rootPath = Settings.getSettings("paths.root") as string;
-    const resolvedRootPath = path.resolve((vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./"), rootPath);
+  static get root() {
+    const _root = Settings.getSettings("paths.root") as string;
+    const resolvedRootPath = path.resolve((vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./"), _root);
     if (fs.existsSync(resolvedRootPath)) return resolvedRootPath;
     return path.resolve(vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./");
   }
-  static set rootPath(root: string) {
+  static set root(_root: string) {
     Settings.setSettings("paths", {
       ...(Settings.getSettings("paths") as object || {}),
-      root,
+      root: _root,
     });
   }
   static get config(): UserTypes.Config {
@@ -112,19 +112,19 @@ export class Settings {
       port: Settings.port,
       host: Settings.host,
       id: Settings.id,
-      rootPath: Settings.rootPath,
+      root: Settings.root,
       base: Settings.base,
       reverse: Settings.reverse,
-      staticDir: Settings.paths.staticDir || "/public",
+      static: Settings.paths.static || "/public",
       ...Settings.defaults
     };
     return config;
   }
 
-  static getValidPath(type: string, relativePath: string, defaults: string) {
+  static getValidPath(relativePath: string, defaults: string) {
     if (relativePath.startsWith("http")) return relativePath?.replace(/\\/g, '/');
 
-    const resolvedPath = path.resolve(Settings.rootPath, relativePath?.trim() || defaults);
+    const resolvedPath = path.resolve(Settings.root, relativePath?.trim() || defaults);
     if (!fs.existsSync(resolvedPath)) return;
     return resolvedPath?.replace(/\\/g, '/');
   }

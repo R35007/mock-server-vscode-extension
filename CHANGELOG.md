@@ -3,6 +3,13 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v10.2.0
+
+- Updated `@r35007/mock-server@10.2.0`.
+- renamed - `mock-server.settings.paths.envDir` to `mock-server.settings.paths.environment`
+- renamed - `mock-server.settings.paths.staticDir` to `mock-server.settings.paths.static`
+- renamed - `mock-server.settings.paths.snapshotDir` to `mock-server.settings.paths.snapshots`
+
 ## v10.0.0
 
 - Updated `@r35007/mock-server@10.1.0`.
@@ -31,7 +38,7 @@
     }
   }
   ```
-  > Note: All the paths given in the `env.config.json` will be relative to the path given in `mock-server.settings.paths.envDir`. File or Folder name with `injectors` and `middlewares` will not list in the pick list.
+  > Note: All the paths given in the `env.config.json` will be relative to the path given in `mock-server.settings.paths.environment`. File or Folder name with `injectors` and `middlewares` will not list in the pick list.
 
 ## v9.2.2
 

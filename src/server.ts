@@ -22,7 +22,7 @@ export default class MockServerExt extends Utils {
   }
 
   createServer = () => {
-    this.mockServer = new MockServer({ rootPath: Settings.rootPath });
+    this.mockServer = new MockServer({ root: Settings.root });
     this.clearLog();
     this.log('Mock Server Server Initiated', "\n");
     this.log("Paths - mock-server.settings.paths: ", "\n");
@@ -91,10 +91,10 @@ export default class MockServerExt extends Utils {
   setRoot = async (args?: any) => {
     if (!args?.fsPath) return;
     const stat = fs.statSync(args.fsPath);
-    const rootPath = stat.isFile() ? path.dirname(args.fsPath) : args.fsPath;
-    Settings.rootPath = rootPath;
-    Prompt.showPopupMessage(`Root Path Set to ${rootPath}`);
-    this.log(`[Done] Root Path Set to ${rootPath}`);
+    const root = stat.isFile() ? path.dirname(args.fsPath) : args.fsPath;
+    Settings.root = root;
+    Prompt.showPopupMessage(`Root Path Set to ${root}`);
+    this.log(`[Done] Root Path Set to ${root}`);
   };
 
   startServer = async (fsPath?: string, port: number = Settings.port) => {
@@ -191,7 +191,7 @@ export default class MockServerExt extends Utils {
     const db = JSON.parse(JSON.stringify(this.mockServer.db));
     cleanDb(db);
 
-    const snapShotPath = path.join(Settings.paths.snapshotDir || 'snapshots', `/db-${Date.now()}.json`);
+    const snapShotPath = path.join(Settings.paths.snapshots || 'snapshots', `/db-${Date.now()}.json`);
 
     this.writeFile(
       JSON.stringify(db, null, '\t'),
@@ -205,6 +205,6 @@ export default class MockServerExt extends Utils {
 
   generateMockFiles = async (args?: any) => {
     await delay(1000);
-    await this.createSampleFiles(args?.fsPath || Settings.rootPath);
+    await this.createSampleFiles(args?.fsPath || Settings.root);
   };
 }

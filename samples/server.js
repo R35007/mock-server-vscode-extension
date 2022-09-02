@@ -3,10 +3,11 @@
 const { MockServer } = require("@r35007/mock-server");
 // const MockServer = require("@r35007/mock-server").default; // For default import
 
-const log = false; // Set to true to see logs
+const quiet = false; // Set to true to suppress console logs
+const log = false; // Set to true to see logs. If quiet is false the we cant see the setter logs.
 const port = 3000; // Set Port to 0 to pick a random available port. default: 3000
 const host = "localhost"; // Set empty string to set your Local Ip Address
-const config = { rootPath: __dirname, port, host };
+const config = { root: __dirname, port, host, quiet };
 const mockServer = MockServer.Create(config);
 
 const app = mockServer.app;

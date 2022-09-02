@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "10.0.0",
+  "version": "10.2.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -120,9 +120,9 @@
             "injectors": "injectors.json",
             "rewriters": "rewriters.json",
             "store": "store.json",
-            "staticDir": "public",
-            "envDir": "env",
-            "snapshotDir": "snapshots"
+            "static": "public",
+            "environment": "env",
+            "snapshots": "snapshots"
           },
           "properties": {
             "root": {
@@ -149,15 +149,15 @@
               "type": "string",
               "description": "Set .js or .json or http url here."
             },
-            "staticDir": {
+            "static": {
               "type": "string",
               "description": "Set path to static files."
             },
-            "envDir": {
+            "environment": {
               "type": "string",
               "description": "Set path to environment files."
             },
-            "snapshotDir": {
+            "snapshots": {
               "type": "string",
               "description": "Set SnapShot Folder directory."
             }
@@ -432,7 +432,7 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@r35007/mock-server": "^10.1.0",
+    "@r35007/mock-server": "^10.2.0",
     "axios": "^0.21.1",
     "chokidar": "^3.5.2",
     "express": "^4.17.1",
