@@ -1,9 +1,10 @@
 import { MockServer } from "@r35007/mock-server";
 import { HAR, KIBANA } from '@r35007/mock-server/dist/server/types/common.types';
 import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
-import { cleanDb, extractDbFromHAR, extractDbFromKibana } from '@r35007/mock-server/dist/server/utils';
+import { extractDbFromHAR, extractDbFromKibana, getCleanDb } from '@r35007/mock-server/dist/server/utils';
 import { requireData } from '@r35007/mock-server/dist/server/utils/fetch';
 import * as fs from 'fs';
+import * as fsx from "fs-extra";
 import * as path from 'path';
 import * as vscode from "vscode";
 import { Commands, PromptAction } from './enum';
@@ -44,12 +45,12 @@ export default class MockServerExt extends Utils {
 
   transformToMockServerDB = async (args?: any) => {
     await delay(1000);
-    const editorProps = this.getEditorProps();
-    if (!editorProps) throw Error("Invalid File or path");
+    const { document } = this.getEditorProps(args);
+    const currentFilePath = args?.fsPath || document?.uri?.fsPath;
 
-    const { editor, document, textRange } = editorProps;
+    if (!currentFilePath) throw Error("Invalid File or path");
 
-    const userData = requireData(args?.fsPath || document?.uri?.fsPath);
+    const userData = requireData(currentFilePath);
     const middlewares = await this.getDataFromUrl(Settings.paths.middleware);
 
     const db = extractDbFromHAR(
@@ -63,18 +64,9 @@ export default class MockServerExt extends Utils {
       middlewares?._kibanaDbCallback,
       Settings.iterateDuplicateRoutes
     ) || {};
-
-    cleanDb(db as UserTypes.Db, Settings.dbMode);
-
-    if (!Object.keys(db).length) throw Error("Invalid Data");
-
-    await this.writeFile(
-      JSON.stringify(db, null, '\t'),
-      'Data Transformed Successfully',
-      editor,
-      document,
-      textRange
-    );
+    const cleanDb = getCleanDb(db as UserTypes.Db, Settings.dbMode);
+    if (!Object.keys(cleanDb).length) throw Error("Invalid Data");
+    await this.writeFile(currentFilePath, cleanDb, 'Data Transformed Successfully');
   };
 
   setPort = async (_args?: any) => {
@@ -183,28 +175,12 @@ export default class MockServerExt extends Utils {
 
   getDbSnapshot = async (_args?: any) => {
     await delay(1000);
-    const editorProps = this.getEditorProps();
-    if (!editorProps) throw Error("Invalid File or path");
-
-    const { editor, document, textRange } = editorProps;
-
-    const db = JSON.parse(JSON.stringify(this.mockServer.db));
-    cleanDb(db);
-
-    const snapShotPath = path.join(Settings.paths.snapshots || 'snapshots', `/db-${Date.now()}.json`);
-
-    this.writeFile(
-      JSON.stringify(db, null, '\t'),
-      'Db Snapshot retrieved Successfully',
-      editor,
-      document,
-      textRange,
-      snapShotPath
-    );
+    const snapShotPath = path.resolve(Settings.paths.snapshots || './snapshots', `./db-${Date.now()}.json`);
+    await this.writeFile(snapShotPath, getCleanDb(this.mockServer.db), 'Db Snapshot retrieved Successfully');
   };
 
   generateMockFiles = async (args?: any) => {
     await delay(1000);
-    await this.createSampleFiles(args?.fsPath || Settings.root);
+    fsx.copySync(path.join(__dirname, '../samples'), args?.fsPath || Settings.root);
   };
 }

@@ -6,7 +6,6 @@ import { normalizeDb } from '@r35007/mock-server/dist/server/utils';
 import { getFilesList, requireData } from "@r35007/mock-server/dist/server/utils/fetch";
 import axios from 'axios';
 import { watch } from 'chokidar';
-import * as fs from "fs";
 import * as fsx from "fs-extra";
 import { FSWatcher } from 'node:fs';
 import * as path from "path";
@@ -33,7 +32,30 @@ export class Utils {
 
   watcher: FSWatcher | undefined;
 
-  protected getEditorProps = () => {
+  protected getVariables = (filePath?: string) => {
+    const file = filePath;
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./";
+    const pathDetail = file ? path.parse(file) : {} as any;
+
+    const variables = {
+      workspaceFolder,
+      workspaceFolderBasename: path.basename(workspaceFolder),
+      currentFile: undefined,
+      file,
+      fileWorkspaceFolder: workspaceFolder,
+      relativeFile: file ? path.relative(workspaceFolder, file) : undefined,
+      relativeFileDirname: pathDetail.dir ? path.basename(pathDetail.dir) : undefined,
+      fileBasename: pathDetail.base,
+      fileBasenameNoExtension: pathDetail.name,
+      fileDirname: pathDetail.dir,
+      fileExtname: pathDetail.ext,
+      pathSeparator: "/"
+    };
+
+    return variables;
+  };
+
+  protected getEditorProps = (args: any) => {
     const editor = vscode.window.activeTextEditor;
     if (editor) {
       const document = editor.document;
@@ -43,36 +65,22 @@ export class Utils {
       const textRange = new vscode.Range(firstLine.range.start, lastLine.range.end);
       const editorText = document.getText(textRange);
       const selectedText = document.getText(selection);
-      return { editor, document, selection, textRange, editorText, selectedText };
+      const variables = this.getVariables(document.fileName);
+      return { editor, document, selection, textRange, editorText, selectedText, variables };
     }
-
-    return false;
+    return { variables: this.getVariables(args?.fsPath) };
   };
 
   protected writeFile = async (
-    data: any,
+    filePath: string,
+    data: any = {},
     notificationText: string,
-    editor: vscode.TextEditor,
-    document: vscode.TextDocument,
-    textRange: vscode.Range,
-    fileName?: string,
   ) => {
-    if (fileName) {
-      const filePath = path.resolve(path.dirname(document.fileName), fileName);
-      const folderPath = path.dirname(filePath) || "/";
-      if (!fs.existsSync(folderPath)) {
-        fs.mkdirSync(folderPath, { recursive: true });
-      }
-      fs.writeFileSync(filePath, data);
-      const doc = await vscode.workspace.openTextDocument(filePath);
-      await vscode.window.showTextDocument(doc, undefined, true);
-      Prompt.showPopupMessage(notificationText);
-    } else {
-      editor.edit((editBuilder) => {
-        editBuilder.replace(textRange, data);
-        Prompt.showPopupMessage(notificationText);
-      });
-    }
+    fsx.ensureFileSync(filePath);
+    fsx.writeFileSync(filePath, JSON.stringify(data, null, "\t"));
+    const doc = await vscode.workspace.openTextDocument(filePath);
+    await vscode.window.showTextDocument(doc, undefined, true);
+    Prompt.showPopupMessage(notificationText);
   };
 
   protected getDbData = async (dbPath?: string, mockServer?: MockServer) => {
@@ -241,10 +249,6 @@ export class Utils {
 
   protected isPlainObject = (obj: any) => {
     return obj && typeof obj === 'object' && !Array.isArray(obj);
-  };
-
-  protected createSampleFiles = (root: string = process.cwd()) => {
-    fsx.copySync(path.join(__dirname, '../samples'), root);
   };
 }
 

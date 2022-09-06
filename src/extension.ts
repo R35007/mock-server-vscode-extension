@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
       log('[Done] Data Transformed Successfully');
     } catch (error: any) {
       log(`[Error] Failed to Transform. ${error.message}`);
-      log(error);
+      console.log(error);
       Prompt.showPopupMessage(`Failed to Transform. \n${error.message}`, PromptAction.ERROR);
     };
   }));
@@ -49,6 +49,8 @@ export function activate(context: vscode.ExtensionContext) {
         StatusbarUi.stopServer(ServerStatus.RESTART, server.mockServer.port!, server.mockServer.listeningTo!);
       } catch (error: any) {
         await server.resetServer();
+        log(`[Error] Server Failed to Restart. ${error.message}`);
+        console.log(error);
         StatusbarUi.startServer(`Server Failed to Restart.`, error);
       }
     } else { // Start a new server
@@ -58,6 +60,8 @@ export function activate(context: vscode.ExtensionContext) {
         StatusbarUi.stopServer(ServerStatus.START, server.mockServer.port!, server.mockServer.listeningTo!);
       } catch (error: any) {
         await server.resetServer();
+        log(`[Error] Server Failed to Start. ${error.message}`);
+        console.log(error);
         StatusbarUi.startServer('Server Failed to Start.', error);
       }
     }
@@ -74,7 +78,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.commands.registerCommand(Commands.START_WITH_NEW_PORT, async (args) => {
     const isServerRunning = server.mockServer.server;
     const status = isServerRunning ? ServerStatus.RESTART : ServerStatus.START;
-
     try {
       const port = await server.setPort();
       if (typeof port === 'undefined') return;
@@ -84,7 +87,9 @@ export function activate(context: vscode.ExtensionContext) {
       StatusbarUi.stopServer(status, server.mockServer.port!, server.mockServer.listeningTo!);
     } catch (error: any) {
       await server.resetServer();
-      StatusbarUi.startServer('Server Failed to Reset and Restart.', error, 150);
+      log(`[Error] Failed to Set Port. ${error.message}`);
+      console.log(error);
+      StatusbarUi.startServer('Failed to Set Port.', error, 150);
     }
   }));
 
@@ -102,8 +107,8 @@ export function activate(context: vscode.ExtensionContext) {
       }, async () => await server.getDbSnapshot(args));
       log(`[Done] Db Snapshot retrieved Successfully`);
     } catch (error: any) {
-      log(`[Error] Failed to get Db Snapshot`);
-      log(error);
+      log(`[Error] Failed to get Db Snapshot. ${error.message}`);
+      console.log(error);
       Prompt.showPopupMessage(`Failed to get Db Snapshot. \n${error.message}`, PromptAction.ERROR);
     }
   }));
@@ -125,8 +130,8 @@ export function activate(context: vscode.ExtensionContext) {
       }, async () => await server.generateMockFiles(args));
       log('[Done] Sample files created.');
     } catch (error: any) {
-      log(`[Error] Failed to Create Samples`);
-      log(error);
+      log(`[Error] Failed to Create Samples. ${error.message}`);
+      console.log(error);
       Prompt.showPopupMessage(`Failed to Create Samples. \n${error.message}`, PromptAction.ERROR);
     }
   }));

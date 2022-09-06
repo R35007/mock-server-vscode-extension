@@ -3,6 +3,11 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v10.3.0
+
+- Updated `@r35007/mock-server@10.3.3`.
+- Fixed - Not Transforming if current text file is larger than 4mb.
+
 ## v10.2.0
 
 - Updated `@r35007/mock-server@10.2.0`.
