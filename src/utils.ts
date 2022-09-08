@@ -157,8 +157,8 @@ export class Utils {
       .map((file: any) => ({
         envName: file.fileName,
         db: [].concat(file.filePath).filter(Boolean),
-        injectors: ["./injectors","./injectors.js", "./injectors.json"],
-        middlewares: ["./middlewares","./middlewares.js"],
+        injectors: ["./injectors/index.js", "./injectors/index.json","./injectors.js", "./injectors.json"],
+        middlewares: ["./middlewares/index.js","./middlewares.js"],
         label: file.fileName,
         description: Settings.paths.environment ? path.relative(Settings.paths.environment, file.filePath) : '',
         kind: vscode.QuickPickItemKind.Default
@@ -179,8 +179,8 @@ export class Utils {
     const envConfigList = Object.entries(envConfig).map(([envName, envConfig]: [string, any]) => ({
       envName,
       db: [].concat(envConfig.db).filter(Boolean),
-      injectors: ["./injectors","./injectors.js", "./injectors.json"].concat(envConfig.injectors).filter(Boolean),
-      middlewares: ["./middlewares","./middlewares.js"].concat(envConfig.middlewares).filter(Boolean),
+      injectors: ["./injectors/index.js","./injectors/index.json", "./injectors.js", "./injectors.json"].concat(envConfig.injectors).filter(Boolean),
+      middlewares: ["./middlewares/index.js","./middlewares.js"].concat(envConfig.middlewares).filter(Boolean),
       label: envName,
       description: envConfig.description || "env.config.json",
       kind: vscode.QuickPickItemKind.Default
