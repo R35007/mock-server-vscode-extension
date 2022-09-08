@@ -127,8 +127,8 @@ export default class MockServerExt extends Utils {
 
     const env = await this.getEnvData(mockServer);
     const envResources = mockServer.resources(env.db, {
-      injectors: env.injectors,
-      middlewares: env.middlewares,
+      injectors: [...mockServer.injectors, ...env.injectors],
+      middlewares: {...mockServer.middlewares, ...env.middlewares},
       log: "Environment Resource"
     });
     app.use(mockServer.config.base, envResources);

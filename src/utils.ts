@@ -100,7 +100,7 @@ export class Utils {
       try {
         const promises = selectedEnv.db.map(dbPath => this.getDataFromUrl(dbPath, { mockServer, root }));
         const dbList = await Promise.all(promises);
-        const db = dbList.reduce((res, dbObj) => ({ ...res, ...dbObj }), {});
+        const db = dbList.filter(Boolean).reduce((res, dbObj) => ({ ...res, ...dbObj }), {});
         result.db = db;
       } catch (err) {
         console.log(err);
@@ -111,7 +111,7 @@ export class Utils {
       try {
         const promises = selectedEnv.injectors.map(injectorPath => this.getDataFromUrl(injectorPath, { mockServer, root, isList: true }));
         const injectorsList = await Promise.all(promises);
-        const injectors = injectorsList.reduce((res, injectorList) => ([...res, ...injectorList]), []);
+        const injectors = injectorsList.filter(Boolean).reduce((res, injectorList) => ([...res, ...injectorList]), []);
         result.injectors = injectors;
       } catch (err) {
         console.log(err);
@@ -122,7 +122,7 @@ export class Utils {
       try {
         const promises = selectedEnv.middlewares.map(middlewaresPath => this.getDataFromUrl(middlewaresPath, { mockServer, root }));
         const middlewaresList = await Promise.all(promises);
-        const middlewares = middlewaresList.reduce((res, middlewareObj) => ({ ...res, ...middlewareObj }), {});
+        const middlewares = middlewaresList.filter(Boolean).reduce((res, middlewareObj) => ({ ...res, ...middlewareObj }), {});
         result.middlewares = middlewares;
       } catch (err) {
         console.log(err);
@@ -157,8 +157,8 @@ export class Utils {
       .map((file: any) => ({
         envName: file.fileName,
         db: [].concat(file.filePath).filter(Boolean),
-        injectors: [],
-        middlewares: [],
+        injectors: ["./injectors","./injectors.js", "./injectors.json"],
+        middlewares: ["./middlewares","./middlewares.js"],
         label: file.fileName,
         description: Settings.paths.environment ? path.relative(Settings.paths.environment, file.filePath) : '',
         kind: vscode.QuickPickItemKind.Default
@@ -179,8 +179,8 @@ export class Utils {
     const envConfigList = Object.entries(envConfig).map(([envName, envConfig]: [string, any]) => ({
       envName,
       db: [].concat(envConfig.db).filter(Boolean),
-      injectors: [].concat(envConfig.injectors).filter(Boolean),
-      middlewares: [].concat(envConfig.middlewares).filter(Boolean),
+      injectors: ["./injectors","./injectors.js", "./injectors.json"].concat(envConfig.injectors).filter(Boolean),
+      middlewares: ["./middlewares","./middlewares.js"].concat(envConfig.middlewares).filter(Boolean),
       label: envName,
       description: envConfig.description || "env.config.json",
       kind: vscode.QuickPickItemKind.Default
