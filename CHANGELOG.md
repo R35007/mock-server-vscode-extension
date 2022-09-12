@@ -3,6 +3,10 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v10.3.2
+
+- Fixed - Server not starting with `none` environment.
+
 ## v10.3.1
 
 - Fixed - Env not picking injectors and middlewares by default.

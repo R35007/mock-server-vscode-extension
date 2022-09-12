@@ -91,9 +91,14 @@ export class Utils {
 
   protected getEnvData = async (mockServer?: MockServer) => {
     const selectedEnv = this.storageManager.getValue("environment", NO_ENV);
-    if (selectedEnv.envName === NO_ENV.envName) return {};
+    const result: any = {
+      db: {},
+      injectors: [],
+      middlewares: {}
+    };
 
-    const result: any = {};
+    if (selectedEnv.envName === NO_ENV.envName) return result;
+
     const root = Settings.paths.environment;
 
     if (selectedEnv.db.length) {
@@ -152,13 +157,16 @@ export class Utils {
     const environment = Settings.paths.environment;
     if (!environment) return [NO_ENV];
 
+    const defaultInjectors = ["./injectors/index.js", "./injectors/index.json","./injectors.js", "./injectors.json"];
+    const defaultMiddlewares = ["./middlewares/index.js","./middlewares.js"];
+
     const envFilesList = getFilesList(environment, { onlyIndex: false })
       .filter(file => [".har", ".json", ".js"].includes(file.extension))
       .map((file: any) => ({
         envName: file.fileName,
         db: [].concat(file.filePath).filter(Boolean),
-        injectors: ["./injectors/index.js", "./injectors/index.json","./injectors.js", "./injectors.json"],
-        middlewares: ["./middlewares/index.js","./middlewares.js"],
+        injectors: defaultInjectors,
+        middlewares: defaultMiddlewares,
         label: file.fileName,
         description: Settings.paths.environment ? path.relative(Settings.paths.environment, file.filePath) : '',
         kind: vscode.QuickPickItemKind.Default
@@ -179,8 +187,8 @@ export class Utils {
     const envConfigList = Object.entries(envConfig).map(([envName, envConfig]: [string, any]) => ({
       envName,
       db: [].concat(envConfig.db).filter(Boolean),
-      injectors: ["./injectors/index.js","./injectors/index.json", "./injectors.js", "./injectors.json"].concat(envConfig.injectors).filter(Boolean),
-      middlewares: ["./middlewares/index.js","./middlewares.js"].concat(envConfig.middlewares).filter(Boolean),
+      injectors: envConfig.injectors !== 'undefined' ? [].concat(envConfig.injectors).filter(Boolean) : defaultInjectors,
+      middlewares: envConfig.middlewares !== 'undefined' ? [].concat(envConfig.middlewares).filter(Boolean) :  defaultMiddlewares,
       label: envName,
       description: envConfig.description || "env.config.json",
       kind: vscode.QuickPickItemKind.Default
