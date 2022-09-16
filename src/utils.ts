@@ -10,7 +10,7 @@ import * as fsx from "fs-extra";
 import { FSWatcher } from 'node:fs';
 import * as path from "path";
 import * as vscode from "vscode";
-import { Commands, NO_ENV } from './enum';
+import { Commands, NO_ENV, Recently_Used } from './enum';
 import { LocalStorageService } from './LocalStorageService';
 import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
@@ -155,7 +155,7 @@ export class Utils {
 
   protected getEnvironmentList = async (mockServer?: MockServer) => {
     const environment = Settings.paths.environment;
-    if (!environment) return [NO_ENV];
+    if (!environment) return [Recently_Used, NO_ENV];
 
     const defaultInjectors = ["./injectors/index.js", "./injectors/index.json","./injectors.js", "./injectors.json"];
     const defaultMiddlewares = ["./middlewares/index.js","./middlewares.js"];
@@ -167,8 +167,8 @@ export class Utils {
         db: [].concat(file.filePath).filter(Boolean),
         injectors: defaultInjectors,
         middlewares: defaultMiddlewares,
-        label: file.fileName,
-        description: Settings.paths.environment ? path.relative(Settings.paths.environment, file.filePath) : '',
+        label: Settings.paths.environment ? path.relative(Settings.paths.environment, file.filePath).replace(/\\/g, "/") : file.fileName,
+        description: file.fileName + file.extension,
         kind: vscode.QuickPickItemKind.Default
       }))
       .filter(file =>
@@ -176,6 +176,16 @@ export class Utils {
         !file.description.startsWith("injectors\\") &&
         !file.description.startsWith("middlewares\\")
       );
+
+      envFilesList.unshift({
+        envName: "",
+        label: "Db Files",
+        db: [],
+        injectors: [],
+        middlewares: [],
+        description: "",
+        kind: vscode.QuickPickItemKind.Separator
+      });
 
     let envConfigJson = await this.getDataFromUrl("./env.config.json", { mockServer, root: environment });
     envConfigJson = this.isPlainObject(envConfigJson) ? envConfigJson : {};
@@ -190,9 +200,19 @@ export class Utils {
       injectors: envConfig.injectors !== 'undefined' ? [].concat(envConfig.injectors).filter(Boolean) : defaultInjectors,
       middlewares: envConfig.middlewares !== 'undefined' ? [].concat(envConfig.middlewares).filter(Boolean) :  defaultMiddlewares,
       label: envName,
-      description: envConfig.description || "env.config.json",
+      description: envConfig.description || envName,
       kind: vscode.QuickPickItemKind.Default
     }));
+
+    envConfigList.unshift({
+      envName: "",
+      label: "Environments",
+      db: [],
+      injectors: [],
+      middlewares: [],
+      description: "",
+      kind: vscode.QuickPickItemKind.Separator
+    });
 
     const environmentList = [NO_ENV, ...envConfigList, ...envFilesList];
 
@@ -200,21 +220,14 @@ export class Utils {
     const selectedEnv = this.storageManager.getValue("environment", NO_ENV);
     const selectedEnvIndex = environmentList.findIndex((environment) => JSON.stringify(environment) === JSON.stringify(selectedEnv));
 
-    if (selectedEnvIndex >= 0) {
-      const existing = environmentList.splice(selectedEnvIndex, 1);
-      environmentList.unshift(existing[0]);
-      environmentList.unshift({
-        envName: "",
-        label: "recently used",
-        db: [],
-        injectors: [],
-        middlewares: [],
-        description: "",
-        kind: vscode.QuickPickItemKind.Separator
-      });
+    if (selectedEnvIndex >= 0 && environmentList[selectedEnvIndex].envName !== NO_ENV.envName) {
+      const existing = environmentList[selectedEnvIndex];
+      environmentList.unshift(existing);
     } else {
       this.storageManager.setValue("environment", NO_ENV);
-    }
+    };
+
+    environmentList.unshift(Recently_Used);
 
     return environmentList;
   };

@@ -2,9 +2,9 @@ import { MockServer } from "@r35007/mock-server";
 import { HAR, KIBANA } from '@r35007/mock-server/dist/server/types/common.types';
 import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
 import { extractDbFromHAR, extractDbFromKibana, getCleanDb } from '@r35007/mock-server/dist/server/utils';
-import { requireData } from '@r35007/mock-server/dist/server/utils/fetch';
 import * as fs from 'fs';
 import * as fsx from "fs-extra";
+import JPH from 'json-parse-helpfulerror';
 import * as path from 'path';
 import * as vscode from "vscode";
 import { Commands, PromptAction } from './enum';
@@ -50,22 +50,35 @@ export default class MockServerExt extends Utils {
 
     if (!currentFilePath) throw Error("Invalid File or path");
 
-    const userData = requireData(currentFilePath);
+    const userData = JPH.parse(fs.readFileSync(currentFilePath, "utf-8"));
+
+    if (!this.isPlainObject(userData) || Object.keys(userData).length) throw Error("Invalid or empty Object");
+    const isHar = userData?.log?.entries?.length > 0;
+    const isKibana = userData?.rawResponse?.hits?.hits?.length > 0;
+    if (!isHar && !isKibana) throw Error("Please select a HAR or Kibana object to transform");
+
+    let transformedDb: any = {};
     const middlewares = await this.getDataFromUrl(Settings.paths.middleware);
 
-    const db = extractDbFromHAR(
-      userData as HAR,
-      middlewares?._harEntryCallback,
-      middlewares?._harDbCallback,
-      Settings.iterateDuplicateRoutes,
-    ) || extractDbFromKibana(
-      userData as KIBANA,
-      middlewares?._kibanaHitsCallback,
-      middlewares?._kibanaDbCallback,
-      Settings.iterateDuplicateRoutes
-    ) || {};
-    const cleanDb = getCleanDb(db as UserTypes.Db, Settings.dbMode);
-    if (!Object.keys(cleanDb).length) throw Error("Invalid Data");
+    if (isHar) {
+      transformedDb = extractDbFromHAR(
+        userData as HAR,
+        middlewares?._harEntryCallback,
+        middlewares?._harDbCallback,
+        Settings.iterateDuplicateRoutes,
+      ) || {};
+    }
+
+    if (isKibana) {
+      transformedDb = extractDbFromKibana(
+        userData as KIBANA,
+        middlewares?._kibanaHitsCallback,
+        middlewares?._kibanaDbCallback,
+        Settings.iterateDuplicateRoutes
+      ) || {};
+    }
+
+    const cleanDb = getCleanDb(transformedDb as UserTypes.Db, Settings.dbMode);
     await this.writeFile(currentFilePath, cleanDb, 'Data Transformed Successfully');
   };
 
@@ -128,7 +141,7 @@ export default class MockServerExt extends Utils {
     const env = await this.getEnvData(mockServer);
     const envResources = mockServer.resources(env.db, {
       injectors: [...mockServer.injectors, ...env.injectors],
-      middlewares: {...mockServer.middlewares, ...env.middlewares},
+      middlewares: { ...mockServer.middlewares, ...env.middlewares },
       log: "Environment Resource"
     });
     app.use(mockServer.config.base, envResources);

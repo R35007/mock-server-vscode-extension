@@ -28,6 +28,16 @@ export enum PromptAction {
   WARNING = 'warning'
 }
 
+export const Recently_Used = {
+  envName: "",
+  label: "recently used",
+  db: [],
+  injectors: [],
+  middlewares: [],
+  description: "",
+  kind: vscode.QuickPickItemKind.Separator
+};
+
 export const NO_ENV = {
   envName: "none",
   db: [],
