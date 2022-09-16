@@ -52,7 +52,7 @@ export default class MockServerExt extends Utils {
 
     const userData = JPH.parse(fs.readFileSync(currentFilePath, "utf-8"));
 
-    if (!this.isPlainObject(userData) || Object.keys(userData).length) throw Error("Invalid or empty Object");
+    if (!this.isPlainObject(userData) || !Object.keys(userData).length) throw Error("Invalid or empty Object");
     const isHar = userData?.log?.entries?.length > 0;
     const isKibana = userData?.rawResponse?.hits?.hits?.length > 0;
     if (!isHar && !isKibana) throw Error("Please select a HAR or Kibana object to transform");
@@ -79,6 +79,7 @@ export default class MockServerExt extends Utils {
     }
 
     const cleanDb = getCleanDb(transformedDb as UserTypes.Db, Settings.dbMode);
+    if(!Object.keys(cleanDb).length) throw Error("No Routes Found");
     await this.writeFile(currentFilePath, cleanDb, 'Data Transformed Successfully');
   };
 
