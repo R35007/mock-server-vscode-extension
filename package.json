@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "10.3.4",
+  "version": "11.0.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -116,7 +116,7 @@
           "default": {
             "root": "./",
             "db": "db.json",
-            "middleware": "middleware.js",
+            "middlewares": "middlewares.js",
             "injectors": "injectors.json",
             "rewriters": "rewriters.json",
             "store": "store.json",
@@ -133,7 +133,7 @@
               "type": "string",
               "description": "Set .js or .json or http url here."
             },
-            "middleware": {
+            "middlewares": {
               "type": "string",
               "description": "Set .js path here."
             },
@@ -432,7 +432,7 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@r35007/mock-server": "^10.3.3",
+    "@r35007/mock-server": "^11.0.0",
     "@types/json-parse-helpfulerror": "^1.0.1",
     "axios": "^0.21.1",
     "chokidar": "^3.5.2",

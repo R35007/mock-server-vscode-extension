@@ -43,7 +43,14 @@ app.get("/echo", (req, res) => res.jsonp(req.query));
 
 // Creates resources and returns the express router
 const resources = mockServer.resources("./db.json", { log });
-app.use(resources);
+
+const middlewares = (req, res, next) => { next() };
+resources.create("/todos", middlewares) // /todos will be added to existing db
+  .mock({ userId: 1, id: 1, title: "Marvel", completed: false })
+  .delay(1000) // in milliseconds
+  .done();
+
+app.use(resources.router);
 
 // Create the Mock Server Home Page
 const homePage = mockServer.homePage({ log });

@@ -129,25 +129,25 @@ Helps to work in multiple data environments.
 
 ## Middleware
 
-- Create `middleware.js`
-- Set custom Middleware path using setting `mock-server.settings.paths.middleware`.
+- Create `middlewares.js`
+- Set custom Middleware path using setting `mock-server.settings.paths.middlewares`.
 - Middlewares must be of a type `.js` file.
-- Callback method to generate routes can also be given in this `middleware.js`.
+- Callback method to generate routes can also be given in this `middlewares.js`.
 - Example:
 
-`middleware.js`
+`middlewares.js`
 
 ```js
-const _harEntryCallback = (entry, routePath, routeConfig) => {
+const harEntryCallback = (entry, routePath, routeConfig) => {
   return { [routePath]: routeConfig };
 };
-const _kibanaHitsCallback = (hit, routePath, routeConfig) => {
+const kibanaHitsCallback = (hit, routePath, routeConfig) => {
   return { [routePath]: routeConfig };
 };
-const _harDbCallback = (data, db) => {
+const harDbCallback = (data, db) => {
   return db;
 };
-const _kibanaDbCallback = (data, db) => {
+const kibanaDbCallback = (data, db) => {
   return db;
 };
 
@@ -179,20 +179,15 @@ const GetStoreValue = (req, res, next) => {
 };
 
 module.exports = async (mockServer, env) => {
-  // mockServer will be undefined when using Transform to Mock Server Db command
-  if (mockServer) {
-    const app = mockServer.app;
-    // Add custom global middlewares
-    app.use((req, res) => {
-      console.log("Request path : " + req.path);
-    });
-  }
+  const { app, routes, data, getDb, getStore } = mockServer || {};
+  const { config, db, injectors, middlewares, rewriters, store } = data || {};
+  // Your Global middleware logic here before setting default middlewares by the MockServer
 
   return {
-    _globals: [logPath],
-    _harEntryCallback,
-    _harDbCallback,
-    _kibanaDbCallback,
+    globals: [logPath],
+    harEntryCallback,
+    harDbCallback,
+    kibanaDbCallback,
     DataWrapper,
     CustomLog,
     GetStoreValue,

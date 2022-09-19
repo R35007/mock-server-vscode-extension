@@ -20,10 +20,10 @@ export class Settings {
     const paths = {
       root: Settings.root,
       db: Settings.getValidPath(Settings.getSettings("paths.db") as string, "db.json"),
-      middleware: Settings.getValidPath(Settings.getSettings("paths.middleware") as string, "middleware.js"),
+      middleware: Settings.getValidPath(Settings.getSettings("paths.middlewares") as string, "middlewares.js"),
       injectors: Settings.getValidPath(Settings.getSettings("paths.injectors") as string, "injectors.json"),
       store: Settings.getValidPath(Settings.getSettings("paths.store") as string, "store.json"),
-      rewriters: Settings.getValidPath(Settings.getSettings("paths.rewriters") as string, "rewriter.json"),
+      rewriters: Settings.getValidPath(Settings.getSettings("paths.rewriters") as string, "rewriters.json"),
       environment: Settings.getValidPath(Settings.getSettings("paths.environment") as string, "env"),
       static: Settings.getValidPath(Settings.getSettings("paths.static") as string, "public"),
       snapshots: Settings.getValidPath(Settings.getSettings("paths.snapshots") as string, "snapshots") || path.resolve(Settings.root, "snapshots")

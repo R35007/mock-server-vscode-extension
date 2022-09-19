@@ -2,7 +2,7 @@
   Global Middlewares
   These middlewares will be added to start of the the express app 
 */
-const _globals = [
+const globals = [
   (req, res, next) => {
     console.log(req.originalUrl);
     next();
@@ -14,13 +14,13 @@ const _globals = [
   This method is called only on generating db suing MockServer: Generate Db Command
   It will be called for each entry/hits in a HAR/Kibana formatted data
   Here you can return your custom route and routeConfig
-  `_harEntryCallback`, `_kibanaHitsCallback` is a reserved word for generating Db 
+  `harEntryCallback`, `kibanaHitsCallback` is a reserved word for generating Db 
 */
-const _harEntryCallback = (entry, routePath, routeConfig) => {
+const harEntryCallback = (entry, routePath, routeConfig) => {
   // your code goes here ...
   return { [routePath]: routeConfig };
 };
-const _kibanaHitsCallback = (hit, routePath, routeConfig) => {
+const kibanaHitsCallback = (hit, routePath, routeConfig) => {
   // your code goes here ...
   return { [routePath]: routeConfig };
 };
@@ -30,13 +30,13 @@ const _kibanaHitsCallback = (hit, routePath, routeConfig) => {
   This method is called only on generating db suing MockServer: Generate Db Command
   It will be called at last of all entry/hits looping.
   Here you can return your custom db
-  `_harDbCallback`, `_KibanaDbCallback` is a reserved word for generating Db
+  `harDbCallback`, `_KibanaDbCallback` is a reserved word for generating Db
 */
-const _harDbCallback = (data, db) => {
+const harDbCallback = (data, db) => {
   // your code goes here ...
   return db;
 };
-const _KibanaDbCallback = (data, db) => {
+const kibanaDbCallback = (data, db) => {
   // your code goes here ...
   return db;
 };
@@ -82,11 +82,11 @@ module.exports = (mockServer) => {
   // Your Global middleware logic here before setting default middlewares by the MockServer
 
   return {
-    _globals,
-    _harEntryCallback,
-    _kibanaHitsCallback,
-    _harDbCallback,
-    _KibanaDbCallback,
+    globals,
+    harEntryCallback,
+    kibanaHitsCallback,
+    harDbCallback,
+    kibanaDbCallback,
     DataWrapper,
     CustomLog,
     GetStoreValue,

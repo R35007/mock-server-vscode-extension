@@ -63,8 +63,8 @@ export default class MockServerExt extends Utils {
     if (isHar) {
       transformedDb = extractDbFromHAR(
         userData as HAR,
-        middlewares?._harEntryCallback,
-        middlewares?._harDbCallback,
+        middlewares?.harEntryCallback,
+        middlewares?.harDbCallback,
         Settings.iterateDuplicateRoutes,
       ) || {};
     }
@@ -72,8 +72,8 @@ export default class MockServerExt extends Utils {
     if (isKibana) {
       transformedDb = extractDbFromKibana(
         userData as KIBANA,
-        middlewares?._kibanaHitsCallback,
-        middlewares?._kibanaDbCallback,
+        middlewares?.kibanaHitsCallback,
+        middlewares?.kibanaDbCallback,
         Settings.iterateDuplicateRoutes
       ) || {};
     }
@@ -115,9 +115,8 @@ export default class MockServerExt extends Utils {
     mockServer.setConfig(config, { log });
 
     const rewriters = await this.getDataFromUrl(paths.rewriters, { mockServer });
-    mockServer.setRewriters(rewriters, { log });
 
-    const rewriter = mockServer.rewriter();
+    const rewriter = mockServer.rewriter(rewriters, { log });
     app.use(rewriter);
 
     const defaults = mockServer.defaults();
@@ -126,7 +125,7 @@ export default class MockServerExt extends Utils {
     const middlewares = await this.getDataFromUrl(paths.middleware, { mockServer });
     mockServer.setMiddlewares(middlewares, { log });
 
-    mockServer.middlewares._globals?.length && app.use(mockServer.middlewares._globals);
+    app.use(mockServer.middlewares.globals);
 
     const injectors = await this.getDataFromUrl(paths.injectors, { mockServer, isList: true });
     mockServer.setInjectors(injectors, { log });
@@ -145,11 +144,11 @@ export default class MockServerExt extends Utils {
       middlewares: { ...mockServer.middlewares, ...env.middlewares },
       log: "Environment Resource"
     });
-    app.use(mockServer.config.base, envResources);
+    app.use(mockServer.config.base, envResources.router);
 
     const dbData = await this.getDbData(dbPath, mockServer);
     const dbResources = mockServer.resources(dbData, { log });
-    app.use(mockServer.config.base, dbResources);
+    app.use(mockServer.config.base, dbResources.router);
 
     app.use(mockServer.pageNotFound);
     app.use(mockServer.errorHandler);

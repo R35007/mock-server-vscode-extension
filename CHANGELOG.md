@@ -3,6 +3,16 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v11.0.0
+
+- Updated `@r35007/mock-server@11.0.0`.
+- renamed `mock-server.settings.paths.middleware` to `mock-server.settings.paths.middlewares`
+- renamed `_harEntryCallback` to `harEntryCallback`
+- renamed `_harDbCallback` to `harDbCallback`
+- renamed `_kibanaHitsCallback` to `kibanaHitsCallback`
+- renamed `_kibanaDbCallback` to `kibanaDbCallback`
+- renamed `_globals` to `globals`
+
 ## v10.3.4
 
 - Fixed - Transform to MockServer Db not working.
