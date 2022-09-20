@@ -6,6 +6,7 @@ export class Prompt {
   static getEnvironment = async <T extends vscode.QuickPickItem>(envNameList: T[]): Promise<T | undefined> => {
     return vscode.window.showQuickPick(envNameList, {
       placeHolder: "Please select a Environment",
+      matchOnDescription: true
     });
   };
 

@@ -157,8 +157,8 @@ export class Utils {
     const environment = Settings.paths.environment;
     if (!environment) return [Recently_Used, NO_ENV];
 
-    const defaultInjectors = ["./injectors/index.js", "./injectors/index.json","./injectors.js", "./injectors.json"];
-    const defaultMiddlewares = ["./middlewares/index.js","./middlewares.js"];
+    const defaultInjectors = ["./injectors/index.js", "./injectors/index.json", "./injectors.js", "./injectors.json"];
+    const defaultMiddlewares = ["./middlewares/index.js", "./middlewares.js"];
 
     const envFilesList = getFilesList(environment, { onlyIndex: false })
       .filter(file => [".har", ".json", ".js"].includes(file.extension))
@@ -167,9 +167,9 @@ export class Utils {
         db: [].concat(file.filePath).filter(Boolean),
         injectors: defaultInjectors,
         middlewares: defaultMiddlewares,
-        label: Settings.paths.environment ? path.relative(Settings.paths.environment, file.filePath).replace(/\\/g, "/") : file.fileName,
-        description: file.fileName + file.extension,
-        kind: vscode.QuickPickItemKind.Default
+        description: Settings.paths.environment ? path.relative(Settings.paths.environment, file.filePath).replace(/\\/g, "/") : file.fileName,
+        label: file.fileName + file.extension,
+        kind: vscode.QuickPickItemKind.Default,
       }))
       .filter(file =>
         !["injectors", "middlewares", "env.config"].includes(file.envName) &&
@@ -177,15 +177,15 @@ export class Utils {
         !file.description.startsWith("middlewares\\")
       );
 
-      envFilesList.unshift({
-        envName: "",
-        label: "Db Files",
-        db: [],
-        injectors: [],
-        middlewares: [],
-        description: "",
-        kind: vscode.QuickPickItemKind.Separator
-      });
+    envFilesList.unshift({
+      envName: "",
+      label: "Db Files",
+      db: [],
+      injectors: [],
+      middlewares: [],
+      description: "",
+      kind: vscode.QuickPickItemKind.Separator
+    });
 
     let envConfigJson = await this.getDataFromUrl("./env.config.json", { mockServer, root: environment });
     envConfigJson = this.isPlainObject(envConfigJson) ? envConfigJson : {};
@@ -198,7 +198,7 @@ export class Utils {
       envName,
       db: [].concat(envConfig.db).filter(Boolean),
       injectors: envConfig.injectors !== 'undefined' ? [].concat(envConfig.injectors).filter(Boolean) : defaultInjectors,
-      middlewares: envConfig.middlewares !== 'undefined' ? [].concat(envConfig.middlewares).filter(Boolean) :  defaultMiddlewares,
+      middlewares: envConfig.middlewares !== 'undefined' ? [].concat(envConfig.middlewares).filter(Boolean) : defaultMiddlewares,
       label: envName,
       description: envConfig.description || envName,
       kind: vscode.QuickPickItemKind.Default
@@ -238,7 +238,8 @@ export class Utils {
 
     const fetchPaths = Object.entries(db).map(([_key, obj]) => obj.fetch)
       .filter(Boolean)
-      .filter(fetch => typeof fetch === 'string' && !fetch.startsWith("http")) as string[];
+      .filter(fetch => typeof fetch === 'string' && !fetch.startsWith("http"))
+      .map(fetchPath => path.resolve(Settings.root, fetchPath as string)) as string[];
 
     const filesToWatch = [
       Settings.paths.db,
