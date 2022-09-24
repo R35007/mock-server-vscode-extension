@@ -174,7 +174,7 @@ export default class MockServerExt extends Utils {
     this.log(`Switching Environment...`);
     try {
       const environmentList = await this.getEnvironmentList(this.mockServer);
-      const selectedEnv = await Prompt.getEnvironment(environmentList);
+      const selectedEnv = await Prompt.getEnvironment(environmentList, this.storageManager);
       if (!selectedEnv) return;
       this.storageManager.setValue("environment", selectedEnv);
       this.log(`[Done] Environment Switched to ${selectedEnv.envName}`);

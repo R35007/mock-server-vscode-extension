@@ -47,3 +47,10 @@ export const NO_ENV = {
   description: "",
   kind: vscode.QuickPickItemKind.Default
 };
+
+export type Environment = vscode.QuickPickItem & {
+  envName: string,
+  db: string[],
+  injectors: string[],
+  middlewares: string[],
+};

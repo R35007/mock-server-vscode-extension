@@ -10,7 +10,7 @@ import * as fsx from "fs-extra";
 import { FSWatcher } from 'node:fs';
 import * as path from "path";
 import * as vscode from "vscode";
-import { Commands, NO_ENV, Recently_Used } from './enum';
+import { Commands, Environment, NO_ENV, Recently_Used } from './enum';
 import { LocalStorageService } from './LocalStorageService';
 import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
@@ -153,7 +153,7 @@ export class Utils {
     }
   };
 
-  protected getEnvironmentList = async (mockServer?: MockServer) => {
+  protected getEnvironmentList = async (mockServer?: MockServer): Promise<Environment[]> => {
     const environment = Settings.paths.environment;
     if (!environment) return [Recently_Used, NO_ENV];
 
@@ -173,8 +173,8 @@ export class Utils {
       }))
       .filter(file =>
         !["injectors", "middlewares", "env.config"].includes(file.envName) &&
-        !file.description.startsWith("injectors\\") &&
-        !file.description.startsWith("middlewares\\")
+        !file.description.startsWith("injectors") &&
+        !file.description.startsWith("middlewares")
       );
 
     envFilesList.unshift({
@@ -201,7 +201,7 @@ export class Utils {
       middlewares: envConfig.middlewares !== 'undefined' ? [].concat(envConfig.middlewares).filter(Boolean) : defaultMiddlewares,
       label: envName,
       description: envConfig.description || envName,
-      kind: vscode.QuickPickItemKind.Default
+      kind: vscode.QuickPickItemKind.Default,
     }));
 
     envConfigList.unshift({
