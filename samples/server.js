@@ -17,11 +17,10 @@ mockServer.setData({
   injectors: "./injectors.json",
   middlewares: "./middlewares.js",
   store: "./store.json",
-  rewriters: "./rewriters.json"
 }, { log }); // pass mockServer instance to use it in middleware.js method
 
 // Make sure to use this at first, before all the resources
-const rewriter = mockServer.rewriter();
+const rewriter = mockServer.rewriter("./rewriters.json");
 app.use(rewriter);
 
 // Returns the default middlewares
@@ -48,7 +47,7 @@ const middlewares = (req, res, next) => { next(); };
 resources.create("/todos", middlewares) // /todos will be added to existing db
   .mock({ userId: 1, id: 1, title: "Marvel", completed: false })
   .delay(1000) // in milliseconds
-  .done();
+  .done(); // make sure to call done method at last to complete the route configuration
 
 app.use(resources.router);
 
@@ -76,4 +75,4 @@ mockServer.startServer();
 // or
 // You can also run thru CLI command
 
-// mock-server --watch --d=db.json --m=middleware.js --i=injectors.json --r=rewrites.json --s=store.json
+// mock-server --watch --db=db.json --md=middleware.js --in=injectors.json --rw=rewrites.json --st=store.json
