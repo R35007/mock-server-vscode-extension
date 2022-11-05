@@ -4,7 +4,7 @@
 */
 const globals = [
   (req, res, next) => {
-    console.log(req.originalUrl);
+    // your code goes here ...
     next();
   }
 ];
