@@ -1,5 +1,5 @@
 // Go to terminal and run
-// mock-server --config=./mock-server.js
+// mock-server --config=./mock-server-config.js
 
 module.exports = {
   port: 3000, // Set Port to 0 to pick a random available port.

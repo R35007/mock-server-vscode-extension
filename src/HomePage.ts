@@ -151,7 +151,7 @@ export default class HomePage {
     </div>`;
     const startServerBtn = `<div style="text-align: center; margin: 1rem;"><button class="start-server-btn" onclick="startServer()">Click here to Start Mock Server</button></div>`;
 
-    const iFrame = `<iframe id="iframe-data" style="width: 100%; height: 100%" src="${iFrameSrc}" frameborder="0"></iframe>`
+    const iFrame = `<iframe id="iframe-data" style="width: 100%; height: 100%" src="${iFrameSrc}" frameborder="0"></iframe>`;
 
     const welcomeScreen = `<div id="welcome-container">
     <div class="banner">

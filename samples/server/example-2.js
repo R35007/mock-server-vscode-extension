@@ -4,14 +4,14 @@ const mockServer = MockServer.Create({ root: __dirname });
 const app = mockServer.app;
 
 mockServer.setData({
-  injectors: "./injectors.json",
-  middlewares: "./middlewares.js",
-  store: "./store.json",
+  injectors: "../injectors.json",
+  middlewares: "../middlewares.js",
+  store: "../store.json",
 });
 
-const rewriter = mockServer.rewriter("./rewriters.json");
+const rewriter = mockServer.rewriter("../rewriters.json");
 const defaultsMiddlewares = mockServer.defaults();
-const resources = mockServer.resources("./db.json");
+const resources = mockServer.resources("../db.json");
 const homePage = mockServer.homePage();
 
 app.use(rewriter);

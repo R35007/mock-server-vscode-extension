@@ -4,8 +4,6 @@ import { PathDetails } from '@r35007/mock-server/dist/server/types/common.types'
 import { Db } from '@r35007/mock-server/dist/server/types/valid.types';
 import { normalizeDb } from '@r35007/mock-server/dist/server/utils';
 import { getFilesList, requireData } from "@r35007/mock-server/dist/server/utils/fetch";
-import axios from 'axios';
-import { watch } from 'chokidar';
 import * as fsx from "fs-extra";
 import { FSWatcher } from 'node:fs';
 import * as path from "path";
@@ -144,7 +142,7 @@ export class Utils {
   }: { mockServer?: MockServer, isList?: boolean, root?: string } = {}) => {
     if (!mockPath) return;
     if (mockPath.startsWith("http")) {
-      const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
+      const data = await MockServer.axios.get(mockPath).then(resp => resp.data).catch(_err => { });
       return data;
     } else {
       const data = requireData(mockPath, { root, isList });
@@ -257,7 +255,7 @@ export class Utils {
       .filter(p => p.isFile)
       .map(p => p.filePath);
 
-    this.watcher = watch([...new Set(filesToWatch)], { ignored: Settings.ignoreFiles });
+    this.watcher = MockServer.watcher.watch([...new Set(filesToWatch)], { ignored: Settings.ignoreFiles });
     this.watcher.on('change', (_event, _path) => {
       if (!Settings.shouldWatch) return;
       vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server
