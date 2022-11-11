@@ -1,7 +1,8 @@
-import { MockServer } from "@r35007/mock-server";
+import { MockServer, lodash as _ } from "@r35007/mock-server";
 import { HAR, KIBANA } from '@r35007/mock-server/dist/server/types/common.types';
 import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
 import { extractDbFromHAR, extractDbFromKibana, getCleanDb } from '@r35007/mock-server/dist/server/utils';
+import { requireData } from '@r35007/mock-server/dist/server/utils/fetch';
 import * as fs from 'fs';
 import * as fsx from "fs-extra";
 import JPH from 'json-parse-helpfulerror';
@@ -52,7 +53,7 @@ export default class MockServerExt extends Utils {
 
     const userData = JPH.parse(fs.readFileSync(currentFilePath, "utf-8"));
 
-    if (!this.isPlainObject(userData) || !Object.keys(userData).length) throw Error("Invalid or empty Object");
+    if (!_.isPlainObject(userData) || _.isEmpty(userData)) throw Error("Invalid or empty Object");
     const isHar = userData?.log?.entries?.length > 0;
     const isKibana = userData?.rawResponse?.hits?.hits?.length > 0;
     if (!isHar && !isKibana) throw Error("Please select a HAR or Kibana object to transform");
@@ -79,7 +80,7 @@ export default class MockServerExt extends Utils {
     }
 
     const cleanDb = getCleanDb(transformedDb as UserTypes.Db, Settings.dbMode);
-    if(!Object.keys(cleanDb).length) throw Error("No Routes Found");
+    if (!Object.keys(cleanDb).length) throw Error("No Routes Found");
     await this.writeFile(currentFilePath, cleanDb, 'Data Transformed Successfully');
   };
 
@@ -101,6 +102,76 @@ export default class MockServerExt extends Utils {
     Settings.root = root;
     Prompt.showPopupMessage(`Root Path Set to ${root}`);
     this.log(`[Done] Root Path Set to ${root}`);
+  };
+
+  setConfig = async (args?: any) => {
+    if (!args?.fsPath) return;
+    const config = requireData(args.fsPath);
+
+    if (!_.isPlainObject(config)) return Prompt.showPopupMessage(`Invalid Config File`, PromptAction.ERROR);
+
+    const cleanObject = (obj: any) => {
+      const cleanObj: any = {};
+      Object.entries(obj).forEach(([key, value]) => {
+        if (typeof value === 'undefined' || (_.isPlainObject(value) && _.isEmpty(value))) return;
+        cleanObj[key] = value;
+      });
+      return cleanObj;
+    };
+
+    const paths: any = cleanObject({
+      root: config.paths?.root || config.root,
+      db: config.paths?.db || config.db,
+      middlewares: config.paths?.middlewares || config.middlewares,
+      rewriters: config.paths?.rewriters || config.rewriters,
+      store: config.paths?.store || config.store,
+      static: config.paths?.static || config.static,
+      environment: config.paths?.environment || config.environment,
+      snapshots: config.paths?.snapshots || config.snapshots,
+    });
+
+    const defaults: any = cleanObject({
+      noGzip: config.defaults?.noGzip || config.noGzip,
+      noCors: config.defaults?.noCors || config.noCors,
+      readOnly: config.defaults?.readOnly || config.readOnly,
+      logger: config.defaults?.logger || config.logger,
+      bodyParser: config.defaults?.bodyParser || config.bodyParser,
+      cookieParser: config.defaults?.cookieParser || config.cookieParser
+    });
+
+    const statusBar: any = cleanObject({
+      show: config.statusBar?.show || config.show,
+      position: config.statusBar?.position || config.position,
+      priority: config.statusBar?.priority || config.priority
+    });
+
+    const serverConfig = {
+      port: config.port,
+      host: config.host,
+      base: config.base,
+      id: config.id,
+      dbMode: config.dbMode,
+      reverse: config.reverse,
+      iterateDuplicateRoutes: config.iterateDuplicateRoutes,
+      watchFiles: config.watchFiles,
+      ignoreFiles: config.ignoreFiles,
+      watchForChanges: config.watch,
+      homePage: config.homePage,
+      openHomePageInsideVSCode: config.openHomePageInsideVSCode,
+      showInfoMsg: config.showInfoMsg,
+      paths: _.isEmpty(paths) ? undefined : paths,
+      defaults: _.isEmpty(defaults) ? undefined : defaults,
+      statusBar: _.isEmpty(statusBar) ? undefined : statusBar
+    };
+
+    Object.entries(serverConfig).forEach(([key, value]) => {
+      Settings.setSettings(key, value, false);
+    });
+
+    Prompt.showPopupMessage(`Server Config is Set`);
+    this.log(`[Done] Server Config is Set`);
+    this.log("Server Configs: ", "\n");
+    this.log(JSON.stringify(Settings.config, null, 2), "", true);
   };
 
   startServer = async (fsPath?: string, port: number = Settings.port) => {

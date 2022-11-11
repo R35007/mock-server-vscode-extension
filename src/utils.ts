@@ -1,5 +1,5 @@
 /* eslint-disable curly */
-import { MockServer } from '@r35007/mock-server';
+import { MockServer, axios, watcher, lodash as _ } from '@r35007/mock-server';
 import { PathDetails } from '@r35007/mock-server/dist/server/types/common.types';
 import { Db } from '@r35007/mock-server/dist/server/types/valid.types';
 import { normalizeDb } from '@r35007/mock-server/dist/server/utils';
@@ -83,7 +83,7 @@ export class Utils {
 
   protected getDbData = async (dbPath?: string, mockServer?: MockServer) => {
     const userData = await this.getDataFromUrl(dbPath?.replace(/\\/g, '/'), { mockServer });
-    const dbData = this.isPlainObject(userData) ? normalizeDb(userData, Settings.dbMode) : {};
+    const dbData = _.isPlainObject(userData) ? normalizeDb(userData, Settings.dbMode) : {};
     return dbData;
   };
 
@@ -142,7 +142,7 @@ export class Utils {
   }: { mockServer?: MockServer, isList?: boolean, root?: string } = {}) => {
     if (!mockPath) return;
     if (mockPath.startsWith("http")) {
-      const data = await MockServer.axios.get(mockPath).then(resp => resp.data).catch(_err => { });
+      const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
       return data;
     } else {
       const data = requireData(mockPath, { root, isList });
@@ -186,9 +186,9 @@ export class Utils {
     });
 
     let envConfigJson = await this.getDataFromUrl("./env.config.json", { mockServer, root: environment });
-    envConfigJson = this.isPlainObject(envConfigJson) ? envConfigJson : {};
+    envConfigJson = _.isPlainObject(envConfigJson) ? envConfigJson : {};
     let envConfigJs = await this.getDataFromUrl("./env.config.js", { mockServer, root: environment });
-    envConfigJs = this.isPlainObject(envConfigJs) ? envConfigJs : {};
+    envConfigJs = _.isPlainObject(envConfigJs) ? envConfigJs : {};
 
     const envConfig = { ...envConfigJson, ...envConfigJs };
 
@@ -255,7 +255,7 @@ export class Utils {
       .filter(p => p.isFile)
       .map(p => p.filePath);
 
-    this.watcher = MockServer.watcher.watch([...new Set(filesToWatch)], { ignored: Settings.ignoreFiles });
+    this.watcher = watcher.watch([...new Set(filesToWatch)], { ignored: Settings.ignoreFiles });
     this.watcher.on('change', (_event, _path) => {
       if (!Settings.shouldWatch) return;
       vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server
@@ -265,10 +265,6 @@ export class Utils {
   protected stopWatchingChanges = async () => {
     this.watcher && await this.watcher.close();
     this.watcher = undefined;
-  };
-
-  protected isPlainObject = (obj: any) => {
-    return obj && typeof obj === 'object' && !Array.isArray(obj);
   };
 }
 

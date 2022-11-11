@@ -118,6 +118,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Set Root
   context.subscriptions.push(vscode.commands.registerCommand(Commands.SET_ROOT, server.setRoot));
+  
+  // Set Config
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.SET_CONFIG, server.setConfig));
 
   // Create Sample Files
   context.subscriptions.push(vscode.commands.registerCommand(Commands.GENERATE_MOCK_FILES, async (args) => {

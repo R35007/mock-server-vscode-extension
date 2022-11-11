@@ -11,7 +11,8 @@ export enum Commands {
   GET_DB_SNAPSHOT = "mock-server.getDbSnapShot",
   OPEN_HOMEPAGE = "mock-server.openHomePage",
   SET_PORT = "mock-server.setPort",
-  SET_ROOT = "mock-server.setRoot"
+  SET_ROOT = "mock-server.setRoot",
+  SET_CONFIG = "mock-server.setConfig"
 }
 
 export enum ServerStatus {
