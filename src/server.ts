@@ -59,14 +59,14 @@ export default class MockServerExt extends Utils {
     if (!isHar && !isKibana) throw Error("Please select a HAR or Kibana object to transform");
 
     let transformedDb: any = {};
-    const middlewares = await this.getDataFromUrl(Settings.paths.middleware);
+    const middlewares = await this.getDataFromUrl(Settings.paths.middlewares);
 
     if (isHar) {
       transformedDb = extractDbFromHAR(
         userData as HAR,
         middlewares?.harEntryCallback,
         middlewares?.harDbCallback,
-        Settings.iterateDuplicateRoutes,
+        Settings.duplicates,
       ) || {};
     }
 
@@ -75,7 +75,7 @@ export default class MockServerExt extends Utils {
         userData as KIBANA,
         middlewares?.kibanaHitsCallback,
         middlewares?.kibanaDbCallback,
-        Settings.iterateDuplicateRoutes
+        Settings.duplicates
       ) || {};
     }
 
@@ -140,27 +140,33 @@ export default class MockServerExt extends Utils {
     });
 
     const statusBar: any = cleanObject({
-      show: config.statusBar?.show || config.show,
-      position: config.statusBar?.position || config.position,
-      priority: config.statusBar?.priority || config.priority
+      show: config.statusBar?.show,
+      position: config.statusBar?.position,
+      priority: config.statusBar?.priority
     });
 
     const serverConfig = {
+      // Mock Server configs
       port: config.port,
       host: config.host,
       base: config.base,
       id: config.id,
       dbMode: config.dbMode,
       reverse: config.reverse,
-      iterateDuplicateRoutes: config.iterateDuplicateRoutes,
+      log: config.log,
+      defaults: _.isEmpty(defaults) ? undefined : defaults,
+
+      // CLI configs
+      paths: _.isEmpty(paths) ? undefined : paths,
+      watch: config.watch,
+
+      // VSCode Extension configs
       watchFiles: config.watchFiles,
       ignoreFiles: config.ignoreFiles,
-      watchForChanges: config.watch,
+      duplicates: config.duplicates,
       homePage: config.homePage,
-      openHomePageInsideVSCode: config.openHomePageInsideVSCode,
+      openInside: config.openInside,
       showInfoMsg: config.showInfoMsg,
-      paths: _.isEmpty(paths) ? undefined : paths,
-      defaults: _.isEmpty(defaults) ? undefined : defaults,
       statusBar: _.isEmpty(statusBar) ? undefined : statusBar
     };
 
@@ -172,6 +178,53 @@ export default class MockServerExt extends Utils {
     this.log(`[Done] Server Config is Set`);
     this.log("Server Configs: ", "\n");
     this.log(JSON.stringify(Settings.config, null, 2), "", true);
+  };
+
+  pasteConfig = async (args?: any) => {
+    const { document, editor, textRange } = this.getEditorProps(args);
+    const currentFilePath = args?.fsPath || document?.uri?.fsPath;
+
+    if (!currentFilePath) return Prompt.showPopupMessage(`Invalid File`, PromptAction.ERROR);
+
+    const serverConfig = {
+      // Mock Server configs
+      root: Settings.getSettings("paths.root"),
+      port: Settings.getSettings("port"),
+      host: Settings.getSettings("host"),
+      base: Settings.getSettings("base"),
+      id: Settings.getSettings("id"),
+      dbMode: Settings.getSettings("dbMode"),
+      reverse: Settings.getSettings("reverse"),
+      log: Settings.getSettings("log"),
+      ...Settings.defaults,
+
+      // CLI configs
+      db: Settings.getSettings("paths.db"),
+      middlewares: Settings.getSettings("paths.middlewares"),
+      injectors: Settings.getSettings("paths.injectors"),
+      store: Settings.getSettings("paths.store"),
+      rewriters: Settings.getSettings("paths.rewriters"),
+      static: Settings.getSettings("paths.static"),
+      environment: Settings.getSettings("paths.environment"),
+      snapshots: Settings.getSettings("paths.snapshots"),
+      watch: Settings.watch,
+
+      // VSCode Extension configs
+      watchFiles: Settings.getSettings("watchFiles"),
+      ignoreFiles: Settings.getSettings("ignoreFiles"),
+      duplicates: Settings.duplicates,
+      homePage: Settings.homePage,
+      openInside: Settings.openInside,
+      showInfoMsg: Settings.showInfoMsg,
+      statusBar: Settings.getSettings("statusBar"),
+    };
+
+    await new Promise((resolve) => editor?.edit((editBuilder) => {
+      editBuilder.replace(textRange, JSON.stringify(serverConfig, null, 2));
+      resolve(true);
+    }));
+
+    Prompt.showPopupMessage('Config Pasted Successfully');
   };
 
   startServer = async (fsPath?: string, port: number = Settings.port) => {
@@ -193,7 +246,7 @@ export default class MockServerExt extends Utils {
     const defaults = mockServer.defaults();
     app.use(defaults);
 
-    const middlewares = await this.getDataFromUrl(paths.middleware, { mockServer });
+    const middlewares = await this.getDataFromUrl(paths.middlewares, { mockServer });
     mockServer.setMiddlewares(middlewares, { log });
 
     app.use(mockServer.middlewares.globals);
@@ -227,16 +280,6 @@ export default class MockServerExt extends Utils {
     await mockServer.startServer();
 
     this.restartOnChange(mockServer.db);
-    HomePage.currentPanel?.update();
-  };
-
-  stopServer = async () => {
-    if (this.mockServer.server) {
-      await this.mockServer.stopServer();
-      await this.stopWatchingChanges();
-    } else {
-      throw Error("No Server to Stop");
-    }
     HomePage.currentPanel?.update();
   };
 

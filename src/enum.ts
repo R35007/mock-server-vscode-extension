@@ -12,7 +12,8 @@ export enum Commands {
   OPEN_HOMEPAGE = "mock-server.openHomePage",
   SET_PORT = "mock-server.setPort",
   SET_ROOT = "mock-server.setRoot",
-  SET_CONFIG = "mock-server.setConfig"
+  SET_CONFIG = "mock-server.setConfig",
+  PASTE_CONFIG = "mock-server.pasteConfig"
 }
 
 export enum ServerStatus {

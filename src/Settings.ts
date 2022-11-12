@@ -20,13 +20,13 @@ export class Settings {
     const paths = {
       root: Settings.root,
       db: Settings.getValidPath(Settings.getSettings("paths.db") as string, "db.json"),
-      middleware: Settings.getValidPath(Settings.getSettings("paths.middlewares") as string, "middlewares.js"),
+      middlewares: Settings.getValidPath(Settings.getSettings("paths.middlewares") as string, "middlewares.js"),
       injectors: Settings.getValidPath(Settings.getSettings("paths.injectors") as string, "injectors.json"),
       store: Settings.getValidPath(Settings.getSettings("paths.store") as string, "store.json"),
       rewriters: Settings.getValidPath(Settings.getSettings("paths.rewriters") as string, "rewriters.json"),
       environment: Settings.getValidPath(Settings.getSettings("paths.environment") as string, "env"),
-      static: Settings.getValidPath(Settings.getSettings("paths.static") as string, "public"),
-      snapshots: Settings.getValidPath(Settings.getSettings("paths.snapshots") as string, "snapshots") || path.resolve(Settings.root, "snapshots")
+      static: Settings.getValidPath(Settings.getSettings("paths.static") as string, "") || "",
+      snapshots: path.resolve(Settings.root, Settings.getSettings("paths.snapshots") as string || "snapshots")
     };
     return paths;
   }
@@ -34,7 +34,7 @@ export class Settings {
     return Settings.getSettings("host") as string || '';
   }
   static get port() {
-    return (Settings.getSettings("port") as number);
+    return (Settings.getSettings("port") as number) || 0;
   }
   static set port(value: number) {
     Settings.setSettings("port", value);
@@ -61,8 +61,8 @@ export class Settings {
   static get reverse() {
     return Settings.getSettings("reverse") as boolean;
   }
-  static get iterateDuplicateRoutes() {
-    return Settings.getSettings("iterateDuplicateRoutes") as boolean;
+  static get duplicates() {
+    return Settings.getSettings("duplicates") as boolean;
   }
   static get watchFiles(): string[] {
     return Settings.getSettings("watchFiles") as string[] || [];
@@ -70,14 +70,17 @@ export class Settings {
   static get ignoreFiles(): string[] {
     return Settings.getSettings("ignoreFiles") as string[] || [];
   }
-  static get shouldWatch(): boolean {
-    return Settings.getSettings("watchForChanges") as boolean;
+  static get watch(): boolean {
+    return Settings.getSettings("watch") as boolean;
+  }
+  static get log(): boolean {
+    return Settings.getSettings("log") as boolean;
   }
   static get homePage(): boolean {
     return Settings.getSettings("homePage") as boolean;
   }
   static get openInside(): boolean {
-    return Settings.getSettings("openHomePageInsideVSCode") as boolean;
+    return Settings.getSettings("openInside") as boolean;
   }
   static get showInfoMsg() {
     return Settings.getSettings("showInfoMsg") as boolean;
@@ -92,7 +95,6 @@ export class Settings {
       priority: number;
     };
   }
-
 
   static get root() {
     const _root = Settings.getSettings("paths.root") as string;
@@ -115,16 +117,17 @@ export class Settings {
       root: Settings.root,
       base: Settings.base,
       reverse: Settings.reverse,
-      static: Settings.paths.static || "/public",
+      log: Settings.log,
+      static: Settings.paths.static,
       ...Settings.defaults
     };
     return config;
   }
 
-  static getValidPath(relativePath: string, defaults: string) {
+  static getValidPath(relativePath: string, defaults: string): string | undefined {
     if (relativePath.startsWith("http")) return relativePath?.replace(/\\/g, '/');
 
-    const resolvedPath = path.resolve(Settings.root, relativePath?.trim() || defaults);
+    const resolvedPath = path.resolve(Settings.root, relativePath?.trim() ?? defaults);
     if (!fs.existsSync(resolvedPath)) return;
     return resolvedPath?.replace(/\\/g, '/');
   }

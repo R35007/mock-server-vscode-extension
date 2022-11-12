@@ -241,7 +241,7 @@ export class Utils {
 
     const filesToWatch = [
       Settings.paths.db,
-      Settings.paths.middleware,
+      Settings.paths.middlewares,
       Settings.paths.injectors,
       Settings.paths.rewriters,
       Settings.paths.store,
@@ -257,7 +257,7 @@ export class Utils {
 
     this.watcher = watcher.watch([...new Set(filesToWatch)], { ignored: Settings.ignoreFiles });
     this.watcher.on('change', (_event, _path) => {
-      if (!Settings.shouldWatch) return;
+      if (!Settings.watch) return;
       vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server
     });
   };

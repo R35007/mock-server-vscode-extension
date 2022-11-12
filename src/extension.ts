@@ -122,6 +122,9 @@ export function activate(context: vscode.ExtensionContext) {
   // Set Config
   context.subscriptions.push(vscode.commands.registerCommand(Commands.SET_CONFIG, server.setConfig));
 
+  // Paste Config
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.PASTE_CONFIG, server.pasteConfig));
+
   // Create Sample Files
   context.subscriptions.push(vscode.commands.registerCommand(Commands.GENERATE_MOCK_FILES, async (args) => {
     try {
