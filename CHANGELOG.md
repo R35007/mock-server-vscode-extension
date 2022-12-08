@@ -3,6 +3,10 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v13.0.1
+
+- Build size reduced
+
 ## v13.0.0
 
 - Removed - `Set as Server Root Folder` is removed from context menu. 

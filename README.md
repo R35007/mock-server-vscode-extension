@@ -95,7 +95,7 @@ Helps to work in multiple data environments.
 - `MockServer: Open Home Page` Command opens a new window which shows you all the list of resources.
 - This window also helps to update or add new resources in runtime.
 - It can also be opened in a separate browser window.
-  ![HomePage](./images/HomePage.png)
+  ![HomePage](https://user-images.githubusercontent.com/23217228/206558356-83616823-d43a-4196-94d7-72332eb964a6.png)
 
 ## DB
 
