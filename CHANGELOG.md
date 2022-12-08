@@ -3,6 +3,13 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v13.0.0
+
+- Removed - `Set as Server Root Folder` is removed from context menu. 
+- Added - Mock Server submenus in the editor context.
+- Added  - `mock-server.settings.contextMenu` - Helps to show or hide commands in context menu,
+- Updated - Right click on any `.json` file and select `Start Server` from context to start the mock server with the current file as an `env` file.  
+  
 ## v12.2.0
 
 - Updated `@r35007/mock-server@12.2.0`.

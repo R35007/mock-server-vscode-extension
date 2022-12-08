@@ -6,6 +6,6 @@ export class LocalStorageService {
     return this.storage.get<T>(key, defaultValue);
   }
   public setValue<T>(key: string, value: T) {
-    this.storage.update(key, value);
+    return this.storage.update(key, value);
   }
 }

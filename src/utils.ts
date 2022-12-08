@@ -152,13 +152,18 @@ export class Utils {
   };
 
   protected getEnvironmentList = async (mockServer?: MockServer): Promise<Environment[]> => {
-    const environment = Settings.paths.environment;
-    if (!environment) return [Recently_Used, NO_ENV];
+    const environmentFolderPath = Settings.paths.environment;
+    const selectedEnv = this.storageManager.getValue("environment", NO_ENV);
+
+    if(!environmentFolderPath){
+      if (selectedEnv.envName !== NO_ENV.envName) return [Recently_Used, selectedEnv, NO_ENV];
+      return [Recently_Used, NO_ENV];
+    }
 
     const defaultInjectors = ["./injectors/index.js", "./injectors/index.json", "./injectors.js", "./injectors.json"];
     const defaultMiddlewares = ["./middlewares/index.js", "./middlewares.js"];
 
-    const envFilesList = getFilesList(environment, { onlyIndex: false })
+    const envFilesList = getFilesList(environmentFolderPath, { onlyIndex: false })
       .filter(file => [".har", ".json", ".js"].includes(file.extension))
       .map((file: any) => ({
         envName: file.fileName,
@@ -185,9 +190,9 @@ export class Utils {
       kind: vscode.QuickPickItemKind.Separator
     });
 
-    let envConfigJson = await this.getDataFromUrl("./env.config.json", { mockServer, root: environment });
+    let envConfigJson = await this.getDataFromUrl("./env.config.json", { mockServer, root: environmentFolderPath });
     envConfigJson = _.isPlainObject(envConfigJson) ? envConfigJson : {};
-    let envConfigJs = await this.getDataFromUrl("./env.config.js", { mockServer, root: environment });
+    let envConfigJs = await this.getDataFromUrl("./env.config.js", { mockServer, root: environmentFolderPath });
     envConfigJs = _.isPlainObject(envConfigJs) ? envConfigJs : {};
 
     const envConfig = { ...envConfigJson, ...envConfigJs };
@@ -215,12 +220,8 @@ export class Utils {
     const environmentList = [NO_ENV, ...envConfigList, ...envFilesList];
 
     // making the selected environment to appear in first of the list
-    const selectedEnv = this.storageManager.getValue("environment", NO_ENV);
-    const selectedEnvIndex = environmentList.findIndex((environment) => JSON.stringify(environment) === JSON.stringify(selectedEnv));
-
-    if (selectedEnvIndex >= 0 && environmentList[selectedEnvIndex].envName !== NO_ENV.envName) {
-      const existing = environmentList[selectedEnvIndex];
-      environmentList.unshift(existing);
+    if(selectedEnv && selectedEnv.envName !== NO_ENV.envName){
+      environmentList.unshift(selectedEnv);
     } else {
       this.storageManager.setValue("environment", NO_ENV);
     };

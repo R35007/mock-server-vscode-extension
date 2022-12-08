@@ -116,9 +116,6 @@ export function activate(context: vscode.ExtensionContext) {
   // Set Port
   context.subscriptions.push(vscode.commands.registerCommand(Commands.SET_PORT, server.setPort));
 
-  // Set Root
-  context.subscriptions.push(vscode.commands.registerCommand(Commands.SET_ROOT, server.setRoot));
-  
   // Set Config
   context.subscriptions.push(vscode.commands.registerCommand(Commands.SET_CONFIG, server.setConfig));
 

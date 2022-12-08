@@ -8,7 +8,7 @@ import * as fsx from "fs-extra";
 import JPH from 'json-parse-helpfulerror';
 import * as path from 'path';
 import * as vscode from "vscode";
-import { Commands, PromptAction } from './enum';
+import { Commands, Environment, PromptAction } from './enum';
 import HomePage from './HomePage';
 import { Prompt } from './prompt';
 import { Settings } from './Settings';
@@ -93,15 +93,6 @@ export default class MockServerExt extends Utils {
     Prompt.showPopupMessage(`Port Number Set to ${port}`);
     this.log(`[Done] Port Number Set to ${port}`);
     return parseInt(port);
-  };
-
-  setRoot = async (args?: any) => {
-    if (!args?.fsPath) return;
-    const stat = fs.statSync(args.fsPath);
-    const root = stat.isFile() ? path.dirname(args.fsPath) : args.fsPath;
-    Settings.root = root;
-    Prompt.showPopupMessage(`Root Path Set to ${root}`);
-    this.log(`[Done] Root Path Set to ${root}`);
   };
 
   setConfig = async (args?: any) => {
@@ -219,8 +210,12 @@ export default class MockServerExt extends Utils {
       statusBar: Settings.getSettings("statusBar"),
     };
 
+    const config = [".js", ".ts"].includes(path.extname(currentFilePath))
+      ? `module.exports = ${JSON.stringify(serverConfig, null, 2)}`
+      : JSON.stringify(serverConfig, null, 2);
+
     await new Promise((resolve) => editor?.edit((editBuilder) => {
-      editBuilder.replace(textRange, JSON.stringify(serverConfig, null, 2));
+      editBuilder.replace(textRange, config);
       resolve(true);
     }));
 
@@ -229,7 +224,7 @@ export default class MockServerExt extends Utils {
 
   startServer = async (fsPath?: string, port: number = Settings.port) => {
     const paths = Settings.paths;
-    const dbPath = fsPath || paths.db;
+    const dbPath = paths.db;
 
     const mockServer = this.mockServer;
     const app = mockServer.app;
@@ -262,6 +257,18 @@ export default class MockServerExt extends Utils {
       app.use(mockServer.config.base, homePage);
     }
 
+    if(fsPath){
+      const environment = {
+        envName: path.basename(fsPath),
+        label: path.basename(fsPath),
+        description: Settings.paths.environment ? path.relative(Settings.paths.environment, fsPath).replace(/\\/g, "/") : fsPath,
+        db: [fsPath],
+        injectors: [],
+        middlewares: [],
+      } as Environment;
+  
+      await this.storageManager.setValue("environment", environment);
+    }
     const env = await this.getEnvData(mockServer);
     const envResources = mockServer.resources(env.db, {
       injectors: [...mockServer.injectors, ...env.injectors],
@@ -290,7 +297,7 @@ export default class MockServerExt extends Utils {
       const environmentList = await this.getEnvironmentList(this.mockServer);
       const selectedEnv = await Prompt.getEnvironment(environmentList, this.storageManager);
       if (!selectedEnv) return;
-      this.storageManager.setValue("environment", selectedEnv);
+      await this.storageManager.setValue("environment", selectedEnv);
       this.log(`[Done] Environment Switched to ${selectedEnv.envName}`);
       vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server
     } catch (err: any) {
