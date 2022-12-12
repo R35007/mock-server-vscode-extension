@@ -4,9 +4,9 @@ Get a full REST API with **zero coding** in **less than 30 seconds** (seriously)
 
 Created with <3 for front-end developers who need a quick back-end for prototyping and mocking.
 
-This Extension is built upon node package `@r35007/mock-server`.
+This Extension is built upon node package [@r35007/mock-server](https://www.npmjs.com/package/@r35007/mock-server).
 
-![Home Page](https://github.com/R35007/Mock-Server/blob/main/src/img/VSCode_Extension.gif?raw=true)
+![Preview](https://user-images.githubusercontent.com/23217228/206978718-3f4bdcbd-2e7a-4d7b-b4aa-651165a5781b.gif)
 
 ## Getting started
 
