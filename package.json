@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "13.0.2",
+  "version": "13.0.3",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -473,27 +473,27 @@
           "group": "thinker.mock-server@1"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .json || resourceExtname == .har",
+          "when": "config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .json || config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .har",
           "command": "mock-server.transformToMockServerDB",
           "group": "thinker.mock-server@2"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.startServer && resourceExtname == .json || resourceExtname == .js",
+          "when": "config.mock-server.settings.contextMenu.startServer && resourceExtname == .json || config.mock-server.settings.contextMenu.startServer && resourceExtname == .js",
           "command": "mock-server.startServer",
           "group": "thinker.mock-server@3"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.stopServer && resourceExtname == .json || resourceExtname == .js",
+          "when": "config.mock-server.settings.contextMenu.stopServer && resourceExtname == .json || config.mock-server.settings.contextMenu.stopServer && resourceExtname == .js",
           "command": "mock-server.stopServer",
           "group": "thinker.mock-server@4"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || resourceExtname == .js",
+          "when": "config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .js",
           "command": "mock-server.pasteConfig",
           "group": "thinker.mock-server@5"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || resourceExtname == .js",
+          "when": "config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .js",
           "command": "mock-server.setConfig",
           "group": "thinker.mock-server@6"
         }
@@ -505,54 +505,54 @@
           "group": "thinker.mock-server@1"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .json || resourceExtname == .har",
+          "when": "config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .json || config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .har",
           "command": "mock-server.transformToMockServerDB",
           "group": "thinker.mock-server@2"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.startServer && resourceExtname == .json || resourceExtname == .js",
+          "when": "config.mock-server.settings.contextMenu.startServer && resourceExtname == .json || config.mock-server.settings.contextMenu.startServer && resourceExtname == .js",
           "command": "mock-server.startServer",
           "group": "thinker.mock-server@3"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.stopServer && resourceExtname == .json || resourceExtname == .js",
+          "when": "config.mock-server.settings.contextMenu.stopServer && resourceExtname == .json || config.mock-server.settings.contextMenu.stopServer && resourceExtname == .js",
           "command": "mock-server.stopServer",
           "group": "thinker.mock-server@4"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || resourceExtname == .js",
+          "when": "config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .js",
           "command": "mock-server.pasteConfig",
           "group": "thinker.mock-server@5"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || resourceExtname == .js",
+          "when": "config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .js",
           "command": "mock-server.setConfig",
           "group": "thinker.mock-server@6"
         }
       ],
       "mock-server.subMenu": [
         {
-          "when": "!config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .json || resourceExtname == .har",
+          "when": "!config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .json || !config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .har",
           "command": "mock-server.transformToMockServerDB",
           "group": "thinker.mock-server@2"
         },
         {
-          "when": "!config.mock-server.settings.contextMenu.startServer && resourceExtname == .json || resourceExtname == .js",
+          "when": "!config.mock-server.settings.contextMenu.startServer && resourceExtname == .json || !config.mock-server.settings.contextMenu.startServer && resourceExtname == .js",
           "command": "mock-server.startServer",
           "group": "thinker.mock-server@3"
         },
         {
-          "when": "!config.mock-server.settings.contextMenu.stopServer && resourceExtname == .json || resourceExtname == .js",
+          "when": "!config.mock-server.settings.contextMenu.stopServer && resourceExtname == .json || !config.mock-server.settings.contextMenu.stopServer && resourceExtname == .js",
           "command": "mock-server.stopServer",
           "group": "thinker.mock-server@4"
         },
         {
-          "when": "!config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || resourceExtname == .js",
+          "when": "!config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || !config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .js",
           "command": "mock-server.pasteConfig",
           "group": "thinker.mock-server@5"
         },
         {
-          "when": "!config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || resourceExtname == .js",
+          "when": "!config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || !config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .js",
           "command": "mock-server.setConfig",
           "group": "thinker.mock-server@6"
         }
