@@ -239,6 +239,8 @@ export class Utils {
       .filter(fetch => typeof fetch === 'string' && !fetch.startsWith("http"))
       .map(fetchPath => path.resolve(Settings.root, fetchPath as string)) as string[];
 
+    const selectedEnvironment = this.storageManager.getValue("environment", NO_ENV);
+
     const filesToWatch = [
       Settings.paths.db,
       Settings.paths.middlewares,
@@ -248,12 +250,14 @@ export class Utils {
       Settings.paths.static,
       Settings.paths.environment,
       ...Settings.watchFiles,
-      ...fetchPaths
+      ...fetchPaths,
+      ...[].concat(selectedEnvironment.db),
+      ...[].concat(selectedEnvironment.injectors),
+      ...[].concat(selectedEnvironment.middlewares),
     ]
       .filter(p => !p?.startsWith("http")).filter(Boolean)
       .reduce((paths, p) => [...paths, ...getFilesList(p!)], [] as PathDetails[])
-      .filter(p => p.isFile)
-      .map(p => p.filePath);
+      .filter(p => p.isFile).map(p => p.filePath);
 
     this.watcher = watcher.watch([...new Set(filesToWatch)], { ignored: Settings.ignoreFiles });
     this.watcher.on('change', (_event, _path) => {

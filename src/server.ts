@@ -3,7 +3,7 @@ import { HAR, KIBANA } from '@r35007/mock-server/dist/types/common.types';
 import * as UserTypes from "@r35007/mock-server/dist/types/user.types";
 import { extractDbFromHAR, extractDbFromKibana, getCleanDb } from '@r35007/mock-server/dist/utils';
 import { requireData } from '@r35007/mock-server/dist/utils/fetch';
-import * as cjson from 'comment-json';
+import * as jsonc from 'comment-json';
 import * as fs from 'fs';
 import * as fsx from "fs-extra";
 import * as path from 'path';
@@ -51,7 +51,7 @@ export default class MockServerExt extends Utils {
 
     if (!currentFilePath) throw Error("Invalid File or path");
 
-    const userData = cjson.parse(fs.readFileSync(currentFilePath, "utf-8"), undefined, false) as any;
+    const userData = jsonc.parse(fs.readFileSync(currentFilePath, "utf-8"), undefined, false) as any;
 
     if (!_.isPlainObject(userData) || _.isEmpty(userData)) throw Error("Invalid or empty Object");
     const isHar = userData?.log?.entries?.length > 0;
@@ -295,7 +295,7 @@ export default class MockServerExt extends Utils {
     this.log(`Switching Environment...`);
     try {
       const environmentList = await this.getEnvironmentList(this.mockServer);
-      const selectedEnv = await Prompt.getEnvironment(environmentList, this.storageManager);
+      const selectedEnv = await Prompt.getEnvironment(environmentList);
       if (!selectedEnv) return;
       await this.storageManager.setValue("environment", selectedEnv);
       this.log(`[Done] Environment Switched to ${selectedEnv.envName}`);

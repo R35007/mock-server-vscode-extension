@@ -5,7 +5,7 @@ import { LocalStorageService } from './LocalStorageService';
 import { Settings } from "./Settings";
 
 export class Prompt {
-  static getEnvironment = async (envNameList: Environment[], storageManager: LocalStorageService) => {
+  static getEnvironment = async (envNameList: Environment[]) => {
     const disposables: vscode.Disposable[] = [];
 
     const openFileButton = {

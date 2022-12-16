@@ -3,6 +3,10 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v14.1.0
+
+- Restart the mock server on changes in environment data file.
+
 ## v14.0.0
 
 - Support for JSON with comments.
