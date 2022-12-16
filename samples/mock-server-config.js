@@ -4,7 +4,7 @@
 module.exports = {
   port: 3000, // Set Port to 0 to pick a random available port.
   host: "localhost", // Set host to empty string to set your local ip address
-  root: process.cwd(), // Root path of the server. All paths refereed in db data will be relative to this path
+  root: __dirname, // or process.cwd() // Root path of the server. All paths refereed in db data will be relative to this path
   base: "", // Mount db on a base url
   id: "id", // Set db id attribute.
   dbMode: 'mock', // Give one of 'multi', 'fetch', 'mock'

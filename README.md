@@ -53,7 +53,7 @@ This command sets current folder as the server root folder in setting `mock-serv
 Helps to work in multiple data environments.
 
 - Create `env` folder in root.
-- Keep you different db data of extension `.json` or `.har`
+- Keep you different db data of extension `.json`, `.jsonc` or `.har`
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Switch Environment`
 - Use`Alt+S` shortcut to switch environment.
 - This path can be modified using the settings `mock-server.settings.paths.environment`.

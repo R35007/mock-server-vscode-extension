@@ -1,9 +1,8 @@
-/* eslint-disable curly */
-import { MockServer, axios, watcher, lodash as _ } from '@r35007/mock-server';
-import { PathDetails } from '@r35007/mock-server/dist/server/types/common.types';
-import { Db } from '@r35007/mock-server/dist/server/types/valid.types';
-import { normalizeDb } from '@r35007/mock-server/dist/server/utils';
-import { getFilesList, requireData } from "@r35007/mock-server/dist/server/utils/fetch";
+import { axios, lodash as _, MockServer, watcher } from '@r35007/mock-server';
+import { PathDetails } from '@r35007/mock-server/dist/types/common.types';
+import { Db } from '@r35007/mock-server/dist/types/valid.types';
+import { normalizeDb } from '@r35007/mock-server/dist/utils';
+import { getFilesList, requireData } from "@r35007/mock-server/dist/utils/fetch";
 import * as fsx from "fs-extra";
 import { FSWatcher } from 'node:fs';
 import * as path from "path";
@@ -155,7 +154,7 @@ export class Utils {
     const environmentFolderPath = Settings.paths.environment;
     const selectedEnv = this.storageManager.getValue("environment", NO_ENV);
 
-    if(!environmentFolderPath){
+    if (!environmentFolderPath) {
       if (selectedEnv.envName !== NO_ENV.envName) return [Recently_Used, selectedEnv, NO_ENV];
       return [Recently_Used, NO_ENV];
     }
@@ -220,7 +219,7 @@ export class Utils {
     const environmentList = [NO_ENV, ...envConfigList, ...envFilesList];
 
     // making the selected environment to appear in first of the list
-    if(selectedEnv && selectedEnv.envName !== NO_ENV.envName){
+    if (selectedEnv && selectedEnv.envName !== NO_ENV.envName) {
       environmentList.unshift(selectedEnv);
     } else {
       this.storageManager.setValue("environment", NO_ENV);

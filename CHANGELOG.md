@@ -3,14 +3,21 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v14.0.0
+
+- Support for JSON with comments.
+- Added - `Mock It` command in context menu. Helps to run the current file data in mock server.
+- Added - `Switch Environment` command in context menu.
+- Build size reduced using webpack.
+  
 ## v13.0.3
 
-- Context mwnu show and hide issue fixed.
+- Context menu show and hide issue fixed.
   
 ## v13.0.2
 
 - Build size reduced
-- Context mwnu grouped by publisher name.
+- Context menu grouped by publisher name.
 
 ## v13.0.1
 

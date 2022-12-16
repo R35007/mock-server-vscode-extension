@@ -1,11 +1,11 @@
-import { MockServer, lodash as _ } from "@r35007/mock-server";
-import { HAR, KIBANA } from '@r35007/mock-server/dist/server/types/common.types';
-import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
-import { extractDbFromHAR, extractDbFromKibana, getCleanDb } from '@r35007/mock-server/dist/server/utils';
-import { requireData } from '@r35007/mock-server/dist/server/utils/fetch';
+import { lodash as _, MockServer } from "@r35007/mock-server";
+import { HAR, KIBANA } from '@r35007/mock-server/dist/types/common.types';
+import * as UserTypes from "@r35007/mock-server/dist/types/user.types";
+import { extractDbFromHAR, extractDbFromKibana, getCleanDb } from '@r35007/mock-server/dist/utils';
+import { requireData } from '@r35007/mock-server/dist/utils/fetch';
+import * as cjson from 'comment-json';
 import * as fs from 'fs';
 import * as fsx from "fs-extra";
-import JPH from 'json-parse-helpfulerror';
 import * as path from 'path';
 import * as vscode from "vscode";
 import { Commands, Environment, PromptAction } from './enum';
@@ -51,7 +51,7 @@ export default class MockServerExt extends Utils {
 
     if (!currentFilePath) throw Error("Invalid File or path");
 
-    const userData = JPH.parse(fs.readFileSync(currentFilePath, "utf-8"));
+    const userData = cjson.parse(fs.readFileSync(currentFilePath, "utf-8"), undefined, false) as any;
 
     if (!_.isPlainObject(userData) || _.isEmpty(userData)) throw Error("Invalid or empty Object");
     const isHar = userData?.log?.entries?.length > 0;
@@ -257,7 +257,7 @@ export default class MockServerExt extends Utils {
       app.use(mockServer.config.base, homePage);
     }
 
-    if(fsPath){
+    if (fsPath) {
       const environment = {
         envName: path.basename(fsPath),
         label: path.basename(fsPath),
@@ -266,7 +266,7 @@ export default class MockServerExt extends Utils {
         injectors: [],
         middlewares: [],
       } as Environment;
-  
+
       await this.storageManager.setValue("environment", environment);
     }
     const env = await this.getEnvData(mockServer);

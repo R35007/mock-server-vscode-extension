@@ -1,4 +1,4 @@
-import open from "open";
+import * as open from "open";
 import * as vscode from "vscode";
 import { Commands, PromptAction, ServerStatus } from './enum';
 import HomePage from './HomePage';
@@ -35,6 +35,11 @@ export function activate(context: vscode.ExtensionContext) {
       console.log(error);
       Prompt.showPopupMessage(`Failed to Transform. \n${error.message}`, PromptAction.ERROR);
     };
+  }));
+
+  // Mock It
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.MOCK_IT, async (args) => {
+    vscode.commands.executeCommand(Commands.START_SERVER, args);
   }));
 
   // Start Server

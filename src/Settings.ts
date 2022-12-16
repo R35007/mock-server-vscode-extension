@@ -1,5 +1,5 @@
-import { DbMode } from '@r35007/mock-server/dist/server/types/common.types';
-import * as UserTypes from "@r35007/mock-server/dist/server/types/user.types";
+import { DbMode } from '@r35007/mock-server/dist/types/common.types';
+import * as UserTypes from "@r35007/mock-server/dist/types/user.types";
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";

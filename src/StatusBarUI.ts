@@ -42,6 +42,7 @@ export class StatusbarUi {
       StatusbarUi.statusBarItem.text = '$(broadcast) Mock it';
       StatusbarUi.statusBarItem.command = Commands.START_SERVER;
       StatusbarUi.statusBarItem.tooltip = 'Click to start mock server';
+      vscode.commands.executeCommand('setContext', "isServerRunning", false);
 
       if (error?.code === 'EADDRINUSE') {
         const action = "Use another Port ?";
@@ -70,6 +71,7 @@ export class StatusbarUi {
       StatusbarUi.statusBarItem.tooltip = 'Click to stop mock server';
       Prompt.showPopupMessage(`Server ${status}ed : [${url}](command:${Commands.OPEN_HOMEPAGE})`);
       StatusbarUi.log(`[Done] Server ${status}ed : ${url}`);
+      vscode.commands.executeCommand('setContext', "isServerRunning", true);
     }, 150);
   }
 }

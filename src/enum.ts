@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 export enum Commands {
   TRANSFORM_TO_MOCK_SERVER_DB = "mock-server.transformToMockServerDB",
   GENERATE_MOCK_FILES = "mock-server.generateMockFiles",
+  MOCK_IT = "mock-server.mockIt", // Alias for Start Server. Shows up only on context menus.
   START_SERVER = "mock-server.startServer", // Will Restart if already running. If Full Reload it will reset and restart.
   STOP_SERVER = "mock-server.stopServer", // Will Reset
   START_WITH_NEW_PORT = "mock-server.startWithNewPort",
