@@ -118,6 +118,9 @@ export function activate(context: vscode.ExtensionContext) {
     }
   }));
 
+  // Make Request
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.MAKE_REQUEST, server.makeRequest));
+
   // Set Port
   context.subscriptions.push(vscode.commands.registerCommand(Commands.SET_PORT, server.setPort));
 

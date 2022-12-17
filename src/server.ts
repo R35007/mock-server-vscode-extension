@@ -6,6 +6,7 @@ import { requireData } from '@r35007/mock-server/dist/utils/fetch';
 import * as jsonc from 'comment-json';
 import * as fs from 'fs';
 import * as fsx from "fs-extra";
+import { findIndex } from 'lodash';
 import * as path from 'path';
 import * as vscode from "vscode";
 import { Commands, Environment, PromptAction } from './enum';
@@ -316,5 +317,35 @@ export default class MockServerExt extends Utils {
   generateMockFiles = async (args?: any) => {
     await delay(1000);
     fsx.copySync(path.join(__dirname, '../samples'), args?.fsPath || Settings.root);
+  };
+
+  makeRequest = async () => {
+
+    const selectedEnv = this.storageManager.getValue("endpoint", { label: "undefined", kind: vscode.QuickPickItemKind.Default });
+
+    const endpoints = this.mockServer.server ? [...Object.keys(this.mockServer.db), "/_db", "/_routes", "/_store"].map(endpoint => ({ label: endpoint, kind: vscode.QuickPickItemKind.Default })) : [];
+
+    // remove the selected endpoint from the endpoints and add it to the first selected endpoint
+    if (selectedEnv.label?.length) {
+      const endpointIndex = endpoints.findIndex(endpoint => endpoint.label === selectedEnv.label);
+      if (endpointIndex !== -1) endpoints.splice(endpointIndex, 1);
+      endpoints.unshift(selectedEnv);
+      endpoints.unshift({ label: "last request", kind: vscode.QuickPickItemKind.Separator });
+    }
+
+    const selectedEndpoint = await this.endpointsQuickPick(endpoints);
+
+    if (!selectedEndpoint) return;
+    await this.storageManager.setValue("endpoint", selectedEndpoint);
+
+    await vscode.window.withProgress({
+      location: vscode.ProgressLocation.Notification,
+      title: "Please wait. Fetching Data from selected endpoint...",
+    }, async () => {
+      const url = selectedEndpoint.label.startsWith("http") ? selectedEndpoint.label : `http://localhost:${Settings.port}` + selectedEndpoint.label;
+      const content = await this.makeGetRequest(url);
+      const doc = await vscode.workspace.openTextDocument({ content, language: "jsonc" });
+      await vscode.window.showTextDocument(doc);
+    });
   };
 }

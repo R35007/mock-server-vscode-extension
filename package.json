@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "14.1.0",
+  "version": "15.0.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -51,6 +51,7 @@
     "onCommand:mock-server.stopServer",
     "onCommand:mock-server.switchEnvironment",
     "onCommand:mock-server.getDbSnapShot",
+    "onCommand:mock-server.makeRequest",
     "onCommand:mock-server.openHomePage",
     "onCommand:mock-server.setPort",
     "onCommand:mock-server.transformToMockServerDB",
@@ -84,6 +85,11 @@
       {
         "command": "mock-server.getDbSnapShot",
         "title": "Get Db Snapshot",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.makeRequest",
+        "title": "Make Request",
         "category": "MockServer"
       },
       {
@@ -376,6 +382,7 @@
             "mockIt": false,
             "stopServer": false,
             "switchEnvironment": false,
+            "makeRequest": false,
             "pasteServerConfig": false,
             "setAsServerConfig": false
           },
@@ -396,6 +403,9 @@
               "type": "boolean"
             },
             "switchEnvironment": {
+              "type": "boolean"
+            },
+            "makeRequest": {
               "type": "boolean"
             },
             "pasteServerConfig": {
@@ -508,6 +518,11 @@
           "group": "thinker.mock-server@5"
         },
         {
+          "when": "config.mock-server.settings.contextMenu.makeRequest",
+          "command": "mock-server.makeRequest",
+          "group": "thinker.mock-server@5"
+        },
+        {
           "when": "config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .js",
           "command": "mock-server.pasteConfig",
           "group": "thinker.mock-server@6"
@@ -545,14 +560,19 @@
           "group": "thinker.mock-server@5"
         },
         {
+          "when": "config.mock-server.settings.contextMenu.makeRequest",
+          "command": "mock-server.makeRequest",
+          "group": "thinker.mock-server@6"
+        },
+        {
           "when": "config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .js",
           "command": "mock-server.pasteConfig",
-          "group": "thinker.mock-server@6"
+          "group": "thinker.mock-server@7"
         },
         {
           "when": "config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .js",
           "command": "mock-server.setConfig",
-          "group": "thinker.mock-server@7s"
+          "group": "thinker.mock-server@8"
         }
       ],
       "mock-server.subMenu": [
@@ -577,14 +597,19 @@
           "group": "thinker.mock-server@4"
         },
         {
+          "when": "!config.mock-server.settings.contextMenu.makeRequest",
+          "command": "mock-server.makeRequest",
+          "group": "thinker.mock-server@5"
+        },
+        {
           "when": "!config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || !config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .js",
           "command": "mock-server.pasteConfig",
-          "group": "thinker.mock-server@5"
+          "group": "thinker.mock-server@6"
         },
         {
           "when": "!config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || !config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .js",
           "command": "mock-server.setConfig",
-          "group": "thinker.mock-server@6"
+          "group": "thinker.mock-server@7"
         }
       ]
     },
@@ -622,7 +647,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "@r35007/mock-server": "^13.0.1",
+    "@r35007/mock-server": "^13.0.2",
     "comment-json": "^4.2.3",
     "fs-extra": "^10.1.0",
     "open": "^8.4.0"

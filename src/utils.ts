@@ -5,6 +5,7 @@ import { normalizeDb } from '@r35007/mock-server/dist/utils';
 import { getFilesList, requireData } from "@r35007/mock-server/dist/utils/fetch";
 import * as fsx from "fs-extra";
 import { FSWatcher } from 'node:fs';
+import { performance } from 'node:perf_hooks';
 import * as path from "path";
 import * as vscode from "vscode";
 import { Commands, Environment, NO_ENV, Recently_Used } from './enum';
@@ -74,7 +75,7 @@ export class Utils {
     notificationText: string,
   ) => {
     fsx.ensureFileSync(filePath);
-    fsx.writeFileSync(filePath, JSON.stringify(data, null, "\t"));
+    fsx.writeFileSync(filePath, JSON.stringify(data, null, vscode.window.activeTextEditor?.options.tabSize || "\t"));
     const doc = await vscode.workspace.openTextDocument(filePath);
     await vscode.window.showTextDocument(doc, undefined, true);
     Prompt.showPopupMessage(notificationText);
@@ -270,5 +271,85 @@ export class Utils {
     this.watcher && await this.watcher.close();
     this.watcher = undefined;
   };
-}
 
+  protected endpointsQuickPick = async (endpoints: vscode.QuickPickItem[] = []) => {
+    const disposables: vscode.Disposable[] = [];
+
+    const editRequest = {
+      iconPath: new vscode.ThemeIcon("pencil"),
+      tooltip: "Edit selected comparison code"
+    };
+
+    const pick: vscode.QuickPickItem | undefined = await new Promise((resolve) => {
+      let isResolved = false;
+      const quickPick = vscode.window.createQuickPick();
+      quickPick.title = "Make Request";
+      quickPick.placeholder = 'Please select a endpoint to make a get request';
+      quickPick.matchOnDescription = false;
+      quickPick.canSelectMany = false;
+      quickPick.items = endpoints;
+      quickPick.matchOnDetail = false;
+      quickPick.buttons = [editRequest];
+
+      disposables.push(
+        quickPick.onDidAccept(() => {
+          const selection = quickPick.activeItems[0];
+          if (!isResolved) {
+            resolve(selection);
+            isResolved = true;
+          }
+          quickPick.dispose();
+        }),
+        quickPick.onDidChangeValue(() => {
+          // add a new custom request to the pick list as the first item
+          if (!endpoints.map(cc => cc.label).includes(quickPick.value)) {
+            const newItems = quickPick.value ? [{ label: quickPick.value, description: "custom request" }, ...endpoints] : endpoints;
+            quickPick.items = newItems;
+          }
+        }),
+        quickPick.onDidHide(() => {
+          if (!isResolved) {
+            resolve(undefined);
+            isResolved = true;
+          }
+          quickPick.dispose();
+        }),
+        quickPick.onDidTriggerButton((_item) => {
+          quickPick.value = quickPick.activeItems[0].label;
+        }),
+      );
+
+      quickPick.show();
+    });
+
+    disposables.forEach(d => d.dispose());
+
+    return pick;
+  };
+
+  protected makeGetRequest = async (url: string) => {
+    const start = performance.now();
+    try {
+      const response = await axios.get(url);
+      const responseTime = (performance.now() - start).toFixed(2);
+      const data = typeof response.data === "string" ? response.data : JSON.stringify(response.data, undefined, vscode.window.activeTextEditor?.options.tabSize || "\t");
+      let result = `// ${url}\n`; // add Url to result
+      result += `// Status: ${response.status || ""} ${response.statusText || ""}\n`; // add Status to result
+      result += `// Time: ${response.headers?.["x-response-time"] || responseTime}ms\n`; // add Time to result
+      result += `// Response:\n`; // add Response to result
+      result += data;
+      return result;
+    } catch (error: any) {
+      const response = error?.response || {};
+      const responseTime = (performance.now() - start).toFixed(2);
+      const data = typeof response?.data === "string" ? error?.response?.data : JSON.stringify(response?.data || "", undefined, vscode.window.activeTextEditor?.options.tabSize || "\t");
+      let result = `// ${url}\n`; // add Url to result
+      result += `// Status: ${response.status || ""} ${response.statusText || ""}\n`; // add Status to result
+      result += `// Time: ${response.headers?.["x-response-time"] || responseTime}ms\n`; // add Time to result
+      result += `// Error: ${error.message}\n`; // add Status to result
+      result += `// Response:\n`; // add Response to result
+      result += data;
+      return result;
+    }
+  };
+}
