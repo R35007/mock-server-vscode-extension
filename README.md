@@ -57,7 +57,7 @@ Helps to work in multiple data environments.
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Switch Environment`
 - Use`Alt+S` shortcut to switch environment.
 - This path can be modified using the settings `mock-server.settings.paths.environment`.
-- Now all the `.json`, `.har`, `.js` files will be listed down. You can pick a data to launch the server.
+- Now all the `.json`, `.jsonc`, `.har`, `.js` files will be listed down. You can pick a data to launch the server.
 - You can create a `env.config.json` file to create a custom database environment.
   For Example: `env/env.config.json`
   ```json

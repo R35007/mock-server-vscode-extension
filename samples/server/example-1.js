@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // Install - npm install @r35007/mock-server
 
+const path = require("path");
 const { MockServer } = require("@r35007/mock-server");
 // const MockServer = require("@r35007/mock-server").default; // For default import
 
 const config = {
-  root: __dirname, // All fetch paths will be relative to this path
+  root: path.resolve(__dirname, "../"), // All fetch paths will be relative to this path
   port: 3000, // Set Port to 0 to pick a random available port. default: 3000
   host: "localhost", // Set empty string to set your Local Ip Address 
   quiet: false, // Set to true to suppress console logs
@@ -16,13 +18,13 @@ const app = mockServer.app;
 
 // Sets global injectors, middlewares, store and rewriters
 mockServer.setData({
-  injectors: "../injectors.json",
-  middlewares: "../middlewares.js",
-  store: "../store.json",
+  injectors: "./injectors.json",
+  middlewares: "./middlewares.js",
+  store: "./store.json",
 }); // pass mockServer instance to use it in middleware.js method
 
 // Make sure to use this at first, before all the resources
-const rewriter = mockServer.rewriter("../rewriters.json");
+const rewriter = mockServer.rewriter("./rewriters.json");
 app.use(rewriter);
 
 // Returns the default middlewares
@@ -43,7 +45,7 @@ app.use((req, res, next) => {
 app.get("/echo", (req, res) => res.jsonp(req.query));
 
 // Creates resources and returns the express router
-const resources = mockServer.resources("../db.json");
+const resources = mockServer.resources("./db.json");
 
 resources.create("/todos", (req, res, next) => { next(); }) // /todos will be added to existing db
   .send({ userId: 1, id: 1, title: "Marvel", completed: false })

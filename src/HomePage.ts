@@ -174,7 +174,7 @@ export default class HomePage {
       <p>Created with &lt;3 for front-end developers who need a quick back-end for prototyping and mocking.</p>
     </div>
     ${Settings.homePage ? startServerBtn : enableHomePage}
-    <div class="demo-container"><img src="https://github.com/R35007/Mock-Server/blob/main/src/img/VSCode_Extension.gif?raw=true" alt="Home Page" /></div>
+    <div class="demo-container"><img src="https://user-images.githubusercontent.com/23217228/206978718-3f4bdcbd-2e7a-4d7b-b4aa-651165a5781b.gif" alt="Home Page" /></div>
   </div>`;
 
     return `

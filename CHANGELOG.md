@@ -3,6 +3,16 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v16.0.0
+
+- Reverted using webpack build due to require file from outside the build not supported limitations. 
+- Added Auto completion of routes and configs.
+- Provided JSON schema for `*db.js*`, `*injectors.js*`, `mock-server*.js*`, `msconfig.js*`.
+- These above schema helps to autocomplete server config properties
+- Added - `Set as Server Root Folder` command in explorer context
+- Added - `Start with New Port` command in command pallet
+- Resolved - Sample files errors
+  
 ## v15.1.0
 
 - Added - `Make Request` command. Helps to search endpoint and make get request to get the endpoint data. 

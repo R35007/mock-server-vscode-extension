@@ -107,7 +107,7 @@
   },
   "/fetch/image/url": {
     "_config": true,
-    "fetch": "https://r35007.github.io/Mock-Server/images/mockserverlogo.png"
+    "fetch": "https://user-images.githubusercontent.com/23217228/208503656-ea651bc4-5a88-43b7-9405-54cddb780d9c.png"
   },
   "/fetch/todos/fetchCount/3/times": {
     "_config": true,

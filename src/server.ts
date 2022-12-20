@@ -44,7 +44,7 @@ export default class MockServerExt extends Utils {
     HomePage.currentPanel?.update();
   };
 
-  transformToMockServerDB = async (args?: any) => {
+  transformToMockDB = async (args?: any) => {
     await delay(1000);
     const { document } = this.getEditorProps(args);
     const currentFilePath = args?.fsPath || document?.uri?.fsPath;
@@ -93,6 +93,15 @@ export default class MockServerExt extends Utils {
     Prompt.showPopupMessage(`Port Number Set to ${port}`);
     this.log(`[Done] Port Number Set to ${port}`);
     return parseInt(port);
+  };
+
+  setRoot = async (args?: any) => {
+    if (!args?.fsPath) return;
+    const stat = fs.statSync(args.fsPath);
+    const root = stat.isFile() ? path.dirname(args.fsPath) : args.fsPath;
+    Settings.root = root;
+    Prompt.showPopupMessage(`Root Path Set to ${root}`);
+    this.log(`[Done] Root Path Set to ${root}`);
   };
 
   setConfig = async (args?: any) => {
@@ -322,10 +331,10 @@ export default class MockServerExt extends Utils {
 
     const selectedEnv = this.storageManager.getValue("endpoint", { label: "undefined", kind: vscode.QuickPickItemKind.Default });
 
-    const endpoints = this.mockServer.server ? [...Object.keys(this.mockServer.db), "/_db", "/_routes", "/_store"].map(endpoint => ({ label: endpoint, kind: vscode.QuickPickItemKind.Default })) : [];
+    const endpoints = this.mockServer.server ? [...Object.keys(this.mockServer.db || {}), "/_db", "/_routes", "/_store"].map(endpoint => ({ label: endpoint, kind: vscode.QuickPickItemKind.Default })) : [];
 
     // remove the selected endpoint from the endpoints and add it to the first selected endpoint
-    if (selectedEnv.label?.length) {
+    if (selectedEnv.label?.length && selectedEnv.label !== "undefined") {
       const endpointIndex = endpoints.findIndex(endpoint => endpoint.label === selectedEnv.label);
       if (endpointIndex !== -1) endpoints.splice(endpointIndex, 1);
       endpoints.unshift(selectedEnv);
@@ -346,5 +355,26 @@ export default class MockServerExt extends Utils {
       const doc = await vscode.workspace.openTextDocument({ content, language: "jsonc" });
       await vscode.window.showTextDocument(doc);
     });
+  };
+
+  endpointAutoCompletion = async (document: vscode.TextDocument, position: vscode.Position) => {
+
+    const completionItems: vscode.CompletionItem[] = [];
+
+    // get all text until the `position` and check if it reads `/`
+    const linePrefix = document.lineAt(position).text.substr(0, position.character);
+    const isSubPath = !path.relative(Settings.root, document.uri.fsPath).startsWith("..");
+    if (!isSubPath || !linePrefix.endsWith('/')) {
+      return completionItems;
+    }
+
+    const db = this.mockServer.server ? this.mockServer.db : await this.getDataFromUrl(Settings.paths.db);
+    Object.keys(db || {}).forEach(route => {
+      const completionItem = new vscode.CompletionItem(route, vscode.CompletionItemKind.Property);
+      completionItem.insertText = new vscode.SnippetString(route.slice(1));
+      completionItems.push(completionItem);
+    });
+
+    return completionItems;
   };
 }

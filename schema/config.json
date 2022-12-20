@@ -1,0 +1,227 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "type": "object",
+  "default": {
+    "root": "./",
+    "port": 3000,
+    "host": "localhost",
+    "db": "./db.json",
+    "injectors": "./injectors.json",
+    "middlewares": "./middlewares.js",
+    "rewriters": "./rewriters.json",
+    "store": "./store.json",
+    "static": "public",
+    "snapshots": "snapshots",
+    "watch": true
+  },
+  "properties": {
+    "root": {
+      "type": "string",
+      "format": "file-system-path",
+      "default": "./",
+      "description": "Set custom root path. Note : every other paths given in will be relative to this root path."
+    },
+    "db": {
+      "type": "string",
+      "format": "file-system-path",
+      "default": "db.json",
+      "description": "Set custom root path. Note : every other paths given in will be relative to this root path."
+    },
+    "middlewares": {
+      "type": "string",
+      "format": "file-system-path",
+      "default": "middlewares.js",
+      "description": "Set .js path here."
+    },
+    "injectors": {
+      "type": "string",
+      "format": "file-system-path",
+      "default": "injectors.json",
+      "description": "Set .js or .json or http url here."
+    },
+    "rewriters": {
+      "type": "string",
+      "format": "file-system-path",
+      "default": "rewriters.json",
+      "description": "Set .js or .json or http url here."
+    },
+    "store": {
+      "type": "string",
+      "format": "file-system-path",
+      "default": "store.json",
+      "description": "Set .js or .json or http url here."
+    },
+    "static": {
+      "type": "string",
+      "format": "file-system-path",
+      "default": "public",
+      "description": "Set path to static files."
+    },
+    "snapshots": {
+      "type": "string",
+      "format": "file-system-path",
+      "default": "snapshots",
+      "description": "Set SnapShot Folder directory."
+    },
+    "environment": {
+      "type": "string",
+      "default": "env",
+      "description": "Set path to environment files.\n\nThis will only be used in vscode Mock Server Extension.\nThis will not be used in @r35007/mock-server cli."
+    },
+    "port": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 3000,
+      "maximum": 65535,
+      "description": "Set Custom Port number. Set 0 to pick a random available port."
+    },
+    "host": {
+      "type": "string",
+      "description": "Set custom host or Ip address. Give empty string to use Local Ip address."
+    },
+    "base": {
+      "type": "string",
+      "format": "uri-reference",
+      "default": "",
+      "description": "Set custom base url."
+    },
+    "id": {
+      "type": "string",
+      "default": "id",
+      "description": "Set custom database id."
+    },
+    "dbMode": {
+      "type": "string",
+      "enum": [
+        "mock",
+        "fetch",
+        "multi"
+      ],
+      "enumDescriptions": [
+        "All direct values will be set to mock attribute",
+        "All direct values will be set to fetch attribute",
+        "Only string is set to fetch attribute and all other direct values are set to mock attribute"
+      ],
+      "default": "mock",
+      "description": "Helps to set the direct route value to the selected attribute."
+    },
+    "reverse": {
+      "type": "boolean",
+      "default": false,
+      "description": "Generate Routes in reverse order."
+    },
+    "readOnly": {
+      "type": "boolean",
+      "default": false,
+      "description": "Accept only GET requests."
+    },
+    "noCors": {
+      "type": "boolean",
+      "default": false,
+      "description": "Disable CORS ( Cross Origin Resource Sharing )."
+    },
+    "noGzip": {
+      "type": "boolean",
+      "default": false,
+      "description": "Disable compression."
+    },
+    "logger": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable logger middleware."
+    },
+    "bodyParser": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable body-parser middleware."
+    },
+    "cookieParser": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable cookie-parser middleware."
+    },
+    "watch": {
+      "type": "boolean",
+      "default": true,
+      "description": "Watch for changes and restarts the server."
+    },
+    "quiet": {
+      "type": "boolean",
+      "default": true,
+      "description": "Prevent console logs."
+    },
+    "log": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable Setter logs."
+    },
+    "watchFiles": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string",
+        "format": "file-system-path"
+      },
+      "additionalItems": true,
+      "description": "Set files and folder path to watch for changes. By default all the paths in `#paths#` are included for watches.\n\nThis will only be used in vscode Mock Server Extension.\nThis will not be used in @r35007/mock-server cli."
+    },
+    "ignoreFiles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "file-system-path"
+      },
+      "additionalItems": true,
+      "description": "Set files and folder path to ignore changes.\n\nThis will only be used in vscode Mock Server Extension.\nThis will not be used in @r35007/mock-server cli."
+    },
+    "duplicates": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, transformDb will iterate duplicate routes using _IterateRoutes middleware.\n\nThis will only be used in vscode Mock Server Extension.\nThis will not be used in @r35007/mock-server cli."
+    },
+    "homePage": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable Mock Server Home Page.\n\nThis will only be used in vscode Mock Server Extension.\nThis will not be used in @r35007/mock-server cli."
+    },
+    "openInside": {
+      "type": "boolean",
+      "default": true,
+      "description": "Open Home Page inside VS Code, instead of default browser.\n\nThis will only be used in vscode Mock Server Extension.\nThis will not be used in @r35007/mock-server cli."
+    },
+    "showInfoMsg": {
+      "type": "boolean",
+      "default": true,
+      "description": "Change this to false if you don't want to show information pop up messages.\n\nThis will only be used in vscode Mock Server Extension.\nThis will not be used in @r35007/mock-server cli."
+    },
+    "statusBar": {
+      "type": "object",
+      "default": {
+        "show": true,
+        "position": "Right",
+        "priority": 0
+      },
+      "properties": {
+        "show": {
+          "type": "boolean",
+          "description": "Change this to false if you don't want the button to show in statusbar."
+        },
+        "position": {
+          "type": "string",
+          "default": "Right",
+          "enum": [
+            "Right",
+            "Left"
+          ],
+          "description": "Set a custom position of the statusbar. Note: Please reload the extension to take effect."
+        },
+        "priority": {
+          "type": "number",
+          "default": 0,
+          "description": "Helps to reorder the placement of the statusbar. Minimum priority moves the statusbar to left most. Note: Please reload the extension to take effect."
+        }
+      },
+      "description": "This object will only be used in vscode Mock Server Extension.\nThis will not be used in @r35007/mock-server cli."
+    }
+  }
+}

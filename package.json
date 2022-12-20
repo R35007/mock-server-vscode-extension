@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "15.0.0",
+  "version": "16.0.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -15,9 +15,10 @@
     "url": "https://github.com/R35007/mock-server-vscode-extension"
   },
   "files": [
-    "dist",
+    "out",
+    "images",
     "samples",
-    "public"
+    "schema"
   ],
   "keywords": [
     "JSON",
@@ -54,9 +55,12 @@
     "onCommand:mock-server.makeRequest",
     "onCommand:mock-server.openHomePage",
     "onCommand:mock-server.setPort",
-    "onCommand:mock-server.transformToMockServerDB",
-    "onCommand:mock-server.generateMockFiles",
+    "onCommand:mock-server.setRoot",
+    "onCommand:mock-server.setConfig",
+    "onCommand:mock-server.pasteConfig",
     "onCommand:mock-server.startWithNewPort",
+    "onCommand:mock-server.transformToMockDB",
+    "onCommand:mock-server.generateMockFiles",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
@@ -103,13 +107,8 @@
         "category": "MockServer"
       },
       {
-        "command": "mock-server.transformToMockServerDB",
-        "title": "Transform to DB",
-        "category": "MockServer"
-      },
-      {
-        "command": "mock-server.generateMockFiles",
-        "title": "Generate Sample Mock Files",
+        "command": "mock-server.setRoot",
+        "title": "Set as Server Root Folder",
         "category": "MockServer"
       },
       {
@@ -120,6 +119,21 @@
       {
         "command": "mock-server.pasteConfig",
         "title": "Paste Server Config",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.startWithNewPort",
+        "title": "Start with New Port",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.transformToMockDB",
+        "title": "Transform to Mock DB",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.generateMockFiles",
+        "title": "Generate Mock Files",
         "category": "MockServer"
       }
     ],
@@ -141,8 +155,8 @@
             "rewriters": "rewriters.json",
             "store": "store.json",
             "static": "public",
-            "environment": "env",
-            "snapshots": "snapshots"
+            "snapshots": "snapshots",
+            "environment": "env"
           },
           "properties": {
             "root": {
@@ -173,13 +187,13 @@
               "type": "string",
               "description": "Set path to static files."
             },
-            "environment": {
-              "type": "string",
-              "description": "Set path to environment files."
-            },
             "snapshots": {
               "type": "string",
               "description": "Set SnapShot Folder directory."
+            },
+            "environment": {
+              "type": "string",
+              "description": "Set path to environment files."
             }
           },
           "description": "Set Database config paths.",
@@ -346,6 +360,7 @@
             "position": "Right",
             "priority": "0"
           },
+          "additionalProperties": false,
           "properties": {
             "show": {
               "type": "string",
@@ -368,6 +383,7 @@
             "priority": {
               "type": "string",
               "default": "0",
+              "pattern": "-?\b[0-9]+\b",
               "description": "Helps to reorder the placement of the statusbar. Minimum priority moves the statusbar to left most. Note: Please reload the extension to take effect."
             }
           },
@@ -378,11 +394,12 @@
           "type": "object",
           "default": {
             "mockServerSubMenu": true,
-            "transformToDB": false,
+            "transformToMockDB": false,
             "mockIt": false,
             "stopServer": false,
             "switchEnvironment": false,
             "makeRequest": false,
+            "setPort": false,
             "pasteServerConfig": false,
             "setAsServerConfig": false
           },
@@ -393,7 +410,7 @@
               "default": true,
               "description": "Show all Mock Server Commands under context submenu"
             },
-            "transformToDB": {
+            "transformToMockDB": {
               "type": "boolean"
             },
             "mockIt": {
@@ -406,6 +423,9 @@
               "type": "boolean"
             },
             "makeRequest": {
+              "type": "boolean"
+            },
+            "setPort": {
               "type": "boolean"
             },
             "pasteServerConfig": {
@@ -421,7 +441,7 @@
     },
     "keybindings": [
       {
-        "command": "mock-server.transformToMockServerDB",
+        "command": "mock-server.transformToMockDB",
         "key": "alt+t",
         "mac": "alt+t"
       },
@@ -458,15 +478,19 @@
           "when": "false"
         },
         {
-          "command": "mock-server.setConfig",
-          "when": "false"
-        },
-        {
           "command": "mock-server.generateMockFiles",
           "when": "false"
         },
         {
-          "command": "mock-server.transformToMockServerDB",
+          "command": "mock-server.transformToMockDB",
+          "when": "false"
+        },
+        {
+          "command": "mock-server.setRoot",
+          "when": "false"
+        },
+        {
+          "command": "mock-server.setConfig",
           "when": "false"
         },
         {
@@ -481,9 +505,24 @@
           "group": "thinker.mock-server@1"
         },
         {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
+          "command": "mock-server.setRoot",
+          "group": "thinker.mock-server@2"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
+          "command": "mock-server.transformToMockDB",
+          "group": "thinker.mock-server@3"
+        },
+        {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
           "command": "mock-server.mockIt",
-          "group": "thinker.mock-server@2"
+          "group": "thinker.mock-server@3"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && isServerRunning",
+          "command": "mock-server.stopServer",
+          "group": "thinker.mock-server@4"
         },
         {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
@@ -498,8 +537,8 @@
           "group": "thinker.mock-server@1"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .json || config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .har",
-          "command": "mock-server.transformToMockServerDB",
+          "when": "config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .json || config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .har",
+          "command": "mock-server.transformToMockDB",
           "group": "thinker.mock-server@2"
         },
         {
@@ -520,65 +559,28 @@
         {
           "when": "config.mock-server.settings.contextMenu.makeRequest",
           "command": "mock-server.makeRequest",
-          "group": "thinker.mock-server@5"
-        },
-        {
-          "when": "config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .js",
-          "command": "mock-server.pasteConfig",
           "group": "thinker.mock-server@6"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .js",
-          "command": "mock-server.setConfig",
+          "when": "config.mock-server.settings.contextMenu.setPort",
+          "command": "mock-server.setPort",
           "group": "thinker.mock-server@7"
-        }
-      ],
-      "editor/title/context": [
-        {
-          "when": "config.mock-server.settings.contextMenu.mockServerSubMenu",
-          "submenu": "mock-server.subMenu",
-          "group": "thinker.mock-server@1"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .json || config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .har",
-          "command": "mock-server.transformToMockServerDB",
-          "group": "thinker.mock-server@2"
-        },
-        {
-          "when": "config.mock-server.settings.contextMenu.mockIt && resourceExtname == .json || config.mock-server.settings.contextMenu.startServer && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.startServer && resourceExtname == .js",
-          "command": "mock-server.mockIt",
-          "group": "thinker.mock-server@3"
-        },
-        {
-          "when": "config.mock-server.settings.contextMenu.stopServer && isServerRunning",
-          "command": "mock-server.stopServer",
-          "group": "thinker.mock-server@4"
-        },
-        {
-          "when": "config.mock-server.settings.contextMenu.switchEnvironment",
-          "command": "mock-server.switchEnvironment",
-          "group": "thinker.mock-server@5"
-        },
-        {
-          "when": "config.mock-server.settings.contextMenu.makeRequest",
-          "command": "mock-server.makeRequest",
-          "group": "thinker.mock-server@6"
-        },
-        {
-          "when": "config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .js",
+          "when": "config.mock-server.settings.contextMenu.pasteServerConfig",
           "command": "mock-server.pasteConfig",
-          "group": "thinker.mock-server@7"
-        },
-        {
-          "when": "config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .js",
-          "command": "mock-server.setConfig",
           "group": "thinker.mock-server@8"
+        },
+        {
+          "when": "config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .js",
+          "command": "mock-server.setConfig",
+          "group": "thinker.mock-server@9"
         }
       ],
       "mock-server.subMenu": [
         {
-          "when": "!config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .json || !config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.transformToDB && resourceExtname == .har",
-          "command": "mock-server.transformToMockServerDB",
+          "when": "!config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .json || !config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .har",
+          "command": "mock-server.transformToMockDB",
           "group": "thinker.mock-server@1"
         },
         {
@@ -602,14 +604,19 @@
           "group": "thinker.mock-server@5"
         },
         {
-          "when": "!config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || !config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .js",
-          "command": "mock-server.pasteConfig",
+          "when": "!config.mock-server.settings.contextMenu.setPort",
+          "command": "mock-server.setPort",
           "group": "thinker.mock-server@6"
+        },
+        {
+          "when": "!config.mock-server.settings.contextMenu.pasteServerConfig",
+          "command": "mock-server.pasteConfig",
+          "group": "thinker.mock-server@7"
         },
         {
           "when": "!config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || !config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .js",
           "command": "mock-server.setConfig",
-          "group": "thinker.mock-server@7"
+          "group": "thinker.mock-server@8"
         }
       ]
     },
@@ -619,6 +626,24 @@
         "label": "Mock Server",
         "group": "thinker.mock-server"
       }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": "mock-server*.js*",
+        "url": "./schema/config.json"
+      },
+      {
+        "fileMatch": "msconfig.js*",
+        "url": "./schema/config.json"
+      },
+      {
+        "fileMatch": "*db.js*",
+        "url": "./schema/db.json"
+      },
+      {
+        "fileMatch": "*injectors.js*",
+        "url": "./schema/injectors.json"
+      }
     ]
   },
   "scripts": {
@@ -627,18 +652,22 @@
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
+    "@types/chalk": "^2.2.0",
     "@types/comment-json": "^2.4.2",
+    "@types/express": "^4.17.15",
     "@types/fs-extra": "^9.0.13",
+    "@types/lodash": "^4.14.191",
     "@types/node": "14.x",
     "@types/open": "^6.2.1",
-    "@types/vscode": "^1.74.0",
+    "@types/ora": "^3.2.0",
+    "@types/vscode": "^1.30.0",
     "@typescript-eslint/eslint-plugin": "^5.16.0",
     "@typescript-eslint/parser": "^5.16.0",
     "eslint": "^8.11.0",
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@r35007/mock-server": "^13.0.2",
+    "@r35007/mock-server": "^13.1.0",
     "comment-json": "^4.2.3",
     "fs-extra": "^10.1.0",
     "open": "^8.4.0"

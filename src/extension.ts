@@ -1,4 +1,4 @@
-import * as open from "open";
+import open from "open";
 import * as vscode from "vscode";
 import { Commands, PromptAction, ServerStatus } from './enum';
 import HomePage from './HomePage';
@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
       await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         title: "Please wait. Data Transforming...",
-      }, async () => await server.transformToMockServerDB(args));
+      }, async () => await server.transformToMockDB(args));
       log('[Done] Data Transformed Successfully');
     } catch (error: any) {
       log(`[Error] Failed to Transform. ${error.message}`);
@@ -124,6 +124,9 @@ export function activate(context: vscode.ExtensionContext) {
   // Set Port
   context.subscriptions.push(vscode.commands.registerCommand(Commands.SET_PORT, server.setPort));
 
+  // Set Root
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.SET_ROOT, server.setRoot));
+
   // Set Config
   context.subscriptions.push(vscode.commands.registerCommand(Commands.SET_CONFIG, server.setConfig));
 
@@ -163,5 +166,10 @@ export function activate(context: vscode.ExtensionContext) {
 
   // show status bar
   context.subscriptions.push(StatusbarUi.statusBarItem);
+
+  // Auto Completion Provider
+  const provideCompletionItems = async (document: vscode.TextDocument, position: vscode.Position) => await server.endpointAutoCompletion(document, position);
+  context.subscriptions.push(vscode.languages.registerCompletionItemProvider('jsonc', { provideCompletionItems }, '/'));
+  context.subscriptions.push(vscode.languages.registerCompletionItemProvider('json', { provideCompletionItems }, '/'));
 }
 export function deactivate() { }

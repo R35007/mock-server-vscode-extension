@@ -1,0 +1,175 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "routes"
+    ],
+    "properties": {
+      "routes": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "override": {
+        "type": "boolean"
+      },
+      "exact": {
+        "type": "boolean"
+      },
+      "id": {
+        "type": [
+          "string",
+          "number"
+        ]
+      },
+      "description": {
+        "type": "string"
+      },
+      "mock": {
+        "type": [
+          "array",
+          "integer",
+          "number",
+          "object",
+          "string"
+        ]
+      },
+      "fetch": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string"
+              },
+              "headers": {
+                "type": "object"
+              },
+              "params": {
+                "type": "object"
+              },
+              "data": {
+                "type": "any"
+              },
+              "timeout": {
+                "type": "number"
+              },
+              "responseType": {
+                "type": "string"
+              },
+              "xsrfCookieName": {
+                "type": "string"
+              },
+              "xsrfHeaderName": {
+                "type": "string"
+              },
+              "maxContentLength": {
+                "type": "number"
+              },
+              "maxRedirects": {
+                "type": "number"
+              },
+              "httpAgent": {
+                "type": [
+                  "array",
+                  "boolean",
+                  "integer",
+                  "null",
+                  "number",
+                  "object",
+                  "string"
+                ]
+              },
+              "httpsAgent": {
+                "type": [
+                  "array",
+                  "boolean",
+                  "integer",
+                  "null",
+                  "number",
+                  "object",
+                  "string"
+                ]
+              },
+              "proxy": {
+                "type": [
+                  "object",
+                  "boolean"
+                ]
+              },
+              "cancelToken": {
+                "type": [
+                  "array",
+                  "boolean",
+                  "integer",
+                  "null",
+                  "number",
+                  "object",
+                  "string"
+                ]
+              },
+              "socketPath": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "store": {
+        "type": "object"
+      },
+      "statusCode": {
+        "type": "number",
+        "minimum": 100,
+        "maximum": 599
+      },
+      "delay": {
+        "type": "number"
+      },
+      "fetchCount": {
+        "type": "number"
+      },
+      "skipFetchError": {
+        "type": "boolean"
+      },
+      "mockFirst": {
+        "type": "boolean"
+      },
+      "middlewares": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "directUse": {
+        "type": "boolean"
+      },
+      "headers": {
+        "type": "object"
+      }
+    }
+  }
+}
