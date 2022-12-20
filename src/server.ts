@@ -6,7 +6,6 @@ import { requireData } from '@r35007/mock-server/dist/utils/fetch';
 import * as jsonc from 'comment-json';
 import * as fs from 'fs';
 import * as fsx from "fs-extra";
-import { findIndex } from 'lodash';
 import * as path from 'path';
 import * as vscode from "vscode";
 import { Commands, Environment, PromptAction } from './enum';
