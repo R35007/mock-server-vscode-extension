@@ -4,6 +4,9 @@
   "additionalProperties": {
     "oneOf": [
       {
+        "type": "boolean"
+      },
+      {
         "type": "array"
       },
       {
@@ -11,153 +14,225 @@
       },
       {
         "type": "object",
+        "additionalProperties": true,
         "properties": {
           "_config": {
-            "type": "boolean"
-          },
-          "id": {
-            "type": [
-              "string",
-              "number"
-            ]
-          },
-          "description": {
-            "type": "string"
-          },
-          "mock": {
-            "type": [
-              "array",
-              "integer",
-              "number",
-              "object",
-              "string"
-            ]
-          },
-          "fetch": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "url": {
-                    "type": "string"
-                  },
-                  "method": {
-                    "type": "string"
-                  },
-                  "headers": {
-                    "type": "object"
-                  },
-                  "params": {
-                    "type": "object"
-                  },
-                  "data": {
-                    "type": "any"
-                  },
-                  "timeout": {
-                    "type": "number"
-                  },
-                  "responseType": {
-                    "type": "string"
-                  },
-                  "xsrfCookieName": {
-                    "type": "string"
-                  },
-                  "xsrfHeaderName": {
-                    "type": "string"
-                  },
-                  "maxContentLength": {
-                    "type": "number"
-                  },
-                  "maxRedirects": {
-                    "type": "number"
-                  },
-                  "httpAgent": {
-                    "type": [
-                      "array",
-                      "boolean",
-                      "integer",
-                      "null",
-                      "number",
-                      "object",
-                      "string"
-                    ]
-                  },
-                  "httpsAgent": {
-                    "type": [
-                      "array",
-                      "boolean",
-                      "integer",
-                      "null",
-                      "number",
-                      "object",
-                      "string"
-                    ]
-                  },
-                  "proxy": {
-                    "type": [
-                      "object",
-                      "boolean"
-                    ]
-                  },
-                  "cancelToken": {
-                    "type": [
-                      "array",
-                      "boolean",
-                      "integer",
-                      "null",
-                      "number",
-                      "object",
-                      "string"
-                    ]
-                  },
-                  "socketPath": {
+            "type": "boolean",
+            "default": false,
+            "description": "Please set this attribute to true to consider this object as a route configuration."
+          }
+        },
+        "if": {
+          "properties": {
+            "_config": {
+              "const": false
+            }
+          }
+        },
+        "then": {
+          "additionalProperties": true,
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The URL for the request"
+            },
+            "method": {
+              "type": "string",
+              "enum": [
+                "GET",
+                "HEAD",
+                "POST",
+                "PUT",
+                "DELETE",
+                "CONNECT",
+                "OPTIONS",
+                "TRACE",
+                "PATCH"
+              ],
+              "description": "The HTTP method for the request"
+            },
+            "headers": {
+              "type": "object",
+              "description": "An object containing the request headers"
+            },
+            "params": {
+              "type": "object",
+              "description": "An object containing the query parameters for the request"
+            },
+            "data": {
+              "type": [
+                "boolean",
+                "array",
+                "integer",
+                "number",
+                "object",
+                "string"
+              ],
+              "description": "The data to be sent as the request body. Can be a string, object, or array."
+            },
+            "timeout": {
+              "type": "number",
+              "description": "The number of milliseconds before the request times out"
+            },
+            "responseType": {
+              "type": "string",
+              "enum": [
+                "arraybuffer",
+                "blob",
+                "document",
+                "json",
+                "text"
+              ],
+              "description": "The type of data that the server is expected to return"
+            }
+          }
+        },
+        "else": {
+          "minProperties": 2,
+          "additionalProperties": false,
+          "properties": {
+            "_config": {
+              "type": "boolean",
+              "description": "Please set this attribute to true to consider this object as a route configuration."
+            },
+            "id": {
+              "type": [
+                "string",
+                "number"
+              ],
+              "description": "Provide a custom id for the route else it will get auto generated by converting the route path to a base64 string."
+            },
+            "description": {
+              "type": "string",
+              "description": "Description of the route."
+            },
+            "mock": {
+              "type": [
+                "boolean",
+                "array",
+                "integer",
+                "number",
+                "object",
+                "string"
+              ],
+              "description": "Provide a custom mock response."
+            },
+            "fetch": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "required": ["url"],
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "The URL for the request"
+                    },
+                    "method": {
+                      "type": "string",
+                      "enum": [
+                        "GET",
+                        "HEAD",
+                        "POST",
+                        "PUT",
+                        "DELETE",
+                        "CONNECT",
+                        "OPTIONS",
+                        "TRACE",
+                        "PATCH"
+                      ],
+                      "description": "The HTTP method for the request"
+                    },
+                    "headers": {
+                      "type": "object",
+                      "description": "An object containing the request headers"
+                    },
+                    "params": {
+                      "type": "object",
+                      "description": "An object containing the query parameters for the request"
+                    },
+                    "data": {
+                      "type": [
+                        "boolean",
+                        "array",
+                        "integer",
+                        "number",
+                        "object",
+                        "string"
+                      ],
+                      "description": "The data to be sent as the request body. Can be a string, object, or array."
+                    },
+                    "timeout": {
+                      "type": "number",
+                      "description": "The number of milliseconds before the request times out"
+                    },
+                    "responseType": {
+                      "type": "string",
+                      "enum": [
+                        "arraybuffer",
+                        "blob",
+                        "document",
+                        "json",
+                        "text"
+                      ],
+                      "description": "The type of data that the server is expected to return"
+                    }
+                  }
+                }
+              ],
+              "description": "Please provide a http url or file path or AxisRequest object to fetch the data."
+            },
+            "store": {
+              "type": "object",
+              "description": "Provide any store value which can be shared across routes."
+            },
+            "statusCode": {
+              "type": "number",
+              "minimum": 100,
+              "maximum": 599,
+              "description": "Provide a custom status code for the response."
+            },
+            "delay": {
+              "type": "number",
+              "description": "Give delay in milliseconds"
+            },
+            "fetchCount": {
+              "type": "number",
+              "description": "Set fetchCount to -1 to fetch infinite times."
+            },
+            "skipFetchError": {
+              "type": "boolean",
+              "description": "If true, It skips any fetch error and send the mock data as a response if provided"
+            },
+            "mockFirst": {
+              "type": "boolean",
+              "description": "If true, it always sends the mock data as a response if provided else it try's to make a fetch call by default."
+            },
+            "middlewares": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
                     "type": "string"
                   }
                 }
-              }
-            ]
-          },
-          "store": {
-            "type": "object"
-          },
-          "statusCode": {
-            "type": "number",
-            "minimum": 100,
-            "maximum": 599
-          },
-          "delay": {
-            "type": "number"
-          },
-          "fetchCount": {
-            "type": "number"
-          },
-          "skipFetchError": {
-            "type": "boolean"
-          },
-          "mockFirst": {
-            "type": "boolean"
-          },
-          "middlewares": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            ]
-          },
-          "directUse": {
-            "type": "boolean"
-          },
-          "headers": {
-            "type": "object"
+              ],
+              "description": "GIve a middleware function names that should be called for this route. The given middleware must be present in the `middlewares.js` file"
+            },
+            "directUse": {
+              "type": "boolean",
+              "description": "If true, the route directly uses the given middleware without any other helper middlewares."
+            },
+            "headers": {
+              "type": "object",
+              "description": "Provide a custom response headers for this route."
+            }
           }
         }
       }

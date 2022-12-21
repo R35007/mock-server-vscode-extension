@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "16.0.0",
+  "version": "16.1.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -161,39 +161,48 @@
           "properties": {
             "root": {
               "type": "string",
+              "format": "file-system-path",
               "description": "Set custom root path. Note : every other paths given in will be relative to this root path."
             },
             "db": {
               "type": "string",
-              "description": "Set .js or .json or http url here."
+              "format": "file-system-path",
+              "description": "Set .js or .json or .jsonc or http url here."
             },
             "middlewares": {
               "type": "string",
+              "format": "file-system-path",
               "description": "Set .js path here."
             },
             "injectors": {
               "type": "string",
-              "description": "Set .js or .json or http url here."
+              "format": "file-system-path",
+              "description": "Set .js or .json or .jsonc."
             },
             "rewriters": {
               "type": "string",
-              "description": "Set .js or .json or http url here."
+              "format": "file-system-path",
+              "description": "Set .js or .json or .jsonc."
             },
             "store": {
               "type": "string",
-              "description": "Set .js or .json or http url here."
+              "format": "file-system-path",
+              "description": "Set .js or .json or .jsonc."
             },
             "static": {
               "type": "string",
-              "description": "Set path to static files."
+              "format": "file-system-path",
+              "description": "Set path to static files. Give an empty string to prevent hosting a default public folder."
             },
             "snapshots": {
               "type": "string",
-              "description": "Set SnapShot Folder directory."
+              "format": "file-system-path",
+              "description": "Set Snapshot Folder directory."
             },
             "environment": {
               "type": "string",
-              "description": "Set path to environment files."
+              "format": "file-system-path",
+              "description": "Set path to environment data files."
             }
           },
           "description": "Set Database config paths.",
@@ -383,7 +392,8 @@
             "priority": {
               "type": "string",
               "default": "0",
-              "pattern": "-?\b[0-9]+\b",
+              "pattern": "^-?\\d+$",
+              "errorMessage": "Must contain only positive or negative integers in double quotes.",
               "description": "Helps to reorder the placement of the statusbar. Minimum priority moves the statusbar to left most. Note: Please reload the extension to take effect."
             }
           },
@@ -643,6 +653,14 @@
       {
         "fileMatch": "*injectors.js*",
         "url": "./schema/injectors.json"
+      },
+      {
+        "fileMatch": "*rewriters.js*",
+        "url": "./schema/rewriters.json"
+      },
+      {
+        "fileMatch": "*store.js*",
+        "url": "./schema/store.json"
       }
     ]
   },

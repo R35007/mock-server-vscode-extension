@@ -25,7 +25,7 @@
       "type": "string",
       "format": "file-system-path",
       "default": "db.json",
-      "description": "Set custom root path. Note : every other paths given in will be relative to this root path."
+      "description": "Set .js or .json or .jsonc or http url here."
     },
     "middlewares": {
       "type": "string",
@@ -37,36 +37,36 @@
       "type": "string",
       "format": "file-system-path",
       "default": "injectors.json",
-      "description": "Set .js or .json or http url here."
+      "description": "Set .js or .json or .jsonc."
     },
     "rewriters": {
       "type": "string",
       "format": "file-system-path",
       "default": "rewriters.json",
-      "description": "Set .js or .json or http url here."
+      "description": "Set .js or .json or .jsonc."
     },
     "store": {
       "type": "string",
       "format": "file-system-path",
       "default": "store.json",
-      "description": "Set .js or .json or http url here."
+      "description": "Set .js or .json or .jsonc."
     },
     "static": {
       "type": "string",
       "format": "file-system-path",
       "default": "public",
-      "description": "Set path to static files."
+      "description": "Set path to static files. Give an empty string to prevent hosting a default public folder."
     },
     "snapshots": {
       "type": "string",
       "format": "file-system-path",
       "default": "snapshots",
-      "description": "Set SnapShot Folder directory."
+      "description": "Set Snapshot Folder directory."
     },
     "environment": {
       "type": "string",
       "default": "env",
-      "description": "Set path to environment files.\n\nThis will only be used in vscode Mock Server Extension.\nThis will not be used in @r35007/mock-server cli."
+      "description": "Set path to environment data files.\n\nThis will only be used in vscode Mock Server Extension.\nThis will not be used in @r35007/mock-server cli."
     },
     "port": {
       "type": "integer",
@@ -81,7 +81,6 @@
     },
     "base": {
       "type": "string",
-      "format": "uri-reference",
       "default": "",
       "description": "Set custom base url."
     },
@@ -92,6 +91,7 @@
     },
     "dbMode": {
       "type": "string",
+      "default": "mock",
       "enum": [
         "mock",
         "fetch",
@@ -102,7 +102,6 @@
         "All direct values will be set to fetch attribute",
         "Only string is set to fetch attribute and all other direct values are set to mock attribute"
       ],
-      "default": "mock",
       "description": "Helps to set the direct route value to the selected attribute."
     },
     "reverse": {
@@ -197,13 +196,14 @@
     "statusBar": {
       "type": "object",
       "default": {
-        "show": true,
+        "show": "true",
         "position": "Right",
-        "priority": 0
+        "priority": "0"
       },
       "properties": {
         "show": {
-          "type": "boolean",
+          "type": "string",
+          "enum": ["true", "false"],
           "description": "Change this to false if you don't want the button to show in statusbar."
         },
         "position": {
@@ -216,8 +216,10 @@
           "description": "Set a custom position of the statusbar. Note: Please reload the extension to take effect."
         },
         "priority": {
-          "type": "number",
-          "default": 0,
+          "type": "string",
+          "default": "0",
+          "pattern": "^-?\\d+$",
+          "errorMessage": "Must contain only positive or negative integers in double quotes.",
           "description": "Helps to reorder the placement of the statusbar. Minimum priority moves the statusbar to left most. Note: Please reload the extension to take effect."
         }
       },

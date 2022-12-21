@@ -364,16 +364,59 @@ export default class MockServerExt extends Utils {
     // get all text until the `position` and check if it reads `/`
     const linePrefix = document.lineAt(position).text.substr(0, position.character);
     const isSubPath = !path.relative(Settings.root, document.uri.fsPath).startsWith("..");
-    if (!isSubPath || !linePrefix.endsWith('/')) {
+
+    // return empty list if the document is under the server root folder.
+    if (!isSubPath) return completionItems;
+
+    // Auto completion for json placeholder urls
+    if (linePrefix.endsWith("http:") || linePrefix.endsWith("https:")) {
+      const jsonPlaceholders = [
+        "//jsonplaceholder.typicode.com/",
+        "//jsonplaceholder.typicode.com/posts",
+        "//jsonplaceholder.typicode.com/comments",
+        "//jsonplaceholder.typicode.com/albums",
+        "//jsonplaceholder.typicode.com/photos",
+        "//jsonplaceholder.typicode.com/posts?_embed=comments",
+        "//jsonplaceholder.typicode.com/todos",
+        "//jsonplaceholder.typicode.com/users",
+      ];
+      jsonPlaceholders.forEach(route => {
+        const completionItem = new vscode.CompletionItem(route, vscode.CompletionItemKind.Property);
+        completionItem.insertText = new vscode.SnippetString(route.slice(1));
+        completionItems.push(completionItem);
+      });
+
       return completionItems;
     }
 
-    const db = this.mockServer.server ? this.mockServer.db : await this.getDataFromUrl(Settings.paths.db);
-    Object.keys(db || {}).forEach(route => {
-      const completionItem = new vscode.CompletionItem(route, vscode.CompletionItemKind.Property);
-      completionItem.insertText = new vscode.SnippetString(route.slice(1));
-      completionItems.push(completionItem);
-    });
+    // Auto completion for json placeholder routes
+    if (linePrefix.endsWith("https://jsonplaceholder.typicode.com/")) {
+      const jsonPlaceholders = [
+        "/posts",
+        "/comments",
+        "/albums",
+        "/photos",
+        "/posts?_embed=comments",
+        "/todos",
+        "/users",
+      ];
+      jsonPlaceholders.forEach(route => {
+        const completionItem = new vscode.CompletionItem(route, vscode.CompletionItemKind.Property);
+        completionItem.insertText = new vscode.SnippetString(route.slice(1));
+        completionItems.push(completionItem);
+      });
+      return completionItems;
+    }
+
+    // Auto completion for mock server routes
+    if(linePrefix.endsWith('/')) {
+      const db = this.mockServer.server ? this.mockServer.db : await this.getDataFromUrl(Settings.paths.db);
+      Object.keys(db || {}).forEach(route => {
+        const completionItem = new vscode.CompletionItem(route, vscode.CompletionItemKind.Property);
+        completionItem.insertText = new vscode.SnippetString(route.slice(1));
+        completionItems.push(completionItem);
+      });
+    }
 
     return completionItems;
   };
