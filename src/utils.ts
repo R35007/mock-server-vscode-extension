@@ -160,11 +160,11 @@ export class Utils {
       return [Recently_Used, NO_ENV];
     }
 
-    const defaultInjectors = ["./injectors/index.js", "./injectors/index.json", "./injectors.js", "./injectors.json"];
+    const defaultInjectors = ["./injectors/index.js", "./injectors/index.json", "./injectors/index.jsonc", "./injectors.js", "./injectors.json", "./injectors.jsonc"];
     const defaultMiddlewares = ["./middlewares/index.js", "./middlewares.js"];
 
     const envFilesList = getFilesList(environmentFolderPath, { onlyIndex: false })
-      .filter(file => [".har", ".json", ".js"].includes(file.extension))
+      .filter(file => [".har", ".json", ".jsonc", ".js"].includes(file.extension))
       .map((file: any) => ({
         envName: file.fileName,
         db: [].concat(file.filePath).filter(Boolean),

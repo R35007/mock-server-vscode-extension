@@ -3,6 +3,11 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v16.1.1
+
+- Fixed - `.jsonc` files are not showing up in the `Switch Environment` quick pick list items issue fixed.
+- Increased font size for Home page.
+  
 ## v16.1.0
 
 - Added more auto completions and schema updates.

@@ -98,7 +98,7 @@ export default class HomePage {
 
   private getWebviewContent = () => {
     const mockServer = this._server?.mockServer;
-    const iFrameSrc = `${mockServer?.listeningTo}?_fontSize=13px&_dataFontSize=0.9rem&_dataLineHeight=1.2`;
+    const iFrameSrc = `${mockServer?.listeningTo}?_fontSize=16px&_dataFontSize=1rem&_dataLineHeight=1.2`;
 
     const styles = `
     <style>
