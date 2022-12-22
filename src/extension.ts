@@ -6,6 +6,7 @@ import { Prompt } from './prompt';
 import Server from "./server";
 import { Settings } from './Settings';
 import { StatusbarUi } from "./StatusBarUI";
+require("jsonc-require");
 
 export function activate(context: vscode.ExtensionContext) {
 

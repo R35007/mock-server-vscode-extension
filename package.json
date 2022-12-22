@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "16.1.1",
+  "version": "16.1.2",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -685,9 +685,10 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@r35007/mock-server": "^13.1.0",
+    "@r35007/mock-server": "^14.0.0",
     "comment-json": "^4.2.3",
     "fs-extra": "^10.1.0",
+    "jsonc-require": "^1.0.1",
     "open": "^8.4.0"
   }
 }
