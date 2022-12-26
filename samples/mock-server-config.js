@@ -38,7 +38,7 @@ module.exports = {
   showInfoMsg: true, // Show vscode notification on start and stop of server
   statusBar: { // Status bar settings
     position: "Right",
-    priority: 0,
-    show: true
+    priority: "0",
+    show: "true"
   }
 };
