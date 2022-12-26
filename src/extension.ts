@@ -172,5 +172,7 @@ export function activate(context: vscode.ExtensionContext) {
   const provideCompletionItems = async (document: vscode.TextDocument, position: vscode.Position) => await server.endpointAutoCompletion(document, position);
   context.subscriptions.push(vscode.languages.registerCompletionItemProvider('jsonc', { provideCompletionItems }, '/'));
   context.subscriptions.push(vscode.languages.registerCompletionItemProvider('json', { provideCompletionItems }, '/'));
+  context.subscriptions.push(vscode.languages.registerCompletionItemProvider('javascript', { provideCompletionItems }, '/'));
+  context.subscriptions.push(vscode.languages.registerCompletionItemProvider('typescript', { provideCompletionItems }, '/'));
 }
 export function deactivate() { }

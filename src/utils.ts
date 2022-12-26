@@ -243,6 +243,7 @@ export class Utils {
     const selectedEnvironment = this.storageManager.getValue("environment", NO_ENV);
 
     const filesToWatch = [
+      Settings.paths.root,
       Settings.paths.db,
       Settings.paths.middlewares,
       Settings.paths.injectors,

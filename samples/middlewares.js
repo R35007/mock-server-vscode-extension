@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /* 
   Global Middlewares
   These middlewares will be added to start of the the express app 

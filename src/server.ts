@@ -99,7 +99,7 @@ export default class MockServerExt extends Utils {
     if (!args?.fsPath) return;
     const stat = fs.statSync(args.fsPath);
     const root = stat.isFile() ? path.dirname(args.fsPath) : args.fsPath;
-    Settings.root = root;
+    await Settings.setSettings("paths", { ...(Settings.paths || {}), root }, false);
     Prompt.showPopupMessage(`Root Path Set to ${root}`);
     this.log(`[Done] Root Path Set to ${root}`);
   };
@@ -170,9 +170,11 @@ export default class MockServerExt extends Utils {
       statusBar: _.isEmpty(statusBar) ? undefined : statusBar
     };
 
-    Object.entries(serverConfig).forEach(([key, value]) => {
-      Settings.setSettings(key, value, false);
+    const promises = Object.entries(serverConfig).map(async ([key, value]) => {
+      await Settings.setSettings(key, value, false);
     });
+
+    await Promise.all(promises);
 
     Prompt.showPopupMessage(`Server Config is Set`);
     this.log(`[Done] Server Config is Set`);
@@ -409,7 +411,7 @@ export default class MockServerExt extends Utils {
     }
 
     // Auto completion for mock server routes
-    if(linePrefix.endsWith('/')) {
+    if (linePrefix.endsWith('/')) {
       const db = this.mockServer.server ? this.mockServer.db : await this.getDataFromUrl(Settings.paths.db);
       Object.keys(db || {}).forEach(route => {
         const completionItem = new vscode.CompletionItem(route, vscode.CompletionItemKind.Property);
