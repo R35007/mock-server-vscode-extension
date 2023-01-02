@@ -58,8 +58,8 @@ Helps to work in multiple data environments.
 - Use`Alt+S` shortcut to switch environment.
 - This path can be modified using the settings `mock-server.settings.paths.environment`.
 - Now all the `.json`, `.jsonc`, `.har`, `.js` files will be listed down. You can pick a data to launch the server.
-- You can create a `env.config.json` file to create a custom database environment.
-  For Example: `env/env.config.json`
+- You can create a `env-config.json` file to create a custom database environment.
+  For Example: `env/env-config.json`
   ```json
   // These names will be listed in the environment pick list
   {
@@ -70,11 +70,13 @@ Helps to work in multiple data environments.
       "description": "Your description here" // This description will be shown in the switch environment pick list
     },
     "Your New  Environment Name": {
-      "db": ["./testDb2.json", "./testDb2.json"] // Can also provide multiple paths
+      "db": ["./testDb2.json", "./testDb2.json"],  // Can also provide multiple paths
+      "injectors": [],
+      "middlewares": [],
     }
   }
   ```
-  > Note: All the paths given in the `env.config.json` will be relative to the path given in `mock-server.settings.paths.environment`. File or Folder name with `injectors` and `middlewares` will not list in the pick list.
+  > Note: All the paths given in the `env-config.json` will be relative to the path given in `mock-server.settings.paths.environment`. File or Folder name with `injectors` and `middlewares` will not list in the pick list.
 
 ### `Get Db Snapshot`
 

@@ -1,0 +1,5 @@
+{
+  "Join issue 1 and issue 2": {
+    "db": ["./issue1_db.json", "./issue2_db.json"] // join both issue1 and issue2
+  }
+}

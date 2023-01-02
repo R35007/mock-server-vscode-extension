@@ -175,7 +175,7 @@ export class Utils {
         kind: vscode.QuickPickItemKind.Default,
       }))
       .filter(file =>
-        !["injectors", "middlewares", "env.config"].includes(file.envName) &&
+        !["injectors", "middlewares", "env-config"].includes(file.envName) &&
         !file.description.startsWith("injectors") &&
         !file.description.startsWith("middlewares")
       );
@@ -190,12 +190,14 @@ export class Utils {
       kind: vscode.QuickPickItemKind.Separator
     });
 
-    let envConfigJson = await this.getDataFromUrl("./env.config.json", { mockServer, root: environmentFolderPath });
+    let envConfigJson = await this.getDataFromUrl("./env-config.json", { mockServer, root: environmentFolderPath });
     envConfigJson = _.isPlainObject(envConfigJson) ? envConfigJson : {};
-    let envConfigJs = await this.getDataFromUrl("./env.config.js", { mockServer, root: environmentFolderPath });
+    let envConfigJsonc = await this.getDataFromUrl("./env-config.jsonc", { mockServer, root: environmentFolderPath });
+    envConfigJsonc = _.isPlainObject(envConfigJsonc) ? envConfigJsonc : {};
+    let envConfigJs = await this.getDataFromUrl("./env-config.js", { mockServer, root: environmentFolderPath });
     envConfigJs = _.isPlainObject(envConfigJs) ? envConfigJs : {};
 
-    const envConfig = { ...envConfigJson, ...envConfigJs };
+    const envConfig = { ...envConfigJsonc, ...envConfigJson, ...envConfigJs };
 
     const envConfigList = Object.entries(envConfig).map(([envName, envConfig]: [string, any]) => ({
       envName,

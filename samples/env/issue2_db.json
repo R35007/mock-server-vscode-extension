@@ -1,0 +1,8 @@
+{
+  "/customDelay": {
+    "_config": true,
+    "delay": 1000,
+    "description": "Note: give delay in milliseconds",
+    "mock": "This is response is received with a delay of 1000 milliseconds"
+  }
+}

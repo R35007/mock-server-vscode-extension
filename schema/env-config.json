@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "properties": {
+      "db": {
+        "type": [
+          "string",
+          "array"
+        ],
+        "items": {
+          "type": "string"
+        }
+      },
+      "injectors": {
+        "type": [
+          "string",
+          "array"
+        ],
+        "items": {
+          "type": "string"
+        }
+      },
+      "middlewares": {
+        "type": [
+          "string",
+          "array"
+        ],
+        "items": {
+          "type": "string"
+        }
+      },
+      "description": {
+        "type": "string",
+        "description": "This description will be shown in the switch environment pick list"
+      }
+    },
+    "additionalProperties": false
+  }
+}

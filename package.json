@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "16.1.4",
+  "version": "16.2.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -638,6 +638,10 @@
       }
     ],
     "jsonValidation": [
+      {
+        "fileMatch": "env-config.js*",
+        "url": "./schema/env-config.json"
+      },
       {
         "fileMatch": "mock-server*.js*",
         "url": "./schema/config.json"
