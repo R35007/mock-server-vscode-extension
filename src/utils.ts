@@ -264,8 +264,9 @@ export class Utils {
       .filter(p => p.isFile).map(p => p.filePath);
 
     this.watcher = watcher.watch([...new Set(filesToWatch)], { ignored: Settings.ignoreFiles });
-    this.watcher.on('change', (_event, _path) => {
+    this.watcher.on('change', (changedFile, _event) => {
       if (!Settings.watch) return;
+      this.log(`[Modified] ${changedFile}`, "\n");
       vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server
     });
   };

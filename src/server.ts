@@ -22,17 +22,11 @@ export default class MockServerExt extends Utils {
     super(context, output, clearLog);
     this.createServer();
   }
-
+  
   createServer = () => {
     this.mockServer = new MockServer({ root: Settings.root });
-    this.clearLog();
-    this.log('Mock Server Server Initiated', "\n");
-    this.log("Paths - mock-server.settings.paths: ", "\n");
-    this.log(JSON.stringify(Settings.paths, null, 2), "", true);
-    this.log("Server Configs: ", "\n");
-    this.log(JSON.stringify(Settings.config, null, 2), "", true);
   };
-
+  
   destroyServer = async () => {
     await MockServer.Destroy(this.mockServer);
     await this.stopWatchingChanges();
@@ -123,6 +117,7 @@ export default class MockServerExt extends Utils {
       root: config.paths?.root || config.root,
       db: config.paths?.db || config.db,
       middlewares: config.paths?.middlewares || config.middlewares,
+      injectors: config.paths?.injectors || config.injectors,
       rewriters: config.paths?.rewriters || config.rewriters,
       store: config.paths?.store || config.store,
       static: config.paths?.static || config.static,
@@ -178,8 +173,6 @@ export default class MockServerExt extends Utils {
 
     Prompt.showPopupMessage(`Server Config is Set`);
     this.log(`[Done] Server Config is Set`);
-    this.log("Server Configs: ", "\n");
-    this.log(JSON.stringify(Settings.config, null, 2), "", true);
   };
 
   pasteConfig = async (args?: any) => {

@@ -48,9 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
     if (server.mockServer.server) { // If server already running then restart the server
       try {
         StatusbarUi.working(ServerStatus.RESTART);
-        log('Server Resetting...');
         await server.resetServer();
-        log('[Done] Server Reset Done');
         await server.startServer(args?.fsPath);
         StatusbarUi.stopServer(ServerStatus.RESTART, server.mockServer.port!, server.mockServer.listeningTo!);
       } catch (error: any) {
