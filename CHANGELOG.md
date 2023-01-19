@@ -3,7 +3,11 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
-## v16.0.4
+## v16.2.1
+
+- Added  - `Mock It` context menu to `.har` file
+  
+## v16.2.0
 
 - Samples updated.
 - Added  - auto completion for `env-config.json` or `env-config.jsonc`

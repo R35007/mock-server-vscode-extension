@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "16.2.0",
+  "version": "16.2.1",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -520,12 +520,12 @@
           "group": "thinker.mock-server@2"
         },
         {
-          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js || resourceExtname == .har",
           "command": "mock-server.transformToMockDB",
           "group": "thinker.mock-server@3"
         },
         {
-          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js || resourceExtname == .har",
           "command": "mock-server.mockIt",
           "group": "thinker.mock-server@3"
         },
@@ -552,7 +552,7 @@
           "group": "thinker.mock-server@2"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.mockIt && resourceExtname == .json || config.mock-server.settings.contextMenu.mockIt && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.mockIt && resourceExtname == .js",
+          "when": "config.mock-server.settings.contextMenu.mockIt && resourceExtname == .json || config.mock-server.settings.contextMenu.mockIt && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.mockIt && resourceExtname == .js || config.mock-server.settings.contextMenu.mockIt && resourceExtname == .har",
           "command": "mock-server.mockIt",
           "group": "thinker.mock-server@3"
         },
@@ -594,7 +594,7 @@
           "group": "thinker.mock-server@1"
         },
         {
-          "when": "!config.mock-server.settings.contextMenu.mockIt && resourceExtname == .json || !config.mock-server.settings.contextMenu.mockIt && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.mockIt && resourceExtname == .js",
+          "when": "!config.mock-server.settings.contextMenu.mockIt && resourceExtname == .json || !config.mock-server.settings.contextMenu.mockIt && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.mockIt && resourceExtname == .js || !config.mock-server.settings.contextMenu.mockIt && resourceExtname == .har",
           "command": "mock-server.mockIt",
           "group": "thinker.mock-server@2"
         },
