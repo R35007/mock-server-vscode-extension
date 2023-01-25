@@ -21,24 +21,15 @@
     "schema"
   ],
   "keywords": [
-    "JSON",
-    "REST",
-    "API",
+    "json Server",
+    "rest api",
     "prototyping",
-    "mock",
     "mock server",
     "mocking",
-    "test",
     "testing",
-    "rest",
-    "data",
-    "dummy",
+    "dummy server",
     "sandbox",
-    "server",
-    "fake",
-    "response",
-    "db",
-    "local"
+    "local db"
   ],
   "engines": {
     "vscode": "^1.30.0"
