@@ -24,7 +24,7 @@ export default class MockServerExt extends Utils {
   }
   
   createServer = () => {
-    this.mockServer = new MockServer({ root: Settings.root });
+    this.mockServer = new MockServer({ root: Settings.root, log: Settings.log });
   };
   
   destroyServer = async () => {
@@ -232,32 +232,31 @@ export default class MockServerExt extends Utils {
 
     const mockServer = this.mockServer;
     const app = mockServer.app;
-    const log = true;
 
     const config = { ...Settings.config, port };
-    mockServer.setConfig(config, { log });
+    mockServer.setConfig(config);
 
     const rewriters = await this.getDataFromUrl(paths.rewriters, { mockServer });
 
-    const rewriter = mockServer.rewriter(rewriters, { log });
+    const rewriter = mockServer.rewriter(rewriters);
     app.use(rewriter);
 
     const defaults = mockServer.defaults();
     app.use(defaults);
 
     const middlewares = await this.getDataFromUrl(paths.middlewares, { mockServer });
-    mockServer.setMiddlewares(middlewares, { log });
+    mockServer.setMiddlewares(middlewares);
 
     app.use(mockServer.middlewares.globals);
 
     const injectors = await this.getDataFromUrl(paths.injectors, { mockServer, isList: true });
-    mockServer.setInjectors(injectors, { log });
+    mockServer.setInjectors(injectors);
 
     const store = await this.getDataFromUrl(paths.store, { mockServer });
-    mockServer.setStore(store, { log });
+    mockServer.setStore(store);
 
     if (Settings.homePage) {
-      const homePage = mockServer.homePage({ log });
+      const homePage = mockServer.homePage();
       app.use(mockServer.config.base, homePage);
     }
 
@@ -282,7 +281,7 @@ export default class MockServerExt extends Utils {
     app.use(mockServer.config.base, envResources.router);
 
     const dbData = await this.getDbData(dbPath, mockServer);
-    const dbResources = mockServer.resources(dbData, { log });
+    const dbResources = mockServer.resources(dbData);
     app.use(mockServer.config.base, dbResources.router);
 
     app.use(mockServer.pageNotFound);

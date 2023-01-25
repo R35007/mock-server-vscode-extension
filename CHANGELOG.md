@@ -3,6 +3,11 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v16.3.1
+
+- Updated - Node package `@r35007/mock-server@14.0.1`
+- Fixed - `mock-server.settings.log` setting not working issue fixed
+  
 ## v16.3.0
 
 - Modified - Server Output logs
