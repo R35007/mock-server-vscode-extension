@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "16.3.1",
+  "version": "16.3.2",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -53,6 +53,610 @@
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "mock-server.mockIt",
+        "title": "Mock It",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.startServer",
+        "title": "Start Server",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.stopServer",
+        "title": "Stop Server",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.switchEnvironment",
+        "title": "Switch Environment",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.getDbSnapShot",
+        "title": "Get Db Snapshot",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.makeRequest",
+        "title": "Make Request",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.openHomePage",
+        "title": "Open Home Page",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.setPort",
+        "title": "Set Port",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.setRoot",
+        "title": "Set as Server Root Folder",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.setConfig",
+        "title": "Set as Server Config",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.pasteConfig",
+        "title": "Paste Server Config",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.startWithNewPort",
+        "title": "Start with New Port",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.transformToMockDB",
+        "title": "Transform to Mock DB",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.generateMockFiles",
+        "title": "Generate Mock Files",
+        "category": "MockServer"
+      }
+    ],
+    "configuration": {
+      "title": "Mock Server",
+      "order": 1,
+      "properties": {
+        "mock-server.settings.paths": {
+          "order": 1,
+          "type": "object",
+          "required": [
+            "root"
+          ],
+          "default": {
+            "root": "./",
+            "db": "db.json",
+            "middlewares": "middlewares.js",
+            "injectors": "injectors.json",
+            "rewriters": "rewriters.json",
+            "store": "store.json",
+            "static": "public",
+            "snapshots": "snapshots",
+            "environment": "env"
+          },
+          "properties": {
+            "root": {
+              "type": "string",
+              "format": "file-system-path",
+              "description": "Set custom root path. Note : every other paths given in will be relative to this root path."
+            },
+            "db": {
+              "type": "string",
+              "format": "file-system-path",
+              "description": "Set .js or .json or .jsonc or http url here."
+            },
+            "middlewares": {
+              "type": "string",
+              "format": "file-system-path",
+              "description": "Set .js path here."
+            },
+            "injectors": {
+              "type": "string",
+              "format": "file-system-path",
+              "description": "Set .js or .json or .jsonc."
+            },
+            "rewriters": {
+              "type": "string",
+              "format": "file-system-path",
+              "description": "Set .js or .json or .jsonc."
+            },
+            "store": {
+              "type": "string",
+              "format": "file-system-path",
+              "description": "Set .js or .json or .jsonc."
+            },
+            "static": {
+              "type": "string",
+              "format": "file-system-path",
+              "description": "Set path to static files. Give an empty string to prevent hosting a default public folder."
+            },
+            "snapshots": {
+              "type": "string",
+              "format": "file-system-path",
+              "description": "Set Snapshot Folder directory."
+            },
+            "environment": {
+              "type": "string",
+              "format": "file-system-path",
+              "description": "Set path to environment data files."
+            }
+          },
+          "description": "Set Database config paths.",
+          "additionalProperties": false
+        },
+        "mock-server.settings.host": {
+          "order": 2,
+          "type": "string",
+          "default": "localhost",
+          "description": "Set custom host or Ip address. Leave it empty to use Local Ip address."
+        },
+        "mock-server.settings.port": {
+          "order": 4,
+          "type": "number",
+          "default": 3000,
+          "minimum": 0,
+          "maximum": 65535,
+          "description": "Set Custom Port number. Set 0 to pick a random available port."
+        },
+        "mock-server.settings.base": {
+          "order": 5,
+          "type": "string",
+          "default": "",
+          "description": "Set custom base url."
+        },
+        "mock-server.settings.id": {
+          "order": 6,
+          "type": "string",
+          "default": "id",
+          "description": "Set custom database id."
+        },
+        "mock-server.settings.dbMode": {
+          "order": 7,
+          "type": "string",
+          "enum": [
+            "mock",
+            "fetch",
+            "multi"
+          ],
+          "enumDescriptions": [
+            "All direct values will be set to mock attribute",
+            "All direct values will be set to fetch attribute",
+            "Only string is set to fetch attribute and all other direct values are set to mock attribute"
+          ],
+          "default": "mock",
+          "description": "Helps to set the direct route value to the selected attribute."
+        },
+        "mock-server.settings.defaults": {
+          "order": 8,
+          "type": "object",
+          "default": {
+            "noGzip": false,
+            "noCors": false,
+            "readOnly": false,
+            "logger": true,
+            "bodyParser": true,
+            "cookieParser": true
+          },
+          "properties": {
+            "noGzip": {
+              "type": "boolean",
+              "default": false,
+              "description": "Disable compression."
+            },
+            "noCors": {
+              "type": "boolean",
+              "default": false,
+              "description": "Disable CORS ( Cross Origin Resource Sharing )."
+            },
+            "readOnly": {
+              "type": "boolean",
+              "default": false,
+              "description": "Accept only GET requests."
+            },
+            "logger": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable logger middleware."
+            },
+            "bodyParser": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable body-parser middleware."
+            },
+            "cookieParser": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable cookie-parser middleware."
+            }
+          },
+          "description": "Add Default middlewares.",
+          "additionalProperties": false
+        },
+        "mock-server.settings.reverse": {
+          "order": 9,
+          "type": "boolean",
+          "default": false,
+          "description": "Generate Routes in reverse order."
+        },
+        "mock-server.settings.duplicates": {
+          "order": 10,
+          "type": "boolean",
+          "default": false,
+          "description": "If true, transformDb will iterate duplicate routes using _IterateRoutes middleware."
+        },
+        "mock-server.settings.watchFiles": {
+          "order": 11,
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "additionalItems": true,
+          "scope": "window",
+          "markdownDescription": "Set files and folder path to watch for changes. By default all the paths in `#mock-server.settings.paths#` are included for watches."
+        },
+        "mock-server.settings.ignoreFiles": {
+          "order": 12,
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "additionalItems": true,
+          "description": "Set files and folder path to ignore changes."
+        },
+        "mock-server.settings.watch": {
+          "order": 13,
+          "type": "boolean",
+          "default": true,
+          "scope": "window",
+          "markdownDescription": "Watch for changes and restarts the server."
+        },
+        "mock-server.settings.log": {
+          "order": 13,
+          "type": "boolean",
+          "default": false,
+          "scope": "window",
+          "markdownDescription": "If true it logs the setter logs in console. We can view those logs in vscode Help > Toggle Developer Tools > console"
+        },
+        "mock-server.settings.homePage": {
+          "order": 15,
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Mock Server Home Page."
+        },
+        "mock-server.settings.openInside": {
+          "order": 16,
+          "type": "boolean",
+          "default": true,
+          "description": "Open Home Page inside VS Code, instead of default browser."
+        },
+        "mock-server.settings.showInfoMsg": {
+          "order": 17,
+          "type": "boolean",
+          "default": true,
+          "description": "Change this to false if you don't want to show information pop up messages."
+        },
+        "mock-server.settings.statusBar": {
+          "order": 18,
+          "type": "object",
+          "default": {
+            "show": "true",
+            "position": "Right",
+            "priority": "0"
+          },
+          "additionalProperties": false,
+          "properties": {
+            "show": {
+              "type": "string",
+              "default": "true",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "description": "Change this to false if you don't want the button to show in statusbar."
+            },
+            "position": {
+              "type": "string",
+              "default": "Right",
+              "enum": [
+                "Right",
+                "Left"
+              ],
+              "description": "Set a custom position of the statusbar. Note: Please reload the extension to take effect."
+            },
+            "priority": {
+              "type": "string",
+              "default": "0",
+              "pattern": "^-?\\d+$",
+              "errorMessage": "Must contain only positive or negative integers in double quotes.",
+              "description": "Helps to reorder the placement of the statusbar. Minimum priority moves the statusbar to left most. Note: Please reload the extension to take effect."
+            }
+          },
+          "description": "Set Statusbar Settings."
+        },
+        "mock-server.settings.contextMenu": {
+          "order": 19,
+          "type": "object",
+          "default": {
+            "mockServerSubMenu": true,
+            "transformToMockDB": false,
+            "mockIt": false,
+            "stopServer": false,
+            "switchEnvironment": false,
+            "makeRequest": false,
+            "setPort": false,
+            "pasteServerConfig": false,
+            "setAsServerConfig": false
+          },
+          "additionalProperties": false,
+          "properties": {
+            "mockServerSubMenu": {
+              "type": "boolean",
+              "default": true,
+              "description": "Show all Mock Server Commands under context submenu"
+            },
+            "transformToMockDB": {
+              "type": "boolean"
+            },
+            "mockIt": {
+              "type": "boolean"
+            },
+            "stopServer": {
+              "type": "boolean"
+            },
+            "switchEnvironment": {
+              "type": "boolean"
+            },
+            "makeRequest": {
+              "type": "boolean"
+            },
+            "setPort": {
+              "type": "boolean"
+            },
+            "pasteServerConfig": {
+              "type": "boolean"
+            },
+            "setAsServerConfig": {
+              "type": "boolean"
+            }
+          },
+          "description": "Pick a editor context menu commands to show or hide"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "mock-server.transformToMockDB",
+        "key": "alt+t",
+        "mac": "alt+t"
+      },
+      {
+        "command": "mock-server.startServer",
+        "key": "alt+enter",
+        "mac": "alt+enter"
+      },
+      {
+        "command": "mock-server.stopServer",
+        "key": "shift+alt+enter",
+        "mac": "shift+alt+enter"
+      },
+      {
+        "command": "mock-server.switchEnvironment",
+        "key": "alt+e",
+        "mac": "alt+e"
+      },
+      {
+        "command": "mock-server.getDbSnapShot",
+        "key": "alt+s",
+        "mac": "alt+s"
+      },
+      {
+        "command": "mock-server.openHomePage",
+        "key": "alt+h",
+        "mac": "alt+h"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "mock-server.mockIt",
+          "when": "false"
+        },
+        {
+          "command": "mock-server.generateMockFiles",
+          "when": "false"
+        },
+        {
+          "command": "mock-server.transformToMockDB",
+          "when": "false"
+        },
+        {
+          "command": "mock-server.setRoot",
+          "when": "false"
+        },
+        {
+          "command": "mock-server.setConfig",
+          "when": "false"
+        },
+        {
+          "command": "mock-server.pasteConfig",
+          "when": "false"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
+          "command": "mock-server.generateMockFiles",
+          "group": "thinker.mock-server@1"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
+          "command": "mock-server.setRoot",
+          "group": "thinker.mock-server@2"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js || resourceExtname == .har",
+          "command": "mock-server.transformToMockDB",
+          "group": "thinker.mock-server@3"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js || resourceExtname == .har",
+          "command": "mock-server.mockIt",
+          "group": "thinker.mock-server@3"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && isServerRunning",
+          "command": "mock-server.stopServer",
+          "group": "thinker.mock-server@4"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
+          "command": "mock-server.setConfig",
+          "group": "thinker.mock-server@4"
+        }
+      ],
+      "editor/context": [
+        {
+          "when": "config.mock-server.settings.contextMenu.mockServerSubMenu",
+          "submenu": "mock-server.subMenu",
+          "group": "thinker.mock-server@1"
+        },
+        {
+          "when": "config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .json || config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .har",
+          "command": "mock-server.transformToMockDB",
+          "group": "thinker.mock-server@2"
+        },
+        {
+          "when": "config.mock-server.settings.contextMenu.mockIt && resourceExtname == .json || config.mock-server.settings.contextMenu.mockIt && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.mockIt && resourceExtname == .js || config.mock-server.settings.contextMenu.mockIt && resourceExtname == .har",
+          "command": "mock-server.mockIt",
+          "group": "thinker.mock-server@3"
+        },
+        {
+          "when": "config.mock-server.settings.contextMenu.stopServer && isServerRunning",
+          "command": "mock-server.stopServer",
+          "group": "thinker.mock-server@4"
+        },
+        {
+          "when": "config.mock-server.settings.contextMenu.switchEnvironment",
+          "command": "mock-server.switchEnvironment",
+          "group": "thinker.mock-server@5"
+        },
+        {
+          "when": "config.mock-server.settings.contextMenu.makeRequest",
+          "command": "mock-server.makeRequest",
+          "group": "thinker.mock-server@6"
+        },
+        {
+          "when": "config.mock-server.settings.contextMenu.setPort",
+          "command": "mock-server.setPort",
+          "group": "thinker.mock-server@7"
+        },
+        {
+          "when": "config.mock-server.settings.contextMenu.pasteServerConfig",
+          "command": "mock-server.pasteConfig",
+          "group": "thinker.mock-server@8"
+        },
+        {
+          "when": "config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .js",
+          "command": "mock-server.setConfig",
+          "group": "thinker.mock-server@9"
+        }
+      ],
+      "mock-server.subMenu": [
+        {
+          "when": "!config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .json || !config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .har",
+          "command": "mock-server.transformToMockDB",
+          "group": "thinker.mock-server@1"
+        },
+        {
+          "when": "!config.mock-server.settings.contextMenu.mockIt && resourceExtname == .json || !config.mock-server.settings.contextMenu.mockIt && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.mockIt && resourceExtname == .js || !config.mock-server.settings.contextMenu.mockIt && resourceExtname == .har",
+          "command": "mock-server.mockIt",
+          "group": "thinker.mock-server@2"
+        },
+        {
+          "when": "!config.mock-server.settings.contextMenu.stopServer && isServerRunning",
+          "command": "mock-server.stopServer",
+          "group": "thinker.mock-server@3"
+        },
+        {
+          "when": "!config.mock-server.settings.contextMenu.switchEnvironment",
+          "command": "mock-server.switchEnvironment",
+          "group": "thinker.mock-server@4"
+        },
+        {
+          "when": "!config.mock-server.settings.contextMenu.makeRequest",
+          "command": "mock-server.makeRequest",
+          "group": "thinker.mock-server@5"
+        },
+        {
+          "when": "!config.mock-server.settings.contextMenu.setPort",
+          "command": "mock-server.setPort",
+          "group": "thinker.mock-server@6"
+        },
+        {
+          "when": "!config.mock-server.settings.contextMenu.pasteServerConfig",
+          "command": "mock-server.pasteConfig",
+          "group": "thinker.mock-server@7"
+        },
+        {
+          "when": "!config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || !config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .js",
+          "command": "mock-server.setConfig",
+          "group": "thinker.mock-server@8"
+        }
+      ]
+    },
+    "submenus": [
+      {
+        "id": "mock-server.subMenu",
+        "label": "Mock Server",
+        "group": "thinker.mock-server"
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": "env-config.js*",
+        "url": "./schema/env-config.json"
+      },
+      {
+        "fileMatch": "mock-server*.js*",
+        "url": "./schema/config.json"
+      },
+      {
+        "fileMatch": "msconfig.js*",
+        "url": "./schema/config.json"
+      },
+      {
+        "fileMatch": "*db.js*",
+        "url": "./schema/db.json"
+      },
+      {
+        "fileMatch": "*injectors.js*",
+        "url": "./schema/injectors.json"
+      },
+      {
+        "fileMatch": "*rewriters.js*",
+        "url": "./schema/rewriters.json"
+      },
+      {
+        "fileMatch": "*store.js*",
+        "url": "./schema/store.json"
+      }
+    ]
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
