@@ -5,12 +5,12 @@
 
 ## v16.3.2
 
- - Build issue fix
+ - Build issue fix.
   
 ## v16.3.1
 
-- Updated - Node package `@r35007/mock-server@14.0.1`
-- Fixed - `mock-server.settings.log` setting not working issue fixed
+- Updated - Node package `@r35007/mock-server@14.0.1`.
+- Fixed - `mock-server.settings.log` setting not working issue fixed.
   
 ## v16.3.0
 
@@ -19,12 +19,12 @@
   
 ## v16.2.1
 
-- Added  - `Mock It` context menu to `.har` file
+- Added  - `Mock It` context menu to `.har` file.
   
 ## v16.2.0
 
 - Samples updated.
-- Added  - auto completion for `env-config.json` or `env-config.jsonc`
+- Added  - auto completion for `env-config.json` or `env-config.jsonc`.
   
 ## v16.1.4
 
@@ -32,12 +32,12 @@
 
 ## v16.1.3
 
-- Fixed - Routes auto complete is not coming for `.js` and `.ts` file issue fixed
+- Fixed - Routes auto complete is not coming for `.js` and `.ts` file issue fixed.
 - Fixed - `Set as Server Root Folder` is always setting at user level settings issues fixed.
   
 ## v16.1.2
 
-- Updated - `@r35007/mock-server@14.0.0`
+- Updated - `@r35007/mock-server@14.0.0`.
   
 ## v16.1.1
 
@@ -53,10 +53,10 @@
 - Reverted using webpack build due to require file from outside the build not supported limitations. 
 - Added Auto completion of routes and configs.
 - Provided JSON schema for `*db.js*`, `*injectors.js*`, `mock-server*.js*`, `msconfig.js*`.
-- These above schema helps to autocomplete server config properties
-- Added - `Set as Server Root Folder` command in explorer context
-- Added - `Start with New Port` command in command pallet
-- Resolved - Sample files errors
+- These above schema helps to autocomplete server config properties.
+- Added - `Set as Server Root Folder` command in explorer context.
+- Added - `Start with New Port` command in command pallet.
+- Resolved - Sample files errors.
   
 ## v15.1.0
 
@@ -84,7 +84,7 @@
 
 ## v13.0.1
 
-- Build size reduced
+- Build size reduced.
 
 ## v13.0.0
 
