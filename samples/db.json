@@ -174,7 +174,7 @@
       "_IterateRoutes"
     ]
   },
-  "/middleware/utils/example/_AdvancedSearch/users/:id?": {
+  "/middleware/utils/example/_AdvancedSearch/users": {
     "_config": true,
     "fetch": {
       "url": "http://jsonplaceholder.typicode.com/users"

@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "16.3.2",
+  "version": "17.0.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -245,6 +245,7 @@
           "default": {
             "noGzip": false,
             "noCors": false,
+            "noCache": true,
             "readOnly": false,
             "logger": true,
             "bodyParser": true,
@@ -260,6 +261,11 @@
               "type": "boolean",
               "default": false,
               "description": "Disable CORS ( Cross Origin Resource Sharing )."
+            },
+            "noCache": {
+              "type": "boolean",
+              "default": true,
+              "description": "Disable Cache"
             },
             "readOnly": {
               "type": "boolean",
@@ -678,7 +684,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@r35007/mock-server": "^14.0.1",
+    "@r35007/mock-server": "^14.2.0",
     "comment-json": "^4.2.3",
     "fs-extra": "^10.1.0",
     "jsonc-require": "^1.0.1",

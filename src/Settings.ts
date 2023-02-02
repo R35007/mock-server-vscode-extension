@@ -52,6 +52,7 @@ export class Settings {
     return Settings.getSettings("defaults") as {
       noGzip: boolean;
       noCors: boolean;
+      noCache: boolean;
       logger: boolean;
       readOnly: boolean;
       bodyParser: boolean;

@@ -3,6 +3,11 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v17.0.0
+
+- Updated - Node package `@r35007/mock-server@14.2.0`.
+- Added - `noCache` in `mock-server.settings.defaults` settings. Set to false to Enable response caching.
+  
 ## v16.3.2
 
  - Build issue fix.
@@ -128,7 +133,7 @@
 
 ## v11.0.1
 
-- Fixed - Not restarting on changes on the fetch paths
+- Fixed - Not restarting on changes on the fetch paths.
 
 ## v11.0.0
 
