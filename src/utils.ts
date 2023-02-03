@@ -245,7 +245,6 @@ export class Utils {
     const selectedEnvironment = this.storageManager.getValue("environment", NO_ENV);
 
     const filesToWatch = [
-      Settings.paths.root,
       Settings.paths.db,
       Settings.paths.middlewares,
       Settings.paths.injectors,
@@ -258,12 +257,14 @@ export class Utils {
       ...[].concat(selectedEnvironment.db),
       ...[].concat(selectedEnvironment.injectors),
       ...[].concat(selectedEnvironment.middlewares),
-    ]
+    ];
+
+    const filteredPaths = filesToWatch
       .filter(p => !p?.startsWith("http")).filter(Boolean)
       .reduce((paths, p) => [...paths, ...getFilesList(p!)], [] as PathDetails[])
       .filter(p => p.isFile).map(p => p.filePath);
 
-    this.watcher = watcher.watch([...new Set(filesToWatch)], { ignored: Settings.ignoreFiles });
+    this.watcher = watcher.watch([...new Set(filteredPaths)], { ignored: Settings.ignoreFiles });
     this.watcher.on('change', (changedFile, _event) => {
       if (!Settings.watch) return;
       this.log(`[Modified] ${changedFile}`, "\n");
@@ -339,7 +340,7 @@ export class Utils {
       const data = typeof response.data === "string" ? response.data : JSON.stringify(response.data, undefined, vscode.window.activeTextEditor?.options.tabSize || "\t");
       let result = `// ${url}\n`; // add Url to result
       result += `// Status: ${response.status || ""} ${response.statusText || ""}\n`; // add Status to result
-      result += `// Time: ${response.headers?.["x-response-time"] || responseTime}ms\n`; // add Time to result
+      result += `// Time: ${response.headers?.["x-response-time"] || responseTime}\n`; // add Time to result
       result += `// Response:\n`; // add Response to result
       result += data;
       return result;
@@ -349,7 +350,7 @@ export class Utils {
       const data = typeof response?.data === "string" ? error?.response?.data : JSON.stringify(response?.data || "", undefined, vscode.window.activeTextEditor?.options.tabSize || "\t");
       let result = `// ${url}\n`; // add Url to result
       result += `// Status: ${response.status || ""} ${response.statusText || ""}\n`; // add Status to result
-      result += `// Time: ${response.headers?.["x-response-time"] || responseTime}ms\n`; // add Time to result
+      result += `// Time: ${response.headers?.["x-response-time"] || responseTime}\n`; // add Time to result
       result += `// Error: ${error.message}\n`; // add Status to result
       result += `// Response:\n`; // add Response to result
       result += data;

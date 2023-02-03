@@ -17,6 +17,7 @@ export class Settings {
   }
 
   static get paths() {
+    const staticFolder = Settings.getSettings("paths.static") as string || "";
     const paths = {
       root: Settings.root,
       db: Settings.getValidPath(Settings.getSettings("paths.db") as string, "db.json"),
@@ -25,7 +26,7 @@ export class Settings {
       store: Settings.getValidPath(Settings.getSettings("paths.store") as string, "store.json"),
       rewriters: Settings.getValidPath(Settings.getSettings("paths.rewriters") as string, "rewriters.json"),
       environment: Settings.getValidPath(Settings.getSettings("paths.environment") as string, "env"),
-      static: Settings.getValidPath(Settings.getSettings("paths.static") as string, "") || "",
+      static: staticFolder.trim().length ? Settings.getValidPath(staticFolder, "") || "" : "",
       snapshots: path.resolve(Settings.root, Settings.getSettings("paths.snapshots") as string || "snapshots")
     };
     return paths;

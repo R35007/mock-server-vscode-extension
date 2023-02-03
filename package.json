@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "17.0.0",
+  "version": "17.0.1",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -36,20 +36,6 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onCommand:mock-server.mockIt",
-    "onCommand:mock-server.startServer",
-    "onCommand:mock-server.stopServer",
-    "onCommand:mock-server.switchEnvironment",
-    "onCommand:mock-server.getDbSnapShot",
-    "onCommand:mock-server.makeRequest",
-    "onCommand:mock-server.openHomePage",
-    "onCommand:mock-server.setPort",
-    "onCommand:mock-server.setRoot",
-    "onCommand:mock-server.setConfig",
-    "onCommand:mock-server.pasteConfig",
-    "onCommand:mock-server.startWithNewPort",
-    "onCommand:mock-server.transformToMockDB",
-    "onCommand:mock-server.generateMockFiles",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
@@ -143,9 +129,9 @@
             "injectors": "injectors.json",
             "rewriters": "rewriters.json",
             "store": "store.json",
-            "static": "public",
             "snapshots": "snapshots",
-            "environment": "env"
+            "environment": "env",
+            "static": ""
           },
           "properties": {
             "root": {
@@ -178,11 +164,6 @@
               "format": "file-system-path",
               "description": "Set .js or .json or .jsonc."
             },
-            "static": {
-              "type": "string",
-              "format": "file-system-path",
-              "description": "Set path to static files. Give an empty string to prevent hosting a default public folder."
-            },
             "snapshots": {
               "type": "string",
               "format": "file-system-path",
@@ -192,6 +173,11 @@
               "type": "string",
               "format": "file-system-path",
               "description": "Set path to environment data files."
+            },
+            "static": {
+              "type": "string",
+              "format": "file-system-path",
+              "description": "Set path to static files. Give an empty string to prevent hosting a default public folder."
             }
           },
           "description": "Set Database config paths.",

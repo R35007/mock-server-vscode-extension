@@ -22,11 +22,11 @@ export default class MockServerExt extends Utils {
     super(context, output, clearLog);
     this.createServer();
   }
-  
+
   createServer = () => {
     this.mockServer = new MockServer({ root: Settings.root, log: Settings.log });
   };
-  
+
   destroyServer = async () => {
     await MockServer.Destroy(this.mockServer);
     await this.stopWatchingChanges();
@@ -229,8 +229,24 @@ export default class MockServerExt extends Utils {
   startServer = async (fsPath?: string, port: number = Settings.port) => {
     const paths = Settings.paths;
     const dbPath = paths.db;
-
     const mockServer = this.mockServer;
+
+    if (fsPath) {
+      const environment = {
+        envName: path.basename(fsPath),
+        label: path.basename(fsPath),
+        description: Settings.paths.environment ? path.relative(Settings.paths.environment, fsPath).replace(/\\/g, "/") : fsPath,
+        db: [fsPath],
+        injectors: [],
+        middlewares: [],
+      } as Environment;
+
+      await this.storageManager.setValue("environment", environment);
+    }
+    const env = await this.getEnvData(mockServer);
+
+    if (!dbPath && !fsPath && !Object.keys(env.db).length && !paths.static.length) throw new Error("Please provide valid Db path.");
+
     const app = mockServer.app;
 
     const config = { ...Settings.config, port };
@@ -260,19 +276,8 @@ export default class MockServerExt extends Utils {
       app.use(mockServer.config.base, homePage);
     }
 
-    if (fsPath) {
-      const environment = {
-        envName: path.basename(fsPath),
-        label: path.basename(fsPath),
-        description: Settings.paths.environment ? path.relative(Settings.paths.environment, fsPath).replace(/\\/g, "/") : fsPath,
-        db: [fsPath],
-        injectors: [],
-        middlewares: [],
-      } as Environment;
 
-      await this.storageManager.setValue("environment", environment);
-    }
-    const env = await this.getEnvData(mockServer);
+
     const envResources = mockServer.resources(env.db, {
       injectors: [...mockServer.injectors, ...env.injectors],
       middlewares: { ...mockServer.middlewares, ...env.middlewares },

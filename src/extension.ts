@@ -50,6 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
         StatusbarUi.working(ServerStatus.RESTART);
         await server.resetServer();
         await server.startServer(args?.fsPath);
+        await new Promise((resolve, reject) => { setTimeout(resolve, 500); });
         StatusbarUi.stopServer(ServerStatus.RESTART, server.mockServer.port!, server.mockServer.listeningTo!);
       } catch (error: any) {
         await server.resetServer();
