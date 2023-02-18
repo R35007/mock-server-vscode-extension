@@ -3,6 +3,7 @@ import { PathDetails } from '@r35007/mock-server/dist/types/common.types';
 import { Db } from '@r35007/mock-server/dist/types/valid.types';
 import { normalizeDb } from '@r35007/mock-server/dist/utils';
 import { getFilesList, requireData } from "@r35007/mock-server/dist/utils/fetch";
+import * as fs from "fs";
 import * as fsx from "fs-extra";
 import { FSWatcher } from 'node:fs';
 import { performance } from 'node:perf_hooks';
@@ -145,7 +146,17 @@ export class Utils {
       const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
       return data;
     } else {
-      const data = requireData(mockPath, { root, isList });
+      const stat = fs.statSync(mockPath);
+      let data = {};
+      if (stat.isFile()) {
+        try {
+          data = await import(mockPath);
+        } catch (error) {
+          data = requireData(mockPath, { root, isList });
+        }
+      } else {
+        data = requireData(mockPath, { root, isList });
+      }
       const env = this.storageManager.getValue("environment", NO_ENV);
       return typeof data === 'function' ? await data(mockServer, env) : data;
     }

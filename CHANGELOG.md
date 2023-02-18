@@ -3,6 +3,11 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v18.0.0
+
+- Updated - `@35007/mock-server@16.0.0` node package.
+- Support for `.cjs`, `.mjs` and `ES module export` files.
+
 ## v17.0.2
 
 - Updated - `@35007/mock-server@15.1.0` node package.
