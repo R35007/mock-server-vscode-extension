@@ -3,6 +3,10 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v18.1.0
+
+- Updated - `@35007/mock-server@16.1.0` node package.
+
 ## v18.0.0
 
 - Updated - `@35007/mock-server@16.0.0` node package.
@@ -22,30 +26,30 @@
 
 - Updated - Node package `@r35007/mock-server@14.2.0`.
 - Added - `noCache` in `mock-server.settings.defaults` settings. Set to false to Enable response caching.
-  
+
 ## v16.3.2
 
- - Build issue fix.
-  
+- Build issue fix.
+
 ## v16.3.1
 
 - Updated - Node package `@r35007/mock-server@14.0.1`.
 - Fixed - `mock-server.settings.log` setting not working issue fixed.
-  
+
 ## v16.3.0
 
 - Modified - Server Output logs
 - Fixed - Set config not setting injectors path issue fixed.
-  
+
 ## v16.2.1
 
-- Added  - `Mock It` context menu to `.har` file.
-  
+- Added - `Mock It` context menu to `.har` file.
+
 ## v16.2.0
 
 - Samples updated.
-- Added  - auto completion for `env-config.json` or `env-config.jsonc`.
-  
+- Added - auto completion for `env-config.json` or `env-config.jsonc`.
+
 ## v16.1.4
 
 - Samples updated.
@@ -54,34 +58,34 @@
 
 - Fixed - Routes auto complete is not coming for `.js` and `.ts` file issue fixed.
 - Fixed - `Set as Server Root Folder` is always setting at user level settings issues fixed.
-  
+
 ## v16.1.2
 
 - Updated - `@r35007/mock-server@14.0.0`.
-  
+
 ## v16.1.1
 
 - Fixed - `.jsonc` files are not showing up in the `Switch Environment` quick pick list items issue fixed.
 - Increased font size for Home page.
-  
+
 ## v16.1.0
 
 - Added more auto completions and schema updates.
 
 ## v16.0.0
 
-- Reverted using webpack build due to require file from outside the build not supported limitations. 
+- Reverted using webpack build due to require file from outside the build not supported limitations.
 - Added Auto completion of routes and configs.
 - Provided JSON schema for `*db.js*`, `*injectors.js*`, `mock-server*.js*`, `msconfig.js*`.
 - These above schema helps to autocomplete server config properties.
 - Added - `Set as Server Root Folder` command in explorer context.
 - Added - `Start with New Port` command in command pallet.
 - Resolved - Sample files errors.
-  
+
 ## v15.1.0
 
-- Added - `Make Request` command. Helps to search endpoint and make get request to get the endpoint data. 
-  
+- Added - `Make Request` command. Helps to search endpoint and make get request to get the endpoint data.
+
 ## v14.1.0
 
 - Restart the mock server on changes in environment data file.
@@ -92,11 +96,11 @@
 - Added - `Mock It` command in context menu. Helps to run the current file data in mock server.
 - Added - `Switch Environment` command in context menu.
 - Build size reduced using webpack.
-  
+
 ## v13.0.3
 
 - Context menu show and hide issue fixed.
-  
+
 ## v13.0.2
 
 - Build size reduced
@@ -108,11 +112,11 @@
 
 ## v13.0.0
 
-- Removed - `Set as Server Root Folder` is removed from context menu. 
+- Removed - `Set as Server Root Folder` is removed from context menu.
 - Added - Mock Server submenus in the editor context.
-- Added  - `mock-server.settings.contextMenu` - Helps to show or hide commands in context menu,
-- Updated - Right click on any `.json` file and select `Start Server` from context to start the mock server with the current file as an `env` file.  
-  
+- Added - `mock-server.settings.contextMenu` - Helps to show or hide commands in context menu,
+- Updated - Right click on any `.json` file and select `Start Server` from context to start the mock server with the current file as an `env` file.
+
 ## v12.2.0
 
 - Updated `@r35007/mock-server@12.2.0`.
