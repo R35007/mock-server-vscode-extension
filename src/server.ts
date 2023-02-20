@@ -249,42 +249,49 @@ export default class MockServerExt extends Utils {
 
     const app = mockServer.app;
 
+    // Setting server configs
     const config = { ...Settings.config, port };
     mockServer.setConfig(config);
-
-    const rewriters = await this.getDataFromUrl(paths.rewriters, { mockServer });
-
-    const rewriter = mockServer.rewriter(rewriters);
-    app.use(rewriter);
-
-    const defaults = mockServer.defaults();
-    app.use(defaults);
-
+    
+    // Setting Middlewares
     const middlewares = await this.getDataFromUrl(paths.middlewares, { mockServer });
     mockServer.setMiddlewares(middlewares);
-
-    app.use(mockServer.middlewares.globals);
-
+    
+    // Setting Injectors
     const injectors = await this.getDataFromUrl(paths.injectors, { mockServer, isList: true });
     mockServer.setInjectors(injectors);
-
+    
+    // Setting Store
     const store = await this.getDataFromUrl(paths.store, { mockServer });
     mockServer.setStore(store);
-
+    
+    // Setting Rewriters
+    const rewriters = await this.getDataFromUrl(paths.rewriters, { mockServer });
+    const rewriter = mockServer.rewriter(rewriters);
+    app.use(rewriter);
+    
+    // Setting Default Middlewares
+    const defaults = mockServer.defaults();
+    app.use(defaults);
+    
+    // Setting Middleweare Globals
+    app.use(mockServer.middlewares.globals);
+    
+    // Setting Homepage Routes
     if (Settings.homePage) {
       const homePage = mockServer.homePage();
       app.use(mockServer.config.base, homePage);
     }
-
-
-
+    
+    // Setting Environment Db
     const envResources = mockServer.resources(env.db, {
       injectors: [...mockServer.injectors, ...env.injectors],
       middlewares: { ...mockServer.middlewares, ...env.middlewares },
       log: "Environment Resource"
     });
     app.use(mockServer.config.base, envResources.router);
-
+    
+    // Setting Db
     const dbData = await this.getDbData(dbPath, mockServer);
     const dbResources = mockServer.resources(dbData);
     app.use(mockServer.config.base, dbResources.router);
