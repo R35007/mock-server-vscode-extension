@@ -3,6 +3,11 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v19.0.0
+
+- Updated - `@35007/mock-server@17.0.0` node package.
+- Fixed - On server restart the db is not reflecting the changes and its caching issue fixed.
+
 ## v18.1.0
 
 - Updated - `@35007/mock-server@16.1.0` node package.

@@ -2,8 +2,7 @@ import { axios, lodash as _, MockServer, watcher } from '@r35007/mock-server';
 import { PathDetails } from '@r35007/mock-server/dist/types/common.types';
 import { Db } from '@r35007/mock-server/dist/types/valid.types';
 import { normalizeDb } from '@r35007/mock-server/dist/utils';
-import { getFilesList, requireData } from "@r35007/mock-server/dist/utils/fetch";
-import * as fs from "fs";
+import { getFilesList, requireData, getStats } from "@r35007/mock-server/dist/utils/fetch";
 import * as fsx from "fs-extra";
 import { FSWatcher } from 'node:fs';
 import { performance } from 'node:perf_hooks';
@@ -146,14 +145,13 @@ export class Utils {
       const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
       return data;
     } else {
-      const stat = fs.statSync(mockPath);
+      const stat = getStats(mockPath);
+      if (!stat) return {};
       let data = {};
-      if (stat.isFile()) {
-        try {
-          data = await import(mockPath);
-        } catch (error) {
-          data = requireData(mockPath, { root, isList });
-        }
+      if (stat.isFile && stat.extension.endsWith("js")) {
+        data = await import(`${mockPath}?update=${Date.now()}`)
+          .then(data => data?.default || data)
+          .catch(_ => requireData(mockPath, { root, isList }));
       } else {
         data = requireData(mockPath, { root, isList });
       }
