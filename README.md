@@ -6,12 +6,12 @@ Created with <3 for front-end developers who need a quick back-end for prototypi
 
 This Extension is built upon node package [@r35007/mock-server](https://www.npmjs.com/package/@r35007/mock-server).
 
-![Preview](https://user-images.githubusercontent.com/23217228/206978718-3f4bdcbd-2e7a-4d7b-b4aa-651165a5781b.gif)
+![Preview](https://github.com/R35007/mock-server-vscode-extension/assets/23217228/b8096556-4be3-4bc9-b867-3eafc3a3399f)
 
 ## Getting started
 
 - Install the Extension.
-- Right click on the workspace folder and select `Generate Sample Mock Files` from the context.
+- Right click on the workspace folder and select `Mock Server` -> `Create db.json` from the context.
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Start Server` (`Alt+Enter`)
 - To view the List of resources go to Command `MockServer: Home Page` or open any browser and hit the localhost url
 
@@ -70,9 +70,9 @@ Helps to work in multiple data environments.
       "description": "Your description here" // This description will be shown in the switch environment pick list
     },
     "Your New  Environment Name": {
-      "db": ["./testDb2.json", "./testDb2.json"],  // Can also provide multiple paths
+      "db": ["./testDb2.json", "./testDb2.json"], // Can also provide multiple paths
       "injectors": [],
-      "middlewares": [],
+      "middlewares": []
     }
   }
   ```
@@ -85,12 +85,7 @@ Helps to work in multiple data environments.
 ### `Transform to Mock Server Db`
 
 - `MockServer: Transform to Mock Server Db` Command helps to generate a valid routes.
-- This also helps to convert the `.har` data to a valid `db.json` file.
-
-### `Generate Sample Mock Files`
-
-- `MockServer: Generate Sample Mock Files` Command helps to generate a sample mock files in the `mock-server.settings.paths.root` folder.
-- Alternatively you can also generate mock files by right clicking on the folder and click `Generate Sample Mock Files` command in the context menu.
+- This also helps to convert the `.har` or `kibana` json to a valid `db.json` file.
 
 ### `Open Home Page`
 

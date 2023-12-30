@@ -1,11 +1,11 @@
 import open from "open";
 import * as vscode from "vscode";
-import { Commands, PromptAction, ServerStatus } from './enum';
 import HomePage from './HomePage';
-import { Prompt } from './prompt';
-import Server from "./server";
 import { Settings } from './Settings';
 import { StatusbarUi } from "./StatusBarUI";
+import { Commands, PromptAction, ServerStatus } from './enum';
+import { Prompt } from './prompt';
+import Server from "./server";
 require("jsonc-require");
 
 export function activate(context: vscode.ExtensionContext) {
@@ -36,11 +36,6 @@ export function activate(context: vscode.ExtensionContext) {
       console.log(error);
       Prompt.showPopupMessage(`Failed to Transform. \n${error.message}`, PromptAction.ERROR);
     };
-  }));
-
-  // Mock It
-  context.subscriptions.push(vscode.commands.registerCommand(Commands.MOCK_IT, async (args) => {
-    vscode.commands.executeCommand(Commands.START_SERVER, args);
   }));
 
   // Start Server
@@ -133,15 +128,49 @@ export function activate(context: vscode.ExtensionContext) {
   // Paste Config
   context.subscriptions.push(vscode.commands.registerCommand(Commands.PASTE_CONFIG, server.pasteConfig));
 
-  // Create Sample Files
-  context.subscriptions.push(vscode.commands.registerCommand(Commands.GENERATE_MOCK_FILES, async (args) => {
+  // Create db.json File
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.CREATE_DB, async (args) => {
     try {
-      log(`[Running] Creating Samples initiated`, "\n");
-      log('\nCreating Samples...');
+      log(`[Running] Creating Sample db`, "\n");
+      log('\nCreating Db...');
       await vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
-        title: "Please wait. Generating Sample Mock Files...",
-      }, async () => await server.generateMockFiles(args));
+        title: "Please wait. Creating Sample Db...",
+      }, async () => await server.creteSampleDb(args));
+      log('[Done] Sample files created.');
+    } catch (error: any) {
+      log(`[Error] Failed to Create Sample Db. ${error.message}`);
+      console.log(error);
+      Prompt.showPopupMessage(`Failed to Create Sample Db. \n${error.message}`, PromptAction.ERROR);
+    }
+  }));
+
+  // Create server.js File
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.CREATE_SERVER, async (args) => {
+    try {
+      log(`[Running] Creating Sample Server Script`, "\n");
+      log('\nCreating Server Script...');
+      await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: "Please wait. Creating Sample Server Script...",
+      }, async () => await server.creteSampleServer(args));
+      log('[Done] Sample files created.');
+    } catch (error: any) {
+      log(`[Error] Failed to Create Sample Server Script. ${error.message}`);
+      console.log(error);
+      Prompt.showPopupMessage(`Failed to Create Sample Server Script. \n${error.message}`, PromptAction.ERROR);
+    }
+  }));
+
+  // Create Example Files
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.CREATE_ADVANCED_EXAMPLES, async (args) => {
+    try {
+      log(`[Running] Creating Advanced Examples initiated`, "\n");
+      log('\nCreating Examples...');
+      await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: "Please wait. Creating Sample Mock Files...",
+      }, async () => await server.creteAdvancedExamples(args));
       log('[Done] Sample files created.');
     } catch (error: any) {
       log(`[Error] Failed to Create Samples. ${error.message}`);

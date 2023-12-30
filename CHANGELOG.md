@@ -3,6 +3,12 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v20.0.0
+
+- Updated - `@35007/mock-server@18.1.0` node package.
+- Updated - mock-server example files.
+- Added - explorer context menus.
+
 ## v19.1.0
 
 - Updated - `@35007/mock-server@17.1.0` node package.

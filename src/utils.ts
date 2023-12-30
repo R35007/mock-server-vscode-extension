@@ -1,17 +1,17 @@
-import { axios, lodash as _, MockServer, watcher } from '@r35007/mock-server';
+import { MockServer, lodash as _, axios, watcher } from '@r35007/mock-server';
 import { PathDetails } from '@r35007/mock-server/dist/types/common.types';
 import { Db } from '@r35007/mock-server/dist/types/valid.types';
 import { normalizeDb } from '@r35007/mock-server/dist/utils';
-import { getFilesList, requireData, getStats } from "@r35007/mock-server/dist/utils/fetch";
+import { getFilesList, getStats, requireData } from "@r35007/mock-server/dist/utils/fetch";
 import * as fsx from "fs-extra";
 import { FSWatcher } from 'node:fs';
 import { performance } from 'node:perf_hooks';
 import * as path from "path";
 import * as vscode from "vscode";
-import { Commands, Environment, NO_ENV, Recently_Used } from './enum';
 import { LocalStorageService } from './LocalStorageService';
-import { Prompt } from "./prompt";
 import { Settings } from "./Settings";
+import { Commands, Environment, NO_ENV, Recently_Used } from './enum';
+import { Prompt } from "./prompt";
 
 export class Utils {
   storageManager!: LocalStorageService;

@@ -1,6 +1,5 @@
 import { lodash as _, MockServer } from "@r35007/mock-server";
 import { HAR, KIBANA } from '@r35007/mock-server/dist/types/common.types';
-import * as UserTypes from "@r35007/mock-server/dist/types/user.types";
 import { extractDbFromHAR, extractDbFromKibana, getCleanDb } from '@r35007/mock-server/dist/utils';
 import { requireData } from '@r35007/mock-server/dist/utils/fetch';
 import * as jsonc from 'comment-json';
@@ -73,9 +72,7 @@ export default class MockServerExt extends Utils {
       ) || {};
     }
 
-    const cleanDb = getCleanDb(transformedDb as UserTypes.Db, Settings.dbMode);
-    if (!Object.keys(cleanDb).length) throw Error("No Routes Found");
-    await this.writeFile(currentFilePath, cleanDb, 'Data Transformed Successfully');
+    await this.writeFile(currentFilePath, transformedDb, 'Data Transformed Successfully');
   };
 
   setPort = async (_args?: any) => {
@@ -252,37 +249,37 @@ export default class MockServerExt extends Utils {
     // Setting server configs
     const config = { ...Settings.config, port };
     mockServer.setConfig(config);
-    
+
     // Setting Middlewares
     const middlewares = await this.getDataFromUrl(paths.middlewares, { mockServer });
     mockServer.setMiddlewares(middlewares);
-    
+
     // Setting Injectors
     const injectors = await this.getDataFromUrl(paths.injectors, { mockServer, isList: true });
     mockServer.setInjectors(injectors);
-    
+
     // Setting Store
     const store = await this.getDataFromUrl(paths.store, { mockServer });
     mockServer.setStore(store);
-    
+
     // Setting Rewriters
     const rewriters = await this.getDataFromUrl(paths.rewriters, { mockServer });
     const rewriter = mockServer.rewriter(rewriters);
     app.use(rewriter);
-    
+
     // Setting Default Middlewares
     const defaults = mockServer.defaults();
     app.use(defaults);
-    
+
     // Setting Middleweare Globals
     app.use(mockServer.middlewares.globals);
-    
+
     // Setting Homepage Routes
     if (Settings.homePage) {
       const homePage = mockServer.homePage();
       app.use(mockServer.config.base, homePage);
     }
-    
+
     // Setting Environment Db
     const envResources = mockServer.resources(env.db, {
       injectors: [...mockServer.injectors, ...env.injectors],
@@ -290,7 +287,7 @@ export default class MockServerExt extends Utils {
       log: "Environment Resource"
     });
     app.use(mockServer.config.base, envResources.router);
-    
+
     // Setting Db
     const dbData = await this.getDbData(dbPath, mockServer);
     const dbResources = mockServer.resources(dbData);
@@ -328,9 +325,23 @@ export default class MockServerExt extends Utils {
     await this.writeFile(snapShotPath, getCleanDb(this.mockServer.db), 'Db Snapshot retrieved Successfully');
   };
 
-  generateMockFiles = async (args?: any) => {
+  creteSampleDb = async (args?: any) => {
     await delay(1000);
-    fsx.copySync(path.join(__dirname, '../samples'), args?.fsPath || Settings.root);
+    const folderPath = args?.fsPath || Settings.root;
+    fsx.ensureFileSync(path.join(folderPath, '/db.json'));
+    fsx.copySync(path.join(__dirname, '../samples/db.json'), path.join(folderPath, '/db.json'));
+  };
+
+  creteSampleServer = async (args?: any) => {
+    await delay(1000);
+    const folderPath = args?.fsPath || Settings.root;
+    fsx.ensureFileSync(path.join(folderPath, '/server.js'));
+    fsx.copySync(path.join(__dirname, '../samples/server.js'), path.join(folderPath, '/server.js'));
+  };
+
+  creteAdvancedExamples = async (args?: any) => {
+    await delay(1000);
+    fsx.copySync(path.join(__dirname, '../samples/advanced'), args?.fsPath || Settings.root);
   };
 
   makeRequest = async () => {

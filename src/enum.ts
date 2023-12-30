@@ -3,8 +3,7 @@ import * as vscode from "vscode";
 
 export enum Commands {
   TRANSFORM_TO_MOCK_SERVER_DB = "mock-server.transformToMockDB",
-  GENERATE_MOCK_FILES = "mock-server.generateMockFiles",
-  MOCK_IT = "mock-server.mockIt",
+  CREATE_ADVANCED_EXAMPLES = "mock-server.createAdvancedExamples",
   START_SERVER = "mock-server.startServer",
   STOP_SERVER = "mock-server.stopServer",
   START_WITH_NEW_PORT = "mock-server.startWithNewPort",
@@ -15,7 +14,9 @@ export enum Commands {
   SET_PORT = "mock-server.setPort",
   SET_ROOT = "mock-server.setRoot",
   SET_CONFIG = "mock-server.setConfig",
-  PASTE_CONFIG = "mock-server.pasteConfig"
+  PASTE_CONFIG = "mock-server.pasteConfig",
+  CREATE_DB = "mock-server.createDb",
+  CREATE_SERVER = "mock-server.createServer",
 }
 
 export enum ServerStatus {

@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "19.1.0",
+  "version": "20.0.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -42,13 +42,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "mock-server.mockIt",
-        "title": "Mock It",
-        "category": "MockServer"
-      },
-      {
         "command": "mock-server.startServer",
-        "title": "Start Server",
+        "title": "Start / Restart Server",
         "category": "MockServer"
       },
       {
@@ -107,8 +102,18 @@
         "category": "MockServer"
       },
       {
-        "command": "mock-server.generateMockFiles",
-        "title": "Generate Mock Files",
+        "command": "mock-server.createDb",
+        "title": "Create db.json",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.createServer",
+        "title": "Create server.js",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.createAdvancedExamples",
+        "title": "Create Advanced Examples",
         "category": "MockServer"
       }
     ],
@@ -386,7 +391,7 @@
           "default": {
             "mockServerSubMenu": true,
             "transformToMockDB": false,
-            "mockIt": false,
+            "startServer": false,
             "stopServer": false,
             "switchEnvironment": false,
             "makeRequest": false,
@@ -404,7 +409,7 @@
             "transformToMockDB": {
               "type": "boolean"
             },
-            "mockIt": {
+            "startServer": {
               "type": "boolean"
             },
             "stopServer": {
@@ -465,11 +470,15 @@
     "menus": {
       "commandPalette": [
         {
-          "command": "mock-server.mockIt",
+          "command": "mock-server.createDb",
           "when": "false"
         },
         {
-          "command": "mock-server.generateMockFiles",
+          "command": "mock-server.createServer",
+          "when": "false"
+        },
+        {
+          "command": "mock-server.createAdvancedExamples",
           "when": "false"
         },
         {
@@ -491,40 +500,15 @@
       ],
       "explorer/context": [
         {
-          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
-          "command": "mock-server.generateMockFiles",
+          "when": "config.mock-server.settings.contextMenu.mockServerSubMenu && sideBarFocus && activeViewlet == 'workbench.view.explorer'",
+          "submenu": "mock-server.explorer-subMenu",
           "group": "thinker.mock-server@1"
-        },
-        {
-          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
-          "command": "mock-server.setRoot",
-          "group": "thinker.mock-server@2"
-        },
-        {
-          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js || resourceExtname == .har",
-          "command": "mock-server.transformToMockDB",
-          "group": "thinker.mock-server@3"
-        },
-        {
-          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js || resourceExtname == .har",
-          "command": "mock-server.mockIt",
-          "group": "thinker.mock-server@3"
-        },
-        {
-          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && isServerRunning",
-          "command": "mock-server.stopServer",
-          "group": "thinker.mock-server@4"
-        },
-        {
-          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
-          "command": "mock-server.setConfig",
-          "group": "thinker.mock-server@4"
         }
       ],
       "editor/context": [
         {
           "when": "config.mock-server.settings.contextMenu.mockServerSubMenu",
-          "submenu": "mock-server.subMenu",
+          "submenu": "mock-server.editor-subMenu",
           "group": "thinker.mock-server@1"
         },
         {
@@ -533,8 +517,8 @@
           "group": "thinker.mock-server@2"
         },
         {
-          "when": "config.mock-server.settings.contextMenu.mockIt && resourceExtname == .json || config.mock-server.settings.contextMenu.mockIt && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.mockIt && resourceExtname == .js || config.mock-server.settings.contextMenu.mockIt && resourceExtname == .har",
-          "command": "mock-server.mockIt",
+          "when": "config.mock-server.settings.contextMenu.startServer && resourceExtname == .json || config.mock-server.settings.contextMenu.startServer && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.startServer && resourceExtname == .js || config.mock-server.settings.contextMenu.startServer && resourceExtname == .har",
+          "command": "mock-server.startServer",
           "group": "thinker.mock-server@3"
         },
         {
@@ -568,15 +552,15 @@
           "group": "thinker.mock-server@9"
         }
       ],
-      "mock-server.subMenu": [
+      "mock-server.editor-subMenu": [
         {
           "when": "!config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .json || !config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .har",
           "command": "mock-server.transformToMockDB",
           "group": "thinker.mock-server@1"
         },
         {
-          "when": "!config.mock-server.settings.contextMenu.mockIt && resourceExtname == .json || !config.mock-server.settings.contextMenu.mockIt && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.mockIt && resourceExtname == .js || !config.mock-server.settings.contextMenu.mockIt && resourceExtname == .har",
-          "command": "mock-server.mockIt",
+          "when": "!config.mock-server.settings.contextMenu.startServer && resourceExtname == .json || !config.mock-server.settings.contextMenu.startServer && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.startServer && resourceExtname == .js || !config.mock-server.settings.contextMenu.startServer && resourceExtname == .har",
+          "command": "mock-server.startServer",
           "group": "thinker.mock-server@2"
         },
         {
@@ -609,11 +593,63 @@
           "command": "mock-server.setConfig",
           "group": "thinker.mock-server@8"
         }
+      ],
+      "mock-server.explorer-subMenu": [
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
+          "command": "mock-server.createDb",
+          "group": "thinker.mock-server@1"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
+          "command": "mock-server.createServer",
+          "group": "thinker.mock-server@1"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
+          "command": "mock-server.createAdvancedExamples",
+          "group": "thinker.mock-server@1"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
+          "command": "mock-server.setRoot",
+          "group": "thinker.mock-server@2"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && !config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js || resourceExtname == .har",
+          "command": "mock-server.transformToMockDB",
+          "group": "thinker.mock-server@3"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && !config.mock-server.settings.contextMenu.startServer && resourceExtname == .json || !config.mock-server.settings.contextMenu.startServer && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.startServer && resourceExtname == .js || !config.mock-server.settings.contextMenu.startServer && resourceExtname == .har",
+          "command": "mock-server.startServer",
+          "group": "thinker.mock-server@3"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && !config.mock-server.settings.contextMenu.stopServer && isServerRunning",
+          "command": "mock-server.stopServer",
+          "group": "thinker.mock-server@4"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && !config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
+          "command": "mock-server.pasteConfig",
+          "group": "thinker.mock-server@4"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && !config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
+          "command": "mock-server.setConfig",
+          "group": "thinker.mock-server@4"
+        }
       ]
     },
     "submenus": [
       {
-        "id": "mock-server.subMenu",
+        "id": "mock-server.editor-subMenu",
+        "label": "Mock Server",
+        "group": "thinker.mock-server"
+      },
+      {
+        "id": "mock-server.explorer-subMenu",
         "label": "Mock Server",
         "group": "thinker.mock-server"
       }
@@ -670,7 +706,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@r35007/mock-server": "^17.1.0",
+    "@r35007/mock-server": "^18.1.0",
     "axios": "^1.3.2",
     "comment-json": "^4.2.3",
     "fs-extra": "^10.1.0",
