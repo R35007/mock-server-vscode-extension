@@ -179,6 +179,20 @@ export function activate(context: vscode.ExtensionContext) {
     }
   }));
 
+  // Start Server in Terminal
+  context.subscriptions.push(vscode.commands.registerCommand(Commands.START_SERVER_IN_TERMINAL, () => {
+    try {
+      log(`[Running] Terminal command initiated`, "\n");
+      log('\nStarting Server in Terminal...');
+      server.startServerInTerminal();
+      log('[Done] Terminal command success.');
+    } catch (error: any) {
+      log(`[Error] Failed to Start Server in Terminal. ${error.message}`);
+      console.log(error);
+      Prompt.showPopupMessage(`Failed to Start Server in Terminal. \n${error.message}`, PromptAction.ERROR);
+    }
+  }));
+
   // Home Page
   context.subscriptions.push(vscode.commands.registerCommand(Commands.OPEN_HOMEPAGE, () => {
     if (Settings.openInside || !server.mockServer.listeningTo) return HomePage.createOrShow(context.extensionUri, server);

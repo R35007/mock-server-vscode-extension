@@ -17,6 +17,7 @@ export enum Commands {
   PASTE_CONFIG = "mock-server.pasteConfig",
   CREATE_DB = "mock-server.createDb",
   CREATE_SERVER = "mock-server.createServer",
+  START_SERVER_IN_TERMINAL = "mock-server.startServerInTerminal",
 }
 
 export enum ServerStatus {

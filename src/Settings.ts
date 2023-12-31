@@ -17,20 +17,35 @@ export class Settings {
   }
 
   static get paths() {
-    const staticFolder = Settings.getSettings("paths.static") as string || "";
     const paths = {
       root: Settings.root,
-      db: Settings.getValidPath(Settings.getSettings("paths.db") as string, "db.json"),
-      middlewares: Settings.getValidPath(Settings.getSettings("paths.middlewares") as string, "middlewares.js"),
-      injectors: Settings.getValidPath(Settings.getSettings("paths.injectors") as string, "injectors.json"),
-      store: Settings.getValidPath(Settings.getSettings("paths.store") as string, "store.json"),
-      rewriters: Settings.getValidPath(Settings.getSettings("paths.rewriters") as string, "rewriters.json"),
-      environment: Settings.getValidPath(Settings.getSettings("paths.environment") as string, "env"),
-      static: staticFolder.trim().length ? Settings.getValidPath(staticFolder, "") || "" : "",
-      snapshots: path.resolve(Settings.root, Settings.getSettings("paths.snapshots") as string || "snapshots")
+      db: Settings.getAbsolutePath(Settings.getSettings("paths.db") as string ?? "./db.json"),
+      middlewares: Settings.getAbsolutePath(Settings.getSettings("paths.middlewares") as string ?? "./middlewares.js"),
+      injectors: Settings.getAbsolutePath(Settings.getSettings("paths.injectors") as string ?? "./injectors.json"),
+      store: Settings.getAbsolutePath(Settings.getSettings("paths.store") as string ?? "./store.json"),
+      rewriters: Settings.getAbsolutePath(Settings.getSettings("paths.rewriters") as string ?? "./rewriters.json"),
+      environment: Settings.getAbsolutePath(Settings.getSettings("paths.environment") as string ?? "./env"),
+      static: Settings.getAbsolutePath(Settings.getSettings("paths.static") as string) || "",
+      snapshots: Settings.getAbsolutePath(Settings.getSettings("paths.snapshots") as string) ?? "./snapshots"
     };
     return paths;
   }
+
+  static get relativePaths() {
+    const paths = {
+      root: Settings.root,
+      db: Settings.getRelativePath(Settings.getSettings("paths.db") as string ?? "./db.json"),
+      middlewares: Settings.getRelativePath(Settings.getSettings("paths.middlewares") as string ?? "./middlewares.js"),
+      injectors: Settings.getRelativePath(Settings.getSettings("paths.injectors") as string ?? "./injectors.json"),
+      store: Settings.getRelativePath(Settings.getSettings("paths.store") as string ?? "./store.json"),
+      rewriters: Settings.getRelativePath(Settings.getSettings("paths.rewriters") as string ?? "./rewriters.json"),
+      environment: Settings.getRelativePath(Settings.getSettings("paths.environment") as string ?? "./env"),
+      static: Settings.getRelativePath(Settings.getSettings("paths.static") as string) || "",
+      snapshots: Settings.getRelativePath(Settings.getSettings("paths.snapshots") as string) ?? "./snapshots"
+    };
+    return paths;
+  }
+
   static get host() {
     return Settings.getSettings("host") as string || '';
   }
@@ -100,9 +115,10 @@ export class Settings {
 
   static get root() {
     const _root = Settings.getSettings("paths.root") as string;
-    const resolvedRootPath = path.resolve((vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./"), _root);
-    if (fs.existsSync(resolvedRootPath)) return resolvedRootPath;
-    return path.resolve(vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./");
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./";
+    const resolvedRootPath = path.resolve(workspaceFolder, _root);
+    if (fs.existsSync(resolvedRootPath)) return resolvedRootPath.replace(/\\/g, '/');
+    return path.resolve(workspaceFolder).replace(/\\/g, '/');
   }
   static set root(_root: string) {
     Settings.setSettings("paths", {
@@ -126,11 +142,21 @@ export class Settings {
     return config;
   }
 
-  static getValidPath(relativePath: string, defaults: string): string | undefined {
+  static getAbsolutePath(relativePath: string): string | undefined {
+    if (!relativePath) return;
     if (relativePath.startsWith("http")) return relativePath?.replace(/\\/g, '/');
 
-    const resolvedPath = path.resolve(Settings.root, relativePath?.trim() ?? defaults);
+    const resolvedPath = path.resolve(Settings.root, relativePath?.trim());
     if (!fs.existsSync(resolvedPath)) return;
-    return resolvedPath?.replace(/\\/g, '/');
+    return resolvedPath?.trim()?.replace(/\\/g, '/');
+  }
+
+  static getRelativePath(relativePath: string): string | undefined {
+    if (!relativePath) return;
+    if (relativePath.startsWith("http")) return relativePath?.replace(/\\/g, '/');
+
+    const resolvedPath = path.resolve(Settings.root, relativePath?.trim());
+    if (!fs.existsSync(resolvedPath)) return;
+    return relativePath?.trim()?.replace(/\\/g, '/');
   }
 }

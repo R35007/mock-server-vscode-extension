@@ -8,7 +8,10 @@ const mockServer = MockServer.Create();
 const startServer = () => mockServer.launchServer("./db.json", {});
 
 startServer().then(() => {
-  const watch = watcher.watch(mockServer.config.root);
+  const watch = watcher.watch([
+    mockServer.config.root,
+    // ... provide your custom file or folder path to watch for changes
+  ]);
 
   // Restart server on change
   watch.on("change", async (changedPath) => {

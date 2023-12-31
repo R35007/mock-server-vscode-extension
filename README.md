@@ -6,14 +6,38 @@ Created with <3 for front-end developers who need a quick back-end for prototypi
 
 This Extension is built upon node package [@r35007/mock-server](https://www.npmjs.com/package/@r35007/mock-server).
 
-![Preview](https://github.com/R35007/mock-server-vscode-extension/assets/23217228/b8096556-4be3-4bc9-b867-3eafc3a3399f)
-
 ## Getting started
 
 - Install the Extension.
-- Right click on the workspace folder and select `Mock Server` -> `Create db.json` from the context.
+- Right click on the workspace folder and select `MockServer` -> `Create db.json` from the context.
 - From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Start Server` (`Alt+Enter`)
 - To view the List of resources go to Command `MockServer: Home Page` or open any browser and hit the localhost url
+
+![Preview](https://github.com/R35007/mock-server-vscode-extension/assets/23217228/b8096556-4be3-4bc9-b867-3eafc3a3399f)
+
+## Make Request
+
+- Once the Server is started we can check the request using `MockServer: Make Request` command in command pallet.
+
+![Preview](https://github.com/R35007/mock-server-vscode-extension/assets/23217228/be28a8cc-dd03-4e97-b455-6ed6f82c03b8)
+
+## Start Mock Server in Terminal
+
+- We need to install `npm install -g @r35007/mock-server` to make this command work.
+- From Command Palette (`(Ctrl/Cmd)+Shift+P`) type mock and select `MockServer: Start Server in Terminal`
+- This starts the mock server in terminal.
+
+![Preview](https://github.com/R35007/mock-server-vscode-extension/assets/23217228/64077916-7ac8-4356-8074-62107be8a969)
+
+## Custom Server script
+
+- Install Mock Server `npm install -g @r35007/mock-server`.
+- Right click on the vscode explorer and select `Mock Server` -> `Create Server.js`.
+- This create a sample `server.js` file
+- Now go to terminal and give `node server.js` to start the mock server.
+- Please refer [@r35007/mock-server](https://r35007.github.io/Mock-Server/) for more api documentation.
+
+![Preview](https://github.com/R35007/mock-server-vscode-extension/assets/23217228/5963902a-2b44-4402-9266-051e34286a68)
 
 ## Commands
 

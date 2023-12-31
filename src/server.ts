@@ -1,4 +1,5 @@
 import { lodash as _, MockServer } from "@r35007/mock-server";
+import { Config as DefaultConfigs } from "@r35007/mock-server/dist/defaults";
 import { HAR, KIBANA } from '@r35007/mock-server/dist/types/common.types';
 import { extractDbFromHAR, extractDbFromKibana, getCleanDb } from '@r35007/mock-server/dist/utils';
 import { requireData } from '@r35007/mock-server/dist/utils/fetch';
@@ -436,5 +437,33 @@ export default class MockServerExt extends Utils {
     }
 
     return completionItems;
+  };
+
+  startServerInTerminal = () => {
+    const terminal = vscode.window.createTerminal({
+      name: `Mock Server`,
+      cwd: Settings.root
+    });
+
+    const cliConfigs: Record<string, any> = {
+      ...Settings.config,
+      ...Settings.relativePaths,
+      watch: Settings.watch
+    };
+
+    const filteredConfigEntries = Object.entries(cliConfigs)
+      .filter(([key, value]) => DefaultConfigs[key as keyof typeof DefaultConfigs] !== value)
+      .filter(([key, value]) => value !== undefined && `${value}`?.trim().length);
+
+    const configCommands = filteredConfigEntries.reduce((res, [key, value]) => {
+      if (typeof value === 'string') return res.concat(`--${key}="${value}" `);
+      if (typeof value === 'boolean' && `${value}` === 'false') return res.concat(`--${key}=${value} `);
+      if (typeof value === 'boolean' && `${value}` === 'true') return res.concat(`--${key} `);
+      return res.concat(`--${key}=${value} `);
+    }, '');
+
+    const command = `mock-server ${configCommands}`;
+    terminal.sendText(command);
+    terminal.show();
   };
 }
