@@ -1,16 +1,16 @@
-import { MockServer, lodash as _, axios, watcher } from '@r35007/mock-server';
-import { PathDetails } from '@r35007/mock-server/dist/types/common.types';
-import { Db } from '@r35007/mock-server/dist/types/valid.types';
-import { normalizeDb } from '@r35007/mock-server/dist/utils';
+import { MockServer, lodash as _, axios, watcher } from "@r35007/mock-server";
+import { PathDetails } from "@r35007/mock-server/dist/types/common.types";
+import { Db, Injectors, Middlewares } from "@r35007/mock-server/dist/types/valid.types";
+import { normalizeDb } from "@r35007/mock-server/dist/utils";
 import { getFilesList, getStats, requireData } from "@r35007/mock-server/dist/utils/fetch";
 import * as fsx from "fs-extra";
-import { FSWatcher } from 'node:fs';
-import { performance } from 'node:perf_hooks';
+import { FSWatcher } from "node:fs";
+import { performance } from "node:perf_hooks";
 import * as path from "path";
 import * as vscode from "vscode";
-import { LocalStorageService } from './LocalStorageService';
+import { LocalStorageService } from "./LocalStorageService";
 import { Settings } from "./Settings";
-import { Commands, Environment, NO_ENV, Recently_Used } from './enum';
+import { Commands, Environment, NO_ENV, Recently_Used } from "./enum";
 import { Prompt } from "./prompt";
 
 export class Utils {
@@ -33,7 +33,7 @@ export class Utils {
   protected getVariables = (filePath?: string) => {
     const file = filePath;
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath || "./";
-    const pathDetail = file ? path.parse(file) : {} as any;
+    const pathDetail = file ? path.parse(file) : ({} as any);
 
     const variables = {
       workspaceFolder,
@@ -47,7 +47,7 @@ export class Utils {
       fileBasenameNoExtension: pathDetail.name,
       fileDirname: pathDetail.dir,
       fileExtname: pathDetail.ext,
-      pathSeparator: "/"
+      pathSeparator: "/",
     };
 
     return variables;
@@ -69,11 +69,7 @@ export class Utils {
     return { variables: this.getVariables(args?.fsPath) };
   };
 
-  protected writeFile = async (
-    filePath: string,
-    data: any = {},
-    notificationText: string,
-  ) => {
+  protected writeFile = async (filePath: string, data: any = {}, notificationText: string) => {
     fsx.ensureFileSync(filePath);
     fsx.writeFileSync(filePath, JSON.stringify(data, null, vscode.window.activeTextEditor?.options.tabSize || "\t"));
     const doc = await vscode.workspace.openTextDocument(filePath);
@@ -82,17 +78,17 @@ export class Utils {
   };
 
   protected getDbData = async (dbPath?: string, mockServer?: MockServer) => {
-    const userData = await this.getDataFromUrl(dbPath?.replace(/\\/g, '/'), { mockServer });
+    const userData = await this.getDataFromUrl(dbPath?.replace(/\\/g, "/"), { mockServer });
     const dbData = _.isPlainObject(userData) ? normalizeDb(userData, Settings.dbMode) : {};
     return dbData;
   };
 
   protected getEnvData = async (mockServer?: MockServer) => {
     const selectedEnv = this.storageManager.getValue("environment", NO_ENV);
-    const result: any = {
+    const result = {
       db: {},
-      injectors: [],
-      middlewares: {}
+      injectors: [] as Injectors,
+      middlewares: {} as Middlewares,
     };
 
     if (selectedEnv.envName === NO_ENV.envName) return result;
@@ -101,7 +97,7 @@ export class Utils {
 
     if (selectedEnv.db.length) {
       try {
-        const promises = selectedEnv.db.map(dbPath => this.getDataFromUrl(dbPath, { mockServer, root }));
+        const promises = selectedEnv.db.map((dbPath) => this.getDataFromUrl(dbPath, { mockServer, root }));
         const dbList = await Promise.all(promises);
         const db = dbList.filter(Boolean).reduce((res, dbObj) => ({ ...res, ...dbObj }), {});
         result.db = db;
@@ -112,9 +108,9 @@ export class Utils {
 
     if (selectedEnv.injectors.length) {
       try {
-        const promises = selectedEnv.injectors.map(injectorPath => this.getDataFromUrl(injectorPath, { mockServer, root, isList: true }));
+        const promises = selectedEnv.injectors.map((injectorPath) => this.getDataFromUrl(injectorPath, { mockServer, root, isList: true }));
         const injectorsList = await Promise.all(promises);
-        const injectors = injectorsList.filter(Boolean).reduce((res, injectorList) => ([...res, ...injectorList]), []);
+        const injectors = injectorsList.filter(Boolean).reduce((res, injectorList) => [...res, ...injectorList], []);
         result.injectors = injectors;
       } catch (err) {
         console.log(err);
@@ -123,7 +119,7 @@ export class Utils {
 
     if (selectedEnv.middlewares.length) {
       try {
-        const promises = selectedEnv.middlewares.map(middlewaresPath => this.getDataFromUrl(middlewaresPath, { mockServer, root }));
+        const promises = selectedEnv.middlewares.map((middlewaresPath) => this.getDataFromUrl(middlewaresPath, { mockServer, root }));
         const middlewaresList = await Promise.all(promises);
         const middlewares = middlewaresList.filter(Boolean).reduce((res, middlewareObj) => ({ ...res, ...middlewareObj }), {});
         result.middlewares = middlewares;
@@ -135,14 +131,16 @@ export class Utils {
     return result;
   };
 
-  protected getDataFromUrl = async (mockPath?: string, {
-    mockServer,
-    isList = false,
-    root = Settings.root
-  }: { mockServer?: MockServer, isList?: boolean, root?: string } = {}) => {
+  protected getDataFromUrl = async (
+    mockPath?: string,
+    { mockServer, isList = false, root = Settings.root }: { mockServer?: MockServer; isList?: boolean; root?: string } = {}
+  ) => {
     if (!mockPath) return;
     if (mockPath.startsWith("http")) {
-      const data = await axios.get(mockPath).then(resp => resp.data).catch(_err => { });
+      const data = await axios
+        .get(mockPath)
+        .then((resp) => resp.data)
+        .catch((_err) => {});
       return data;
     } else {
       const stat = getStats(mockPath);
@@ -150,13 +148,13 @@ export class Utils {
       let data = {};
       if (stat.isFile && stat.extension.endsWith("js")) {
         data = await import(`${mockPath}?update=${Date.now()}`)
-          .then(data => data?.default || data)
-          .catch(_ => requireData(mockPath, { root, isList }));
+          .then((data) => data?.default || data)
+          .catch((_) => requireData(mockPath, { root, isList }));
       } else {
         data = requireData(mockPath, { root, isList });
       }
       const env = this.storageManager.getValue("environment", NO_ENV);
-      return typeof data === 'function' ? await data(mockServer, env) : data;
+      return typeof data === "function" ? await data(mockServer, env) : data;
     }
   };
 
@@ -169,24 +167,34 @@ export class Utils {
       return [Recently_Used, NO_ENV];
     }
 
-    const defaultInjectors = ["./injectors/index.js", "./injectors/index.json", "./injectors/index.jsonc", "./injectors.js", "./injectors.json", "./injectors.jsonc"];
+    const defaultInjectors = [
+      "./injectors/index.js",
+      "./injectors/index.json",
+      "./injectors/index.jsonc",
+      "./injectors.js",
+      "./injectors.json",
+      "./injectors.jsonc",
+    ];
     const defaultMiddlewares = ["./middlewares/index.js", "./middlewares.js"];
 
     const envFilesList = getFilesList(environmentFolderPath, { onlyIndex: false })
-      .filter(file => [".har", ".json", ".jsonc", ".js"].includes(file.extension))
+      .filter((file) => [".har", ".json", ".jsonc", ".js"].includes(file.extension))
       .map((file: any) => ({
         envName: file.fileName,
         db: [].concat(file.filePath).filter(Boolean),
         injectors: defaultInjectors,
         middlewares: defaultMiddlewares,
-        description: Settings.paths.environment ? path.relative(Settings.paths.environment, file.filePath).replace(/\\/g, "/") : file.fileName,
+        description: Settings.paths.environment
+          ? path.relative(Settings.paths.environment, file.filePath).replace(/\\/g, "/")
+          : file.fileName,
         label: file.fileName + file.extension,
         kind: vscode.QuickPickItemKind.Default,
       }))
-      .filter(file =>
-        !["injectors", "middlewares", "env-config"].includes(file.envName) &&
-        !file.description.startsWith("injectors") &&
-        !file.description.startsWith("middlewares")
+      .filter(
+        (file) =>
+          !["injectors", "middlewares", "env-config"].includes(file.envName) &&
+          !file.description.startsWith("injectors") &&
+          !file.description.startsWith("middlewares")
       );
 
     envFilesList.unshift({
@@ -196,7 +204,7 @@ export class Utils {
       injectors: [],
       middlewares: [],
       description: "",
-      kind: vscode.QuickPickItemKind.Separator
+      kind: vscode.QuickPickItemKind.Separator,
     });
 
     let envConfigJson = await this.getDataFromUrl("./env-config.json", { mockServer, root: environmentFolderPath });
@@ -211,8 +219,8 @@ export class Utils {
     const envConfigList = Object.entries(envConfig).map(([envName, envConfig]: [string, any]) => ({
       envName,
       db: [].concat(envConfig.db).filter(Boolean),
-      injectors: envConfig.injectors !== 'undefined' ? [].concat(envConfig.injectors).filter(Boolean) : defaultInjectors,
-      middlewares: envConfig.middlewares !== 'undefined' ? [].concat(envConfig.middlewares).filter(Boolean) : defaultMiddlewares,
+      injectors: envConfig.injectors !== "undefined" ? [].concat(envConfig.injectors).filter(Boolean) : defaultInjectors,
+      middlewares: envConfig.middlewares !== "undefined" ? [].concat(envConfig.middlewares).filter(Boolean) : defaultMiddlewares,
       label: envName,
       description: envConfig.description || envName,
       kind: vscode.QuickPickItemKind.Default,
@@ -225,7 +233,7 @@ export class Utils {
       injectors: [],
       middlewares: [],
       description: "",
-      kind: vscode.QuickPickItemKind.Separator
+      kind: vscode.QuickPickItemKind.Separator,
     });
 
     const environmentList = [NO_ENV, ...envConfigList, ...envFilesList];
@@ -235,21 +243,33 @@ export class Utils {
       environmentList.unshift(selectedEnv);
     } else {
       this.storageManager.setValue("environment", NO_ENV);
-    };
+    }
 
     environmentList.unshift(Recently_Used);
 
     return environmentList;
   };
 
-  protected restartOnChange = (db: Db = {}) => {
+  protected restartOnChange = (args: any = {}, db: Db = {}) => {
     // If watcher is already watching then do nothing
     if (this.watcher) return;
 
-    const fetchPaths = Object.entries(db).map(([_key, obj]) => obj.fetch)
+    if (args.fsPath && args.serveStatic) {
+      const staticFolder = fsx.statSync(args.fsPath).isDirectory() ? args.fsPath : path.dirname(args.fsPath);
+      this.watcher = watcher.watch(staticFolder, { ignored: Settings.ignoreFiles });
+      this.watcher.on("change", (changedFile, _event) => {
+        if (!Settings.watch) return;
+        this.log(`[Modified] ${changedFile}`, "\n");
+        vscode.commands.executeCommand(Commands.START_SERVER, { fsPath: args.fsPath, serveStatic: args.serveStatic }); // Restarts the server
+      });
+      return;
+    }
+
+    const fetchPaths = Object.entries(db)
+      .map(([_key, obj]) => obj.fetch)
       .filter(Boolean)
-      .filter(fetch => typeof fetch === 'string' && !fetch.startsWith("http"))
-      .map(fetchPath => path.resolve(Settings.root, fetchPath as string)) as string[];
+      .filter((fetch) => typeof fetch === "string" && !fetch.startsWith("http"))
+      .map((fetchPath) => path.resolve(Settings.root, fetchPath as string)) as string[];
 
     const selectedEnvironment = this.storageManager.getValue("environment", NO_ENV);
 
@@ -269,20 +289,22 @@ export class Utils {
     ];
 
     const filteredPaths = filesToWatch
-      .filter(p => !p?.startsWith("http")).filter(Boolean)
+      .filter((p) => !p?.startsWith("http"))
+      .filter(Boolean)
       .reduce((paths, p) => [...paths, ...getFilesList(p!)], [] as PathDetails[])
-      .filter(p => p.isFile).map(p => p.filePath);
+      .filter((p) => p.isFile)
+      .map((p) => p.filePath);
 
     this.watcher = watcher.watch([...new Set(filteredPaths)], { ignored: Settings.ignoreFiles });
-    this.watcher.on('change', (changedFile, _event) => {
+    this.watcher.on("change", (changedFile, _event) => {
       if (!Settings.watch) return;
       this.log(`[Modified] ${changedFile}`, "\n");
-      vscode.commands.executeCommand(Commands.START_SERVER); // Restarts the server
+      vscode.commands.executeCommand(Commands.START_SERVER, { fsPath: args.fsPath, serveStatic: args.serveStatic }); // Restarts the server
     });
   };
 
   protected stopWatchingChanges = async () => {
-    this.watcher && await this.watcher.close();
+    this.watcher && (await this.watcher.close());
     this.watcher = undefined;
   };
 
@@ -291,14 +313,14 @@ export class Utils {
 
     const editRequest = {
       iconPath: new vscode.ThemeIcon("pencil"),
-      tooltip: "Edit selected comparison code"
+      tooltip: "Edit selected comparison code",
     };
 
     const pick: vscode.QuickPickItem | undefined = await new Promise((resolve) => {
       let isResolved = false;
       const quickPick = vscode.window.createQuickPick();
       quickPick.title = "Make Request";
-      quickPick.placeholder = 'Please select a endpoint to make a get request';
+      quickPick.placeholder = "Please select a endpoint to make a get request";
       quickPick.matchOnDescription = false;
       quickPick.canSelectMany = false;
       quickPick.items = endpoints;
@@ -316,7 +338,7 @@ export class Utils {
         }),
         quickPick.onDidChangeValue(() => {
           // add a new custom request to the pick list as the first item
-          if (!endpoints.map(cc => cc.label).includes(quickPick.value)) {
+          if (!endpoints.map((cc) => cc.label).includes(quickPick.value)) {
             const newItems = quickPick.value ? [{ label: quickPick.value, description: "custom request" }, ...endpoints] : endpoints;
             quickPick.items = newItems;
           }
@@ -330,13 +352,13 @@ export class Utils {
         }),
         quickPick.onDidTriggerButton((_item) => {
           quickPick.value = quickPick.activeItems[0].label;
-        }),
+        })
       );
 
       quickPick.show();
     });
 
-    disposables.forEach(d => d.dispose());
+    disposables.forEach((d) => d.dispose());
 
     return pick;
   };
@@ -346,7 +368,10 @@ export class Utils {
     try {
       const response = await axios.get(url);
       const responseTime = (performance.now() - start).toFixed(2);
-      const data = typeof response.data === "string" ? response.data : JSON.stringify(response.data, undefined, vscode.window.activeTextEditor?.options.tabSize || "\t");
+      const data =
+        typeof response.data === "string"
+          ? response.data
+          : JSON.stringify(response.data, undefined, vscode.window.activeTextEditor?.options.tabSize || "\t");
       let result = `// ${url}\n`; // add Url to result
       result += `// Status: ${response.status || ""} ${response.statusText || ""}\n`; // add Status to result
       result += `// Time: ${response.headers?.["x-response-time"] || responseTime}\n`; // add Time to result
@@ -356,7 +381,10 @@ export class Utils {
     } catch (error: any) {
       const response = error?.response || {};
       const responseTime = (performance.now() - start).toFixed(2);
-      const data = typeof response?.data === "string" ? error?.response?.data : JSON.stringify(response?.data || "", undefined, vscode.window.activeTextEditor?.options.tabSize || "\t");
+      const data =
+        typeof response?.data === "string"
+          ? error?.response?.data
+          : JSON.stringify(response?.data || "", undefined, vscode.window.activeTextEditor?.options.tabSize || "\t");
       let result = `// ${url}\n`; // add Url to result
       result += `// Status: ${response.status || ""} ${response.statusText || ""}\n`; // add Status to result
       result += `// Time: ${response.headers?.["x-response-time"] || responseTime}\n`; // add Time to result

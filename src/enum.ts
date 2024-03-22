@@ -18,20 +18,21 @@ export enum Commands {
   CREATE_DB = "mock-server.createDb",
   CREATE_SERVER = "mock-server.createServer",
   START_SERVER_IN_TERMINAL = "mock-server.startServerInTerminal",
+  SERVE_STATIC_FILES = "mock-server.serveStaticFiles",
 }
 
 export enum ServerStatus {
-  LOAD = 'Load',
-  START = 'Start',
-  STOP = 'Stop',
-  RESTART = 'Restart',
-  RESET = 'Reset'
+  LOAD = "Load",
+  START = "Start",
+  STOP = "Stop",
+  RESTART = "Restart",
+  RESET = "Reset",
 }
 
 export enum PromptAction {
-  INFO = 'info',
-  ERROR = 'error',
-  WARNING = 'warning'
+  INFO = "info",
+  ERROR = "error",
+  WARNING = "warning",
 }
 
 export const Recently_Used = {
@@ -41,7 +42,7 @@ export const Recently_Used = {
   injectors: [],
   middlewares: [],
   description: "",
-  kind: vscode.QuickPickItemKind.Separator
+  kind: vscode.QuickPickItemKind.Separator,
 };
 
 export const NO_ENV = {
@@ -51,12 +52,12 @@ export const NO_ENV = {
   middlewares: [],
   label: "none",
   description: "",
-  kind: vscode.QuickPickItemKind.Default
+  kind: vscode.QuickPickItemKind.Default,
 };
 
 export type Environment = vscode.QuickPickItem & {
-  envName: string,
-  db: string[],
-  injectors: string[],
-  middlewares: string[],
+  envName: string;
+  db: string[];
+  injectors: string[];
+  middlewares: string[];
 };

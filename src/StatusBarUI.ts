@@ -1,7 +1,7 @@
-import * as vscode from 'vscode';
-import { Commands, PromptAction, ServerStatus } from './enum';
-import { Prompt } from './prompt';
-import { Settings } from './Settings';
+import * as vscode from "vscode";
+import { Settings } from "./Settings";
+import { Commands, PromptAction, ServerStatus } from "./enum";
+import { Prompt } from "./prompt";
 
 export class StatusbarUi {
   private static _statusBarItem: vscode.StatusBarItem;
@@ -25,40 +25,39 @@ export class StatusbarUi {
   static init(log: (message: string, newLine?: string) => void) {
     StatusbarUi.log = log;
     StatusbarUi.working(ServerStatus.LOAD);
-    StatusbarUi.startServer(undefined, undefined, 300);
+    StatusbarUi.startServer(undefined, undefined, undefined, 300);
   }
 
   static working(status: ServerStatus = ServerStatus.START) {
     StatusbarUi.statusBarItem.text = `$(pulse) ${status}ing...`;
-    StatusbarUi.statusBarItem.tooltip = 'In case if it takes long time, try to restart the vscode window.';
+    StatusbarUi.statusBarItem.tooltip = "In case if it takes long time, try to restart the vscode window.";
     StatusbarUi.statusBarItem.command = undefined;
 
-    StatusbarUi.log(`[Running] Server ${status} initiated`, '\n');
-    StatusbarUi.log(`Server ${status === ServerStatus.STOP ? 'Stopp' : status}ing...`);
+    StatusbarUi.log(`[Running] Server ${status} initiated`, "\n");
+    StatusbarUi.log(`Server ${status === ServerStatus.STOP ? "Stopp" : status}ing...`);
   }
 
-  static startServer(statusMsg?: string, error?: any, delay: number = 0) {
+  static startServer(args?: any, statusMsg?: string, error?: any, delay: number = 0) {
     setTimeout(() => {
-      StatusbarUi.statusBarItem.text = '$(broadcast) Mock it';
+      StatusbarUi.statusBarItem.text = "$(broadcast) Mock it";
       StatusbarUi.statusBarItem.command = Commands.START_SERVER;
-      StatusbarUi.statusBarItem.tooltip = 'Click to start mock server';
-      vscode.commands.executeCommand('setContext', "isServerRunning", false);
+      StatusbarUi.statusBarItem.tooltip = "Click to start mock server";
+      vscode.commands.executeCommand("setContext", "isServerRunning", false);
 
-      if (error?.code === 'EADDRINUSE') {
+      if (error?.code === "EADDRINUSE") {
         const action = "Use another Port ?";
-        vscode.window.showErrorMessage(`Server already listening to port : ${Settings.port}`, action).then(selectedAction => {
+        vscode.window.showErrorMessage(`Server already listening to port : ${Settings.port}`, action).then((selectedAction) => {
           if (selectedAction === action)
-            vscode.commands.executeCommand(Commands.START_WITH_NEW_PORT);
-
+            vscode.commands.executeCommand(Commands.START_WITH_NEW_PORT, { fsPath: args?.fsPath, serveStatic: args?.serveStatic });
         });
-        StatusbarUi.log(`[${error ? 'Error' : 'Done'}] ${statusMsg}`);
+        StatusbarUi.log(`[${error ? "Error" : "Done"}] ${statusMsg}`);
         StatusbarUi.log(error);
         return;
       }
 
       if (statusMsg) {
-        Prompt.showPopupMessage(`${statusMsg} \n${error?.message || ''}`, error ? PromptAction.ERROR : PromptAction.INFO);
-        StatusbarUi.log(`[${error ? 'Error' : 'Done'}] ${statusMsg}`);
+        Prompt.showPopupMessage(`${statusMsg} \n${error?.message || ""}`, error ? PromptAction.ERROR : PromptAction.INFO);
+        StatusbarUi.log(`[${error ? "Error" : "Done"}] ${statusMsg}`);
         error && StatusbarUi.log(error);
       }
     }, delay);
@@ -68,10 +67,10 @@ export class StatusbarUi {
     setTimeout(() => {
       StatusbarUi.statusBarItem.text = `$(circle-slash) Port : ${port}`;
       StatusbarUi.statusBarItem.command = Commands.STOP_SERVER;
-      StatusbarUi.statusBarItem.tooltip = 'Click to stop mock server';
+      StatusbarUi.statusBarItem.tooltip = "Click to stop mock server";
       Prompt.showPopupMessage(`Server ${status}ed : [${url}](command:${Commands.OPEN_HOMEPAGE})`);
       StatusbarUi.log(`[Done] Server ${status}ed : ${url}`);
-      vscode.commands.executeCommand('setContext', "isServerRunning", true);
+      vscode.commands.executeCommand("setContext", "isServerRunning", true);
     }, 150);
   }
 }

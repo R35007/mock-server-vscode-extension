@@ -2,7 +2,7 @@
   "name": "mock-server",
   "displayName": "Mock Server",
   "description": "Customize Your Own Dynamic Local Mock Server",
-  "version": "20.1.0",
+  "version": "21.0.0",
   "publisher": "Thinker",
   "license": "MIT",
   "icon": "images/mockserverlogo.png",
@@ -119,6 +119,11 @@
       {
         "command": "mock-server.startServerInTerminal",
         "title": "Start Server in Terminal",
+        "category": "MockServer"
+      },
+      {
+        "command": "mock-server.serveStaticFiles",
+        "title": "Serve Static Files",
         "category": "MockServer"
       }
     ],
@@ -402,7 +407,8 @@
             "makeRequest": false,
             "setPort": false,
             "pasteServerConfig": false,
-            "setAsServerConfig": false
+            "setAsServerConfig": false,
+            "serveStaticFiles": false
           },
           "additionalProperties": false,
           "properties": {
@@ -433,6 +439,9 @@
               "type": "boolean"
             },
             "setAsServerConfig": {
+              "type": "boolean"
+            },
+            "serveStatic": {
               "type": "boolean"
             }
           },
@@ -501,19 +510,58 @@
         {
           "command": "mock-server.pasteConfig",
           "when": "false"
+        },
+        {
+          "command": "mock-server.serveStaticFiles",
+          "when": "false"
         }
       ],
       "explorer/context": [
         {
           "when": "config.mock-server.settings.contextMenu.mockServerSubMenu && sideBarFocus && activeViewlet == 'workbench.view.explorer'",
           "submenu": "mock-server.explorer-subMenu",
+          "group": "thinker.mock-server@0"
+        },
+        {
+          "when": "config.mock-server.settings.contextMenu.serveStaticFiles",
+          "command": "mock-server.serveStaticFiles",
           "group": "thinker.mock-server@1"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js || resourceExtname == .har",
+          "command": "mock-server.transformToMockDB",
+          "group": "thinker.mock-server@2"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && config.mock-server.settings.contextMenu.startServer && resourceExtname == .json || config.mock-server.settings.contextMenu.startServer && resourceExtname == .jsonc || config.mock-server.settings.contextMenu.startServer && resourceExtname == .js || config.mock-server.settings.contextMenu.startServer && resourceExtname == .har",
+          "command": "mock-server.startServer",
+          "group": "thinker.mock-server@3"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && config.mock-server.settings.contextMenu.stopServer && isServerRunning",
+          "command": "mock-server.stopServer",
+          "group": "thinker.mock-server@4"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
+          "command": "mock-server.pasteConfig",
+          "group": "thinker.mock-server@5"
+        },
+        {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
+          "command": "mock-server.setConfig",
+          "group": "thinker.mock-server@6"
         }
       ],
       "editor/context": [
         {
           "when": "config.mock-server.settings.contextMenu.mockServerSubMenu",
           "submenu": "mock-server.editor-subMenu",
+          "group": "thinker.mock-server@0"
+        },
+        {
+          "when": "config.mock-server.settings.contextMenu.serveStaticFiles",
+          "command": "mock-server.serveStaticFiles",
           "group": "thinker.mock-server@1"
         },
         {
@@ -559,6 +607,11 @@
       ],
       "mock-server.editor-subMenu": [
         {
+          "when": "!config.mock-server.settings.contextMenu.serveStaticFiles",
+          "command": "mock-server.serveStaticFiles",
+          "group": "thinker.mock-server@0"
+        },
+        {
           "when": "!config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .json || !config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .har",
           "command": "mock-server.transformToMockDB",
           "group": "thinker.mock-server@1"
@@ -601,6 +654,11 @@
       ],
       "mock-server.explorer-subMenu": [
         {
+          "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && !config.mock-server.settings.contextMenu.serveStaticFiles",
+          "command": "mock-server.serveStaticFiles",
+          "group": "thinker.mock-server@0"
+        },
+        {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
           "command": "mock-server.createDb",
           "group": "thinker.mock-server@1"
@@ -608,42 +666,42 @@
         {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
           "command": "mock-server.createServer",
-          "group": "thinker.mock-server@1"
+          "group": "thinker.mock-server@2"
         },
         {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
           "command": "mock-server.createAdvancedExamples",
-          "group": "thinker.mock-server@1"
+          "group": "thinker.mock-server@3"
         },
         {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && explorerResourceIsFolder",
           "command": "mock-server.setRoot",
-          "group": "thinker.mock-server@2"
+          "group": "thinker.mock-server@4"
         },
         {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && !config.mock-server.settings.contextMenu.transformToMockDB && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js || resourceExtname == .har",
           "command": "mock-server.transformToMockDB",
-          "group": "thinker.mock-server@3"
+          "group": "thinker.mock-server@5"
         },
         {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && !config.mock-server.settings.contextMenu.startServer && resourceExtname == .json || !config.mock-server.settings.contextMenu.startServer && resourceExtname == .jsonc || !config.mock-server.settings.contextMenu.startServer && resourceExtname == .js || !config.mock-server.settings.contextMenu.startServer && resourceExtname == .har",
           "command": "mock-server.startServer",
-          "group": "thinker.mock-server@3"
+          "group": "thinker.mock-server@6"
         },
         {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && !config.mock-server.settings.contextMenu.stopServer && isServerRunning",
           "command": "mock-server.stopServer",
-          "group": "thinker.mock-server@4"
+          "group": "thinker.mock-server@7"
         },
         {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && !config.mock-server.settings.contextMenu.pasteServerConfig && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
           "command": "mock-server.pasteConfig",
-          "group": "thinker.mock-server@4"
+          "group": "thinker.mock-server@8"
         },
         {
           "when": "sideBarFocus && activeViewlet == 'workbench.view.explorer' && !config.mock-server.settings.contextMenu.setAsServerConfig && resourceExtname == .json || resourceExtname == .jsonc || resourceExtname == .js",
           "command": "mock-server.setConfig",
-          "group": "thinker.mock-server@4"
+          "group": "thinker.mock-server@9"
         }
       ]
     },

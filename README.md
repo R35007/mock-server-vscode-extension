@@ -21,6 +21,14 @@ This Extension is built upon node package [@r35007/mock-server](https://www.npmj
 
 ![Preview](https://github.com/R35007/mock-server-vscode-extension/assets/23217228/be28a8cc-dd03-4e97-b455-6ed6f82c03b8)
 
+## Serve Static Files
+
+- Right click on any file or folder and select `Serve Static Files` from the Mock server context menu.
+- This will serve the active folder as a server static files.
+- We can also set a custom static folder path in `mock-server.settings.paths.static`.
+
+![Preview](https://github.com/R35007/mock-server-vscode-extension/assets/23217228/701b2a8d-529e-4d1b-b718-859145d298bf)
+
 ## Start Mock Server in Terminal
 
 - We need to install `npm install -g @r35007/mock-server` to make this command work.

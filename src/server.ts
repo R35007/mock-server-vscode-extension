@@ -1,23 +1,22 @@
 import { lodash as _, MockServer } from "@r35007/mock-server";
 import { Config as DefaultConfigs } from "@r35007/mock-server/dist/defaults";
-import { HAR, KIBANA } from '@r35007/mock-server/dist/types/common.types';
-import { extractDbFromHAR, extractDbFromKibana, getCleanDb } from '@r35007/mock-server/dist/utils';
-import { requireData } from '@r35007/mock-server/dist/utils/fetch';
-import * as jsonc from 'comment-json';
-import * as fs from 'fs';
+import { HAR, KIBANA } from "@r35007/mock-server/dist/types/common.types";
+import { extractDbFromHAR, extractDbFromKibana, getCleanDb } from "@r35007/mock-server/dist/utils";
+import { requireData } from "@r35007/mock-server/dist/utils/fetch";
+import * as jsonc from "comment-json";
+import * as fs from "fs";
 import * as fsx from "fs-extra";
-import * as path from 'path';
+import * as path from "path";
 import * as vscode from "vscode";
-import { Commands, Environment, PromptAction } from './enum';
-import HomePage from './HomePage';
-import { Prompt } from './prompt';
-import { Settings } from './Settings';
-import { Utils } from './utils';
+import { Commands, Environment, PromptAction } from "./enum";
+import HomePage from "./HomePage";
+import { Prompt } from "./prompt";
+import { Settings } from "./Settings";
+import { Utils } from "./utils";
 
-const delay = (milliSeconds: number) => new Promise(resolve => setTimeout(() => resolve(true), milliSeconds));
+const delay = (milliSeconds: number) => new Promise((resolve) => setTimeout(() => resolve(true), milliSeconds));
 
 export default class MockServerExt extends Utils {
-
   constructor(context: vscode.ExtensionContext, output: Function, clearLog: Function) {
     super(context, output, clearLog);
     this.createServer();
@@ -56,30 +55,22 @@ export default class MockServerExt extends Utils {
     const middlewares = await this.getDataFromUrl(Settings.paths.middlewares);
 
     if (isHar) {
-      transformedDb = extractDbFromHAR(
-        userData as HAR,
-        middlewares?.harEntryCallback,
-        middlewares?.harDbCallback,
-        Settings.duplicates,
-      ) || {};
+      transformedDb =
+        extractDbFromHAR(userData as HAR, middlewares?.harEntryCallback, middlewares?.harDbCallback, Settings.duplicates) || {};
     }
 
     if (isKibana) {
-      transformedDb = extractDbFromKibana(
-        userData as KIBANA,
-        middlewares?.kibanaHitsCallback,
-        middlewares?.kibanaDbCallback,
-        Settings.duplicates
-      ) || {};
+      transformedDb =
+        extractDbFromKibana(userData as KIBANA, middlewares?.kibanaHitsCallback, middlewares?.kibanaDbCallback, Settings.duplicates) || {};
     }
 
-    await this.writeFile(currentFilePath, transformedDb, 'Data Transformed Successfully');
+    await this.writeFile(currentFilePath, transformedDb, "Data Transformed Successfully");
   };
 
   setPort = async (_args?: any) => {
-    const port = await Prompt.showInputBox('Set Port Number', 'Set 0 if you want random port.', Settings.port);
+    const port = await Prompt.showInputBox("Set Port Number", "Set 0 if you want random port.", Settings.port);
 
-    if (typeof port === 'undefined') return;
+    if (typeof port === "undefined") return;
 
     Settings.port = parseInt(port);
     Prompt.showPopupMessage(`Port Number Set to ${port}`);
@@ -105,7 +96,7 @@ export default class MockServerExt extends Utils {
     const cleanObject = (obj: any) => {
       const cleanObj: any = {};
       Object.entries(obj).forEach(([key, value]) => {
-        if (typeof value === 'undefined' || (_.isPlainObject(value) && _.isEmpty(value))) return;
+        if (typeof value === "undefined" || (_.isPlainObject(value) && _.isEmpty(value))) return;
         cleanObj[key] = value;
       });
       return cleanObj;
@@ -129,13 +120,13 @@ export default class MockServerExt extends Utils {
       readOnly: config.defaults?.readOnly || config.readOnly,
       logger: config.defaults?.logger || config.logger,
       bodyParser: config.defaults?.bodyParser || config.bodyParser,
-      cookieParser: config.defaults?.cookieParser || config.cookieParser
+      cookieParser: config.defaults?.cookieParser || config.cookieParser,
     });
 
     const statusBar: any = cleanObject({
       show: config.statusBar?.show,
       position: config.statusBar?.position,
-      priority: config.statusBar?.priority
+      priority: config.statusBar?.priority,
     });
 
     const serverConfig = {
@@ -160,7 +151,7 @@ export default class MockServerExt extends Utils {
       homePage: config.homePage,
       openInside: config.openInside,
       showInfoMsg: config.showInfoMsg,
-      statusBar: _.isEmpty(statusBar) ? undefined : statusBar
+      statusBar: _.isEmpty(statusBar) ? undefined : statusBar,
     };
 
     const promises = Object.entries(serverConfig).map(async ([key, value]) => {
@@ -216,39 +207,45 @@ export default class MockServerExt extends Utils {
       ? `module.exports = ${JSON.stringify(serverConfig, null, 2)}`
       : JSON.stringify(serverConfig, null, 2);
 
-    await new Promise((resolve) => editor?.edit((editBuilder) => {
-      editBuilder.replace(textRange, config);
-      resolve(true);
-    }));
+    await new Promise((resolve) =>
+      editor?.edit((editBuilder) => {
+        editBuilder.replace(textRange, config);
+        resolve(true);
+      })
+    );
 
-    Prompt.showPopupMessage('Config Pasted Successfully');
+    Prompt.showPopupMessage("Config Pasted Successfully");
   };
 
-  startServer = async (fsPath?: string, port: number = Settings.port) => {
+  startServer = async (args: any = {}, port: number = Settings.port) => {
     const paths = Settings.paths;
+    const staticFolder =
+      args.fsPath && args.serveStatic ? (fs.statSync(args.fsPath).isDirectory() ? args.fsPath : path.dirname(args.fsPath)) : paths.static;
+
     const dbPath = paths.db;
     const mockServer = this.mockServer;
 
-    if (fsPath) {
+    if (args.fsPath && !args.serveStatic) {
       const environment = {
-        envName: path.basename(fsPath),
-        label: path.basename(fsPath),
-        description: Settings.paths.environment ? path.relative(Settings.paths.environment, fsPath).replace(/\\/g, "/") : fsPath,
-        db: [fsPath],
+        envName: path.basename(args.fsPath),
+        label: path.basename(args.fsPath),
+        description: Settings.paths.environment ? path.relative(Settings.paths.environment, args.fsPath).replace(/\\/g, "/") : args.fsPath,
+        db: [args.fsPath],
         injectors: [],
         middlewares: [],
       } as Environment;
 
       await this.storageManager.setValue("environment", environment);
     }
+
     const env = await this.getEnvData(mockServer);
 
-    if (!dbPath && !fsPath && !Object.keys(env.db).length && !paths.static.length) throw new Error("Please provide valid Db path.");
+    if (!dbPath && !args.fsPath && !Object.keys(env.db).length && !staticFolder?.length) throw new Error("Please provide valid Db path.");
 
     const app = mockServer.app;
 
     // Setting server configs
-    const config = { ...Settings.config, port };
+    const config = { ...Settings.config, static: staticFolder, port };
     mockServer.setConfig(config);
 
     // Setting Middlewares
@@ -272,7 +269,7 @@ export default class MockServerExt extends Utils {
     const defaults = mockServer.defaults();
     app.use(defaults);
 
-    // Setting Middleweare Globals
+    // Setting Middleware Globals
     app.use(mockServer.middlewares.globals);
 
     // Setting Homepage Routes
@@ -285,7 +282,7 @@ export default class MockServerExt extends Utils {
     const envResources = mockServer.resources(env.db, {
       injectors: [...mockServer.injectors, ...env.injectors],
       middlewares: { ...mockServer.middlewares, ...env.middlewares },
-      log: "Environment Resource"
+      log: "Environment Resource",
     });
     app.use(mockServer.config.base, envResources.router);
 
@@ -299,7 +296,7 @@ export default class MockServerExt extends Utils {
 
     await mockServer.startServer();
 
-    this.restartOnChange(mockServer.db);
+    this.restartOnChange(args, mockServer.db);
     HomePage.currentPanel?.update();
   };
 
@@ -322,38 +319,42 @@ export default class MockServerExt extends Utils {
 
   getDbSnapshot = async (_args?: any) => {
     await delay(1000);
-    const snapShotPath = path.resolve(Settings.paths.snapshots || './snapshots', `./db-${Date.now()}.json`);
-    await this.writeFile(snapShotPath, getCleanDb(this.mockServer.db), 'Db Snapshot retrieved Successfully');
+    const snapShotPath = path.resolve(Settings.paths.snapshots || "./snapshots", `./db-${Date.now()}.json`);
+    await this.writeFile(snapShotPath, getCleanDb(this.mockServer.db), "Db Snapshot retrieved Successfully");
   };
 
   creteSampleDb = async (args?: any) => {
     await delay(1000);
     const folderPath = args?.fsPath || Settings.root;
-    fsx.ensureFileSync(path.join(folderPath, '/db.json'));
-    fsx.copySync(path.join(__dirname, '../samples/db.json'), path.join(folderPath, '/db.json'));
+    fsx.ensureFileSync(path.join(folderPath, "/db.json"));
+    fsx.copySync(path.join(__dirname, "../samples/db.json"), path.join(folderPath, "/db.json"));
   };
 
   creteSampleServer = async (args?: any) => {
     await delay(1000);
     const folderPath = args?.fsPath || Settings.root;
-    fsx.ensureFileSync(path.join(folderPath, '/server.js'));
-    fsx.copySync(path.join(__dirname, '../samples/server.js'), path.join(folderPath, '/server.js'));
+    fsx.ensureFileSync(path.join(folderPath, "/server.js"));
+    fsx.copySync(path.join(__dirname, "../samples/server.js"), path.join(folderPath, "/server.js"));
   };
 
   creteAdvancedExamples = async (args?: any) => {
     await delay(1000);
-    fsx.copySync(path.join(__dirname, '../samples/advanced'), args?.fsPath || Settings.root);
+    fsx.copySync(path.join(__dirname, "../samples/advanced"), args?.fsPath || Settings.root);
   };
 
   makeRequest = async () => {
-
     const selectedEnv = this.storageManager.getValue("endpoint", { label: "undefined", kind: vscode.QuickPickItemKind.Default });
 
-    const endpoints = this.mockServer.server ? [...Object.keys(this.mockServer.db || {}), "/_db", "/_routes", "/_store"].map(endpoint => ({ label: endpoint, kind: vscode.QuickPickItemKind.Default })) : [];
+    const endpoints = this.mockServer.server
+      ? [...Object.keys(this.mockServer.db || {}), "/_db", "/_routes", "/_store"].map((endpoint) => ({
+          label: endpoint,
+          kind: vscode.QuickPickItemKind.Default,
+        }))
+      : [];
 
     // remove the selected endpoint from the endpoints and add it to the first selected endpoint
     if (selectedEnv.label?.length && selectedEnv.label !== "undefined") {
-      const endpointIndex = endpoints.findIndex(endpoint => endpoint.label === selectedEnv.label);
+      const endpointIndex = endpoints.findIndex((endpoint) => endpoint.label === selectedEnv.label);
       if (endpointIndex !== -1) endpoints.splice(endpointIndex, 1);
       endpoints.unshift(selectedEnv);
       endpoints.unshift({ label: "last request", kind: vscode.QuickPickItemKind.Separator });
@@ -364,19 +365,23 @@ export default class MockServerExt extends Utils {
     if (!selectedEndpoint) return;
     await this.storageManager.setValue("endpoint", selectedEndpoint);
 
-    await vscode.window.withProgress({
-      location: vscode.ProgressLocation.Notification,
-      title: "Please wait. Fetching Data from selected endpoint...",
-    }, async () => {
-      const url = selectedEndpoint.label.startsWith("http") ? selectedEndpoint.label : `http://localhost:${Settings.port}` + selectedEndpoint.label;
-      const content = await this.makeGetRequest(url);
-      const doc = await vscode.workspace.openTextDocument({ content, language: "jsonc" });
-      await vscode.window.showTextDocument(doc);
-    });
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "Please wait. Fetching Data from selected endpoint...",
+      },
+      async () => {
+        const url = selectedEndpoint.label.startsWith("http")
+          ? selectedEndpoint.label
+          : `http://localhost:${Settings.port}` + selectedEndpoint.label;
+        const content = await this.makeGetRequest(url);
+        const doc = await vscode.workspace.openTextDocument({ content, language: "jsonc" });
+        await vscode.window.showTextDocument(doc);
+      }
+    );
   };
 
   endpointAutoCompletion = async (document: vscode.TextDocument, position: vscode.Position) => {
-
     const completionItems: vscode.CompletionItem[] = [];
 
     // get all text until the `position` and check if it reads `/`
@@ -398,7 +403,7 @@ export default class MockServerExt extends Utils {
         "//jsonplaceholder.typicode.com/todos",
         "//jsonplaceholder.typicode.com/users",
       ];
-      jsonPlaceholders.forEach(route => {
+      jsonPlaceholders.forEach((route) => {
         const completionItem = new vscode.CompletionItem(route, vscode.CompletionItemKind.Property);
         completionItem.insertText = new vscode.SnippetString(route.slice(1));
         completionItems.push(completionItem);
@@ -409,16 +414,8 @@ export default class MockServerExt extends Utils {
 
     // Auto completion for json placeholder routes
     if (linePrefix.endsWith("https://jsonplaceholder.typicode.com/")) {
-      const jsonPlaceholders = [
-        "/posts",
-        "/comments",
-        "/albums",
-        "/photos",
-        "/posts?_embed=comments",
-        "/todos",
-        "/users",
-      ];
-      jsonPlaceholders.forEach(route => {
+      const jsonPlaceholders = ["/posts", "/comments", "/albums", "/photos", "/posts?_embed=comments", "/todos", "/users"];
+      jsonPlaceholders.forEach((route) => {
         const completionItem = new vscode.CompletionItem(route, vscode.CompletionItemKind.Property);
         completionItem.insertText = new vscode.SnippetString(route.slice(1));
         completionItems.push(completionItem);
@@ -427,9 +424,9 @@ export default class MockServerExt extends Utils {
     }
 
     // Auto completion for mock server routes
-    if (linePrefix.endsWith('/')) {
+    if (linePrefix.endsWith("/")) {
       const db = this.mockServer.server ? this.mockServer.db : await this.getDataFromUrl(Settings.paths.db);
-      Object.keys(db || {}).forEach(route => {
+      Object.keys(db || {}).forEach((route) => {
         const completionItem = new vscode.CompletionItem(route, vscode.CompletionItemKind.Property);
         completionItem.insertText = new vscode.SnippetString(route.slice(1));
         completionItems.push(completionItem);
@@ -442,13 +439,13 @@ export default class MockServerExt extends Utils {
   startServerInTerminal = () => {
     const terminal = vscode.window.createTerminal({
       name: `Mock Server`,
-      cwd: Settings.root
+      cwd: Settings.root,
     });
 
     const cliConfigs: Record<string, any> = {
       ...Settings.config,
       ...Settings.relativePaths,
-      watch: Settings.watch
+      watch: Settings.watch,
     };
 
     const filteredConfigEntries = Object.entries(cliConfigs)
@@ -456,11 +453,11 @@ export default class MockServerExt extends Utils {
       .filter(([key, value]) => value !== undefined && `${value}`?.trim().length);
 
     const configCommands = filteredConfigEntries.reduce((res, [key, value]) => {
-      if (typeof value === 'string') return res.concat(`--${key}="${value}" `);
-      if (typeof value === 'boolean' && `${value}` === 'false') return res.concat(`--${key}=${value} `);
-      if (typeof value === 'boolean' && `${value}` === 'true') return res.concat(`--${key} `);
+      if (typeof value === "string") return res.concat(`--${key}="${value}" `);
+      if (typeof value === "boolean" && `${value}` === "false") return res.concat(`--${key}=${value} `);
+      if (typeof value === "boolean" && `${value}` === "true") return res.concat(`--${key} `);
       return res.concat(`--${key}=${value} `);
-    }, '');
+    }, "");
 
     const command = `mock-server ${configCommands}`;
     terminal.sendText(command);
