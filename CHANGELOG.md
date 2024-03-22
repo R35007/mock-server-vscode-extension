@@ -3,6 +3,11 @@
 - Click [here](https://r35007.github.io/Mock-Server/) for mock server documentation.
 - Click [here](https://github.com/R35007/Mock-Server/blob/main/CHANGELOG.md) to see more changes reg the `@r35007/mock-server` package
 
+## v21.1.0
+
+- Updated - `@35007/mock-server@19.0.0` node package.
+- Added - `.json5` support.
+
 ## v21.0.0
 
 - Added - `Serve Static Files` - Right click on any file or folder in and select this command to serve the static files.
